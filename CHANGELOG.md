@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-05-27
+
+### Changed
+
+- Move the six chapter PDFs from `PDF/` to the project root so they can be opened directly without descending into a subdirectory.
+- Update `README.md` paths, project structure tree, and usage examples to reflect the new PDF location.
+
+### Removed
+
+- Remove the now-empty `PDF/` directory from the repository.
+
 ## [1.0.0] - 2026-05-25
 
 ### Added
@@ -36,8 +47,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Apply a consistent design system — 16:9 ratio, Black/Navy theme (`#161D26`), accent color (`#FF9900`) — across all six chapter PDFs.
 - Add `Script/workshop-code-README.md` and `Script/workshop-code/README.md` as navigation guides for the snippet archive.
 
-[Unreleased]: https://github.com/<your-org>/claude-code-workshop/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/<your-org>/claude-code-workshop/releases/tag/v1.0.0
+[Unreleased]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/whchoi98/claude-code-workshop/releases/tag/v1.0.0
 
 ---
 
@@ -47,6 +59,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 이 문서는 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)를 기반으로 하며, [Semantic Versioning](https://semver.org/spec/v2.0.0.html)을 따릅니다.
 
 ## [Unreleased]
+
+## [1.0.1] - 2026-05-27
+
+### Changed
+
+- 6개 챕터 PDF를 `PDF/` 하위에서 저장소 루트로 이동하여 하위 디렉토리로 진입하지 않고도 바로 열람 가능하도록 변경.
+- `README.md` 의 PDF 경로, 프로젝트 구조 트리, 사용 예시를 변경된 PDF 위치에 맞게 갱신.
+
+### Removed
+
+- 비어 있는 `PDF/` 디렉토리를 저장소에서 제거.
 
 ## [1.0.0] - 2026-05-25
 
@@ -72,5 +95,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - 16:9 비율, Black/Navy 테마(`#161D26`), 액센트 컬러(`#FF9900`)로 구성된 일관된 디자인 시스템을 6개 챕터 PDF 전체에 일관 적용.
 - 스니펫 아카이브 탐색을 돕는 `Script/workshop-code-README.md` 와 `Script/workshop-code/README.md` 추가.
 
-[Unreleased]: https://github.com/<your-org>/claude-code-workshop/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/<your-org>/claude-code-workshop/releases/tag/v1.0.0
+[Unreleased]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/whchoi98/claude-code-workshop/releases/tag/v1.0.0
