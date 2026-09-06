@@ -24,6 +24,7 @@ Claude Code Deep Dive Workshop — a Korean-language training curriculum distrib
 - Changelog entries: English imperative ("Add X") / Korean 명사형 종결 ("X 추가"). Category headings stay in English in both sections.
 - Do not mention AWS organization or standard names (AWS Korea, V-team, AWS PPT template, AWS Confidential) in documents; use neutral wording such as "consistent design system" and "Proprietary" license.
 - Commits follow Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`).
+- Version strings live in two places — bump both on release: the README version badge (`img.shields.io/badge/version-X.Y.Z-green.svg`) and the CHANGELOG compare-link definitions at the bottom of each language section. Releases are tagged `vX.Y.Z` (first tag: v1.1.0; 1.0.x were never tagged, so their compare links do not resolve).
 - Ignore `.DS_Store` files; they are macOS artifacts.
 
 ## Common Tasks
