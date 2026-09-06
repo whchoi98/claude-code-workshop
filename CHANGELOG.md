@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Add the 2026-09-05 edition of all six chapter PDFs under `20260905/`, revised against Claude Code v2.1.261: speaker notes expanded on 724 of 744 slides, hands-on lab slides redirected to the web lab guides, and the Ch1 model lineup updated to Fable 5.1 / Opus 5.
+- Add `20260901/`, a session-ordered (D1/D2-prefixed) delivery build of the curriculum decks.
 - Add the 2026-07-03 edition of all six chapter PDFs under `20260703/`, newly authored against Claude Code 2.1.198.
 - Add `tech_doc/ClaudeCode-Architecture.pdf`, a Claude Code architecture deep-dive document.
 - Add `tech_doc/Claude_Cost_Efficiency.pdf`, a Claude cost efficiency guide.
@@ -86,6 +88,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Claude Code v2.1.261 기준으로 개정한 2026-09-05 에디션 챕터 PDF 6종을 `20260905/` 아래에 추가. 744매 중 724매 스피커 노트 보강, 핸즈온 랩 슬라이드의 웹 랩 가이드 이관, Ch1 모델 라인업 Fable 5.1 / Opus 5 반영.
+- 발표 세션 순서(D1/D2 접두사)로 구성한 커리큘럼 덱 전달용 빌드 `20260901/` 추가.
 - Claude Code 2.1.198 기준으로 새로 제작한 2026-07-03 에디션 챕터 PDF 6종을 `20260703/` 아래에 추가.
 - Claude Code 아키텍처 심층 문서 `tech_doc/ClaudeCode-Architecture.pdf` 추가.
 - Claude 비용 효율화 가이드 `tech_doc/Claude_Cost_Efficiency.pdf` 추가.

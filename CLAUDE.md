@@ -8,7 +8,7 @@ Claude Code Deep Dive Workshop — a Korean-language training curriculum distrib
 
 ## Repository Layout
 
-- `20260525/`, `20260703/` — chapter PDFs, one directory per curriculum edition (date-stamped `YYYYMMDD`). `20260703/` is the latest edition, newly authored against Claude Code 2.1.198. Six chapters per edition: Ch1 Overview, Ch2 Agents & Subagents, Ch3 Admin Setup, Ch4 Settings, Ch5 CLI Reference, Ch6 Agent SDK.
+- `20260525/`, `20260703/`, `20260905/` — chapter PDFs, one directory per curriculum edition (date-stamped `YYYYMMDD`). `20260905/` is the latest edition, newly authored against Claude Code v2.1.261. Six chapters per edition: Ch1 Overview, Ch2 Agents & Subagents, Ch3 Admin Setup, Ch4 Settings, Ch5 CLI Reference, Ch6 Agent SDK. `20260901/` holds a session-ordered (D1/D2-prefixed) delivery build of the decks; do not name the client in documents.
 - `tech_doc/` — supplementary technical documents (`ClaudeCode-Architecture.pdf`, `Claude_Cost_Efficiency.pdf`), kept separate from the chapter curriculum.
 - `Script/workshop-code/` — 502 extracted code snippets as markdown, organized `chN-topic/part-NN-slug/NNN-slug.md` where `NNN` is the source slide number. Each file contains the slide title, the code block, and a Korean speaker note.
 - `ccw-hands-on-lab/` — self-contained HTML hands-on lab guides: chapter labs (`ClaudeCode_Ch{1..6}_HandsOnLab.html`), capstone missions 1–6 plus legacy labs A–D (`ClaudeCode_Capstone*_HandsOnLab.html`), a capstone setup guide, a preflight-check page, reference pages 1–3, a session intro (`eDM.html`), and the portal entry point `index.html`. Published to the `whchoi98/whchoi98.github.io` repository at `/ccw-hands-on-lab/`.

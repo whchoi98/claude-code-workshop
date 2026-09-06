@@ -15,11 +15,11 @@ A 3-day Claude Code curriculum delivered as dated PDF chapter editions and 502 e
 
 ## Overview
 
-Claude Code Deep Dive Workshop is a Korean-language technical curriculum delivered as ready-to-present PDF slide decks and a searchable archive of every code example used in the workshop. Chapter PDFs ship in date-stamped edition directories — `20260525/` for the original edition and `20260703/` for the latest, newly authored against Claude Code 2.1.198 — each containing six chapters, while `tech_doc/` holds supplementary deep-dive documents on Claude Code architecture and cost efficiency. The decks are paired with 502 markdown files under `Script/workshop-code/` that extract each code-bearing slide into a standalone, grep-friendly snippet with Korean speaker notes. All slide artifacts follow a consistent design system for visual identity.
+Claude Code Deep Dive Workshop is a Korean-language technical curriculum delivered as ready-to-present PDF slide decks and a searchable archive of every code example used in the workshop. Chapter PDFs ship in date-stamped edition directories — `20260525/` for the original edition, `20260703/` for the 2026-07 build, and `20260905/` for the latest, revised against Claude Code v2.1.261 — each containing six chapters, while `tech_doc/` holds supplementary deep-dive documents on Claude Code architecture and cost efficiency. The decks are paired with 502 markdown files under `Script/workshop-code/` that extract each code-bearing slide into a standalone, grep-friendly snippet with Korean speaker notes. All slide artifacts follow a consistent design system for visual identity.
 
 ## Features
 
-- **Six chapter PDFs per edition** — Overview, Agents & Subagents, Admin Setup, Settings, CLI Reference, and the Agent SDK; each curriculum edition ships in a date-stamped directory (`20260525/`, `20260703/`). The latest `20260703/` edition is newly authored against Claude Code 2.1.198.
+- **Six chapter PDFs per edition** — Overview, Agents & Subagents, Admin Setup, Settings, CLI Reference, and the Agent SDK; each curriculum edition ships in a date-stamped directory (`20260525/`, `20260703/`, `20260905/`). The latest `20260905/` edition is revised against Claude Code v2.1.261, with speaker notes expanded on 724 of 744 slides.
 - **Supplementary technical documents** — `tech_doc/` carries deep-dive references beyond the curriculum: `ClaudeCode-Architecture.pdf` and `Claude_Cost_Efficiency.pdf`.
 - **Hands-on lab guides** — `ccw-hands-on-lab/` provides self-contained HTML lab guides: one per chapter (Ch1–Ch6), six capstone missions (Press Start, Market Desk, Frame It, Trend Radar, Quake Watch, Newsroom Lens) with a setup guide, three reference pages (directory structure, slash commands, plugins), and preflight-check and session-intro pages, with an `index.html` portal page as the entry point. Published at [whchoi98.github.io/ccw-hands-on-lab](https://whchoi98.github.io/ccw-hands-on-lab/).
 - **Dark/light theme toggle** — every lab page ships an embedded theme toggle; the light palette is tuned for projector legibility in a lit room, and the choice persists across pages via `localStorage`.
@@ -30,7 +30,7 @@ Claude Code Deep Dive Workshop is a Korean-language technical curriculum deliver
 
 ## Prerequisites
 
-- A PDF viewer to read the chapter decks under the dated edition directories (`20260525/`, `20260703/`) and `tech_doc/`.
+- A PDF viewer to read the chapter decks under the dated edition directories (`20260525/`, `20260703/`, `20260905/`) and `tech_doc/`.
 - A web browser to open the hands-on lab guides under `ccw-hands-on-lab/`.
 - A text editor or GitHub viewer to read markdown snippets under `Script/workshop-code/`.
 - `grep` and `find` (or any equivalent search tool) to locate snippets by keyword or file name.
@@ -44,8 +44,8 @@ git clone https://github.com/whchoi98/claude-code-workshop.git
 cd claude-code-workshop
 
 # 2. Open the PDF for a given chapter from the latest edition (example: Chapter 1)
-xdg-open 20260703/ClaudeCode_Ch1_20260703.pdf    # Linux
-# open  20260703/ClaudeCode_Ch1_20260703.pdf       # macOS
+xdg-open 20260905/ClaudeCode_Ch1_20260905.pdf    # Linux
+# open  20260905/ClaudeCode_Ch1_20260905.pdf       # macOS
 
 # 3. Browse extracted code snippets
 ls Script/workshop-code/ch6-sdk/part-06-production/
@@ -84,7 +84,9 @@ claude-code-workshop/
 ├── CHANGELOG.md                               # Per-version change history
 ├── CLAUDE.md                                  # Claude Code project guidance
 ├── 20260525/                                  # 2026-05-25 edition chapter PDFs (Ch1–Ch6)
-├── 20260703/                                  # 2026-07-03 edition (latest, Claude Code 2.1.198 based)
+├── 20260703/                                  # 2026-07-03 edition (Claude Code 2.1.198 based)
+├── 20260901/                                  # Session-ordered (D1/D2) delivery build
+├── 20260905/                                  # 2026-09-05 edition (latest, Claude Code v2.1.261 based)
 ├── ccw-hands-on-lab/                          # Hands-on lab guides (HTML)
 │   ├── index.html                             # Lab portal entry page
 │   ├── ClaudeCode_Ch{1..6}_HandsOnLab.html    # Chapter labs (Ch1–Ch6)
@@ -142,11 +144,11 @@ This project is distributed under **Proprietary** terms. Internal use, private d
 
 ## 개요
 
-Claude Code Deep Dive Workshop은 발표 가능한 PDF 슬라이드 자료와 워크샵에서 사용된 모든 코드 예제를 검색 가능한 형태로 함께 제공하는 한국어 기술 커리큘럼입니다. 챕터 PDF는 날짜 기반 에디션 디렉토리로 제공됩니다 — 최초 에디션은 `20260525/`, 최신 에디션은 Claude Code 2.1.198 기준으로 새로 제작한 `20260703/`이며 각 에디션은 6개 챕터로 구성됩니다. `tech_doc/`에는 Claude Code 아키텍처와 비용 효율화를 다루는 보조 심층 문서가 들어 있습니다. 슬라이드 자료와 함께 `Script/workshop-code/` 아래에는 코드를 포함한 슬라이드를 각각 독립된 마크다운 파일로 추출한 502개의 스니펫이 제공되며, 각 파일에는 한국어 발표자 노트가 포함되어 있습니다. 모든 슬라이드 자료는 일관된 디자인 시스템을 따라 시각 정체성을 유지합니다.
+Claude Code Deep Dive Workshop은 발표 가능한 PDF 슬라이드 자료와 워크샵에서 사용된 모든 코드 예제를 검색 가능한 형태로 함께 제공하는 한국어 기술 커리큘럼입니다. 챕터 PDF는 날짜 기반 에디션 디렉토리로 제공됩니다 — 최초 에디션은 `20260525/`, 2026-07 빌드는 `20260703/`, 최신 에디션은 Claude Code v2.1.261 기준으로 개정한 `20260905/`이며 각 에디션은 6개 챕터로 구성됩니다. `tech_doc/`에는 Claude Code 아키텍처와 비용 효율화를 다루는 보조 심층 문서가 들어 있습니다. 슬라이드 자료와 함께 `Script/workshop-code/` 아래에는 코드를 포함한 슬라이드를 각각 독립된 마크다운 파일로 추출한 502개의 스니펫이 제공되며, 각 파일에는 한국어 발표자 노트가 포함되어 있습니다. 모든 슬라이드 자료는 일관된 디자인 시스템을 따라 시각 정체성을 유지합니다.
 
 ## 주요 기능
 
-- **에디션별 6개 챕터 PDF** — Overview, Agents & Subagents, Admin Setup, Settings, CLI Reference, Agent SDK. 각 커리큘럼 에디션은 날짜 디렉토리(`20260525/`, `20260703/`)로 제공됩니다. 최신 `20260703/` 에디션은 Claude Code 2.1.198 기준으로 새로 제작되었습니다.
+- **에디션별 6개 챕터 PDF** — Overview, Agents & Subagents, Admin Setup, Settings, CLI Reference, Agent SDK. 각 커리큘럼 에디션은 날짜 디렉토리(`20260525/`, `20260703/`, `20260905/`)로 제공됩니다. 최신 `20260905/` 에디션은 Claude Code v2.1.261 기준으로 개정되었으며, 744매 중 724매의 스피커 노트가 보강되었습니다.
 - **보조 기술 문서** — `tech_doc/`에 커리큘럼 외 심층 참고 자료인 `ClaudeCode-Architecture.pdf`와 `Claude_Cost_Efficiency.pdf`가 포함됩니다.
 - **핸즈온랩 가이드** — `ccw-hands-on-lab/`에 챕터별 랩 6개(Ch1–Ch6), 캡스톤 미션 6개(Press Start, Market Desk, Frame It, Trend Radar, Quake Watch, Newsroom Lens)와 설치 가이드, 참조 문서 3개(디렉토리 구조, 슬래시 커맨드, 플러그인), 사전 점검·세션 소개 페이지가 독립 실행형 HTML로 제공되며, 진입점 역할을 하는 `index.html` 포털 페이지가 포함됩니다. [whchoi98.github.io/ccw-hands-on-lab](https://whchoi98.github.io/ccw-hands-on-lab/)에 게시되어 있습니다.
 - **다크/라이트 테마 토글** — 모든 랩 페이지에 테마 토글이 내장되어 있으며, 라이트 팔레트는 밝은 강의장 프로젝터 가독성에 맞춰 조정되어 있습니다. 선택은 `localStorage`로 저장되어 페이지 간에 유지됩니다.
@@ -157,7 +159,7 @@ Claude Code Deep Dive Workshop은 발표 가능한 PDF 슬라이드 자료와 �
 
 ## 사전 요구 사항
 
-- 날짜 에디션 디렉토리(`20260525/`, `20260703/`)와 `tech_doc/`의 PDF를 열어볼 수 있는 PDF 뷰어.
+- 날짜 에디션 디렉토리(`20260525/`, `20260703/`, `20260905/`)와 `tech_doc/`의 PDF를 열어볼 수 있는 PDF 뷰어.
 - `ccw-hands-on-lab/`의 핸즈온랩 가이드를 열어볼 수 있는 웹 브라우저.
 - `Script/workshop-code/` 아래 마크다운을 확인할 수 있는 텍스트 에디터 또는 GitHub 웹 뷰어.
 - 키워드나 파일명으로 스니펫을 찾기 위한 `grep`, `find` (또는 동등한 검색 도구).
@@ -171,8 +173,8 @@ git clone https://github.com/whchoi98/claude-code-workshop.git
 cd claude-code-workshop
 
 # 2. 최신 에디션에서 원하는 챕터 PDF 열기 (예: Chapter 1)
-xdg-open 20260703/ClaudeCode_Ch1_20260703.pdf    # Linux
-# open  20260703/ClaudeCode_Ch1_20260703.pdf       # macOS
+xdg-open 20260905/ClaudeCode_Ch1_20260905.pdf    # Linux
+# open  20260905/ClaudeCode_Ch1_20260905.pdf       # macOS
 
 # 3. 추출된 코드 스니펫 탐색
 ls Script/workshop-code/ch6-sdk/part-06-production/
@@ -211,7 +213,9 @@ claude-code-workshop/
 ├── CHANGELOG.md                               # 버전별 변경 사항
 ├── CLAUDE.md                                  # Claude Code 프로젝트 가이드
 ├── 20260525/                                  # 2026-05-25 에디션 챕터 PDF (Ch1–Ch6)
-├── 20260703/                                  # 2026-07-03 에디션 (최신, Claude Code 2.1.198 기준)
+├── 20260703/                                  # 2026-07-03 에디션 (Claude Code 2.1.198 기준)
+├── 20260901/                                  # 발표 세션 순서(D1/D2) 전달용 빌드
+├── 20260905/                                  # 2026-09-05 에디션 (최신, Claude Code v2.1.261 기준)
 ├── ccw-hands-on-lab/                          # 핸즈온랩 가이드 (HTML)
 │   ├── index.html                             # 랩 포털 진입 페이지
 │   ├── ClaudeCode_Ch{1..6}_HandsOnLab.html    # 챕터별 랩 (Ch1–Ch6)
