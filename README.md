@@ -5,7 +5,7 @@
 <a href="#english"><img src="https://img.shields.io/badge/lang-English-blue.svg" alt="English"></a>
 <a href="#korean"><img src="https://img.shields.io/badge/lang-한국어-red.svg" alt="Korean"></a>
 
-A 3-day Claude Code curriculum delivered as dated PDF chapter editions and 502 extracted code snippets. | 날짜별 챕터 PDF 에디션과 502개 추출 코드 스니펫으로 제공되는 3일간의 Claude Code 커리큘럼입니다.
+A 3-day Claude Code curriculum delivered as dated PDF chapter editions, web hands-on lab guides, and 502 extracted code snippets. | 날짜별 챕터 PDF 에디션, 웹 핸즈온랩 가이드, 502개 추출 코드 스니펫으로 제공되는 3일간의 Claude Code 커리큘럼입니다.
 
 ---
 
@@ -27,6 +27,18 @@ Claude Code Deep Dive Workshop is a Korean-language technical curriculum deliver
 - **Bilingual coverage in code** — Python and TypeScript samples appear side by side across SDK material, with three authentication paths (Anthropic Direct, Amazon Bedrock, Vertex AI).
 - **Korean speaker notes per snippet** — Every extracted markdown file embeds the original Korean speaker script alongside the code.
 - **Self-contained — no build step required** — PDFs and markdown ship pre-rendered; consumers only need a PDF viewer and a text editor.
+
+## Architecture
+
+All artifacts in this repository are rendered from source slide decks maintained outside the repository. Edit the source decks, not the rendered files.
+
+```mermaid
+flowchart LR
+  Decks[Source slide decks<br/>maintained externally] --> PDFs[Dated PDF editions<br/>20260525 / 20260703 / 20260905]
+  Decks --> Labs[ccw-hands-on-lab/<br/>HTML lab guides]
+  Decks --> Snippets[Script/workshop-code/<br/>502 markdown snippets]
+  Labs -->|rsync| Pages[GitHub Pages<br/>whchoi98.github.io/ccw-hands-on-lab]
+```
 
 ## Prerequisites
 
@@ -156,6 +168,18 @@ Claude Code Deep Dive Workshop은 발표 가능한 PDF 슬라이드 자료와 �
 - **코드 수준의 이중 언어 지원** — SDK 자료 전반에 Python과 TypeScript 예제가 나란히 제공되며, 3가지 인증 경로(Anthropic Direct, Amazon Bedrock, Vertex AI)를 모두 다룹니다.
 - **스니펫별 한국어 발표자 노트** — 추출된 모든 마크다운 파일에 코드와 함께 원본 한국어 발표 스크립트가 포함됩니다.
 - **빌드 단계 없는 즉시 활용** — PDF와 마크다운이 사전 렌더링되어 제공되므로 PDF 뷰어와 텍스트 에디터만 있으면 바로 사용할 수 있습니다.
+
+## 아키텍처
+
+이 저장소의 모든 산출물은 저장소 외부에서 관리되는 원본 슬라이드 덱으로부터 렌더링됩니다. 수정은 렌더링된 파일이 아니라 원본 덱에서 해야 합니다.
+
+```mermaid
+flowchart LR
+  Decks[Source slide decks<br/>maintained externally] --> PDFs[Dated PDF editions<br/>20260525 / 20260703 / 20260905]
+  Decks --> Labs[ccw-hands-on-lab/<br/>HTML lab guides]
+  Decks --> Snippets[Script/workshop-code/<br/>502 markdown snippets]
+  Labs -->|rsync| Pages[GitHub Pages<br/>whchoi98.github.io/ccw-hands-on-lab]
+```
 
 ## 사전 요구 사항
 
