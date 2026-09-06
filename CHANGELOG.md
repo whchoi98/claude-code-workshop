@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-06
+
 ### Added
 
 - Add the 2026-09-05 edition of all six chapter PDFs under `20260905/`, revised against Claude Code v2.1.261: speaker notes expanded on 724 of 744 slides, hands-on lab slides redirected to the web lab guides, and the Ch1 model lineup updated to Fable 5.1 / Opus 5.
@@ -71,7 +73,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Apply a consistent design system — 16:9 ratio, Black/Navy theme (`#161D26`), accent color (`#FF9900`) — across all six chapter PDFs.
 - Add `Script/workshop-code-README.md` and `Script/workshop-code/README.md` as navigation guides for the snippet archive.
 
-[Unreleased]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/whchoi98/claude-code-workshop/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/whchoi98/claude-code-workshop/releases/tag/v1.0.0
 
@@ -85,6 +88,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 이 문서는 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)를 기반으로 하며, [Semantic Versioning](https://semver.org/spec/v2.0.0.html)을 따릅니다.
 
 ## [Unreleased]
+
+## [1.1.0] - 2026-09-06
 
 ### Added
 
@@ -143,6 +148,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - 16:9 비율, Black/Navy 테마(`#161D26`), 액센트 컬러(`#FF9900`)로 구성된 일관된 디자인 시스템을 6개 챕터 PDF 전체에 일관 적용.
 - 스니펫 아카이브 탐색을 돕는 `Script/workshop-code-README.md` 와 `Script/workshop-code/README.md` 추가.
 
-[Unreleased]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/whchoi98/claude-code-workshop/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/whchoi98/claude-code-workshop/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/whchoi98/claude-code-workshop/releases/tag/v1.0.0

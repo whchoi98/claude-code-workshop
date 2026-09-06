@@ -1,7 +1,7 @@
 # Claude Code Deep Dive Workshop
 
 [![License: Proprietary](https://img.shields.io/badge/license-Proprietary-blue.svg)](#license)
-[![Version](https://img.shields.io/badge/version-1.0.1-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](./CHANGELOG.md)
 <a href="#english"><img src="https://img.shields.io/badge/lang-English-blue.svg" alt="English"></a>
 <a href="#korean"><img src="https://img.shields.io/badge/lang-한국어-red.svg" alt="Korean"></a>
 
