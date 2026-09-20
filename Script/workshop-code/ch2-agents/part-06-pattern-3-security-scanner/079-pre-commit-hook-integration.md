@@ -11,17 +11,21 @@
 #!/bin/bash
 
 # 1. 스테이지된 파일에서 시크릿 검사
+#    --json-schema로 출력 계약을 고정하면 결과가 structured_output 키에 담깁니다
+#    (리뷰 본문은 result 문자열, 최상위에는 summary/issues 키가 없습니다)
+SCHEMA='{"type":"object","properties":{"issues":{"type":"array","items":{"type":"object","properties":{"severity":{"type":"string","enum":["critical","high","medium","low"]},"file":{"type":"string"},"line":{"type":"integer"},"message":{"type":"string"}},"required":["severity","file","message"]}}},"required":["issues"]}'
 git diff --cached | claude -p \
   "security-scanner로 이 변경에 시크릿이 있는지 검사" \
-  --output-format json > /tmp/sec-check.json
+  --output-format json --json-schema "$SCHEMA" > /tmp/sec-check.json
 
 # 2. critical 시 커밋 차단
-CRITICAL=$(jq '.issues[] | select(.severity == "critical") | length' \
+CRITICAL=$(jq '[.structured_output.issues[] | select(.severity == "critical")] | length' \
            /tmp/sec-check.json)
 
-if [ "$CRITICAL" -gt 0 ]; then
+if [ "${CRITICAL:-0}" -gt 0 ]; then
   echo "❌ Critical security issues found. Commit blocked."
-  jq '.issues[] | select(.severity == "critical")' /tmp/sec-check.json
+  jq -r '.structured_output.issues[] | select(.severity == "critical")
+         | "[\(.severity)] \(.file):\(.line // "-") — \(.message)"' /tmp/sec-check.json
   exit 1
 fi
 
@@ -44,9 +48,9 @@ Git pre-commit hook 또는 husky 같은 도구로 구현합니다.
 1단계는 스테이지된 파일에서 시크릿 검사입니다.
 git diff --cached 결과를 claude 명령에 파이프합니다.
 security-scanner로 변경에 시크릿이 있는지 검사합니다.
-JSON 출력 형식을 사용합니다.
+JSON 출력 형식을 사용하되, --json-schema로 출력 계약을 고정합니다. 계약에 맞춘 결과는 structured_output 키에 담기고, 최상위에는 issues 같은 키가 없기 때문입니다.
 2단계는 critical 발견 시 커밋 차단입니다.
-jq로 critical severity 이슈를 카운트합니다.
+jq로 structured_output.issues에서 critical severity 이슈를 카운트합니다.
 하나라도 있으면 exit 1로 커밋을 차단합니다.
 사용자 경험을 보겠습니다.
 git commit 명령 실행 시 claude가 백그라운드에서 실행됩니다.

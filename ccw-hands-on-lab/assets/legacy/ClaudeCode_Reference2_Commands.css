@@ -1,0 +1,160 @@
+#workshop-content
+{ --bg:#12181F; --card:#1B242E; --code:#0C1117; --line:#2A3542; --text:#E8ECF1;
+    --muted:#8B96A5; --charcoal:#C7CDD6; --orange:#FF9900; --crimson:#B6002E;
+    --green:#3FB950; --lavender:#c9a2ff; --dim:#7B8198; }
+#workshop-content *
+{ box-sizing:border-box; margin:0; }
+#workshop-content
+{ background:var(--bg); color:var(--text); line-height:1.65; word-break:keep-all; overflow-wrap:break-word;
+    font-family: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif; }
+#workshop-content a
+{ color:var(--orange); text-decoration:none; }
+#workshop-content code, #workshop-content code.inline
+{ font-family: "D2Coding", "JetBrains Mono",ui-monospace,monospace; font-size:.86em;
+    background:#232D38; color:#FFC466; padding:2px 7px; border-radius:4px; white-space:normal; overflow-wrap:anywhere; }
+#workshop-content .hero
+{ position:relative; max-width:1160px; margin:0 auto; padding:44px 28px 30px; overflow:hidden; }
+#workshop-content .hero::after
+{ content:""; position:absolute; top:-150px; right:-170px; width:440px; height:440px;
+    background:radial-gradient(circle, rgba(182,0,46,.28), transparent 62%); pointer-events:none; }
+#workshop-content .eyebrow
+{ display:inline-block; background:var(--crimson); color:#fff; font-size:11.5px; font-weight:800;
+    letter-spacing:.14em; padding:5px 12px; border-radius:4px; margin-bottom:14px; }
+#workshop-content h1
+{ font-size:clamp(24px,3.4vw,34px); line-height:1.3; text-wrap:balance; }
+#workshop-content .subtitle
+{ color:var(--orange); font-weight:700; font-size:16px; margin-top:8px; }
+#workshop-content .lede
+{ color:var(--charcoal); font-size:15px; margin-top:12px; }
+#workshop-content .wrap
+{ max-width:1160px; margin:0 auto; padding:22px 28px 6px; }
+#workshop-content h2
+{ font-size:19px; margin-bottom:4px; }
+#workshop-content .sec-desc
+{ color:var(--muted); font-size:13.5px; margin-bottom:14px; }
+#workshop-content table.tbl
+{ width:100%; border-collapse:collapse; font-size:13.5px; display:block; overflow-x:auto; max-width:100%; }
+#workshop-content .tbl th
+{ text-align:left; color:var(--dim); font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+    padding:8px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+#workshop-content .tbl td
+{ padding:9px 12px; border-bottom:1px solid #202A35; vertical-align:top; }
+#workshop-content .tbl tr:last-child td
+{ border-bottom:0; }
+#workshop-content .tbl td:first-child
+{ white-space:nowrap; }
+#workshop-content .badge
+{ display:inline-block; font-size:11px; font-weight:700; color:var(--bg); background:var(--lavender);
+    border-radius:10px; padding:1px 8px; white-space:nowrap; }
+#workshop-content .badge.ch
+{ background:var(--orange); }
+#workshop-content .callout
+{ background:var(--card); border-radius:8px; padding:14px 18px; margin:16px 0; font-size:14px; color:var(--muted); }
+#workshop-content .co-title
+{ display:block; font-size:12px; font-weight:800; letter-spacing:.1em; margin-bottom:5px; color:var(--orange); }
+#workshop-content .code-wrap
+{ background:var(--code); border:1px solid var(--line); border-radius:10px; margin:14px 0 20px; overflow:hidden; }
+#workshop-content .code-head
+{ display:flex; align-items:center; justify-content:space-between; padding:8px 14px 8px 76px;
+    border-bottom:1px solid var(--line); background:rgba(255,255,255,.02); position:relative; }
+#workshop-content .code-head::before
+{ content:""; position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    width:11px; height:11px; border-radius:50%; background:#FF5F57; box-shadow:18px 0 0 #FEBC2E, 36px 0 0 #28C840; }
+#workshop-content .code-label
+{ font-size:11px; font-weight:700; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
+#workshop-content .code-wrap pre
+{ margin:0; padding:14px 16px; overflow-x:auto; }
+#workshop-content .code-wrap pre code
+{ background:none; color:#D6DEE8; padding:0; font-size:13px; line-height:1.75; white-space:pre; }
+#workshop-content .cmt
+{ color:#5A6676; }
+#workshop-content footer
+{ max-width:1160px; margin:36px auto 0; padding:20px 28px 44px; border-top:1px solid var(--line);
+    color:var(--muted); font-size:12.5px; line-height:1.9; }
+#workshop-content footer .who
+{ color:var(--charcoal); font-weight:700; }
+@media  (max-width:620px){#workshop-content .hero
+{padding:26px 16px 22px}
+#workshop-content .wrap, #workshop-content footer
+{padding-left:16px;padding-right:16px}}
+#workshop-content .k
+{ display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.05em;
+       border-radius:4px; padding:1px 6px; margin-right:6px; vertical-align:1px; }
+#workshop-content .k.s
+{ background:#233524; color:var(--green); }
+#workshop-content .k.w
+{ background:#2A2338; color:var(--lavender); }
+#workshop-content .alias
+{ color:#5A6676; font-size:12px; white-space:nowrap; }
+html[data-theme="light"] #workshop-content
+{
+  --bg:#F3F4F7; --card:#FFFFFF; --code:#EEF1F5; --line:#D7DDE5;
+  --text:#1B2430; --muted:#5B6472; --charcoal:#3A4453;
+  --orange:#B45309; --green:#1F883D; --purple:#6D28D9; --lavender:#6b46c1;
+  background:#F3F4F7;
+}
+html[data-theme="light"] #workshop-content [style*="#c9a2ff"]
+{color:#6b46c1 !important}
+html[data-theme="light"] #workshop-content [style*="#A6ABBE"]
+{color:#5B6472 !important}
+#workshop-content #themeToggle
+{position:fixed;right:16px;bottom:16px;z-index:9999;
+background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
+border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
+font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#workshop-content #themeToggle:hover
+{border-color:var(--orange,#FF9900)}
+html[data-theme="light"] #workshop-content .code-wrap code
+{color:#2A3542}
+html[data-theme="light"] #workshop-content .code-wrap.output code
+{color:#57606E}
+html[data-theme="light"] #workshop-content code
+{color:#B45309;background:#E4E9EF}
+html[data-theme="light"] #workshop-content .code-wrap code, html[data-theme="light"] #workshop-content pre code
+{background:transparent}
+html[data-theme="light"] #workshop-content .k.s
+{background:#DCEEDC}
+html[data-theme="light"] #workshop-content .k.w
+{background:#E9E2F7}
+html[data-theme="light"] #workshop-content code.inline, html[data-theme="light"] #workshop-content .inline
+{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
+html[data-theme="light"] #workshop-content .code-wrap .hl
+{color:#B45309}
+html[data-theme="light"] #workshop-content .code-wrap .cmt
+{color:#6E7B8C}
+html[data-theme="light"] #workshop-content .head
+{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
+html[data-theme="light"] #workshop-content .head, html[data-theme="light"] #workshop-content .head h1
+{color:#F2F4F8}
+html[data-theme="light"] #workshop-content .head .when
+{color:#FF9900}
+html[data-theme="light"] #workshop-content .head .where, html[data-theme="light"] #workshop-content .head .facts span
+{color:#C7CDD6}
+html[data-theme="light"] #workshop-content .step-title .step-no, html[data-theme="light"] #workshop-content .btn.primary, html[data-theme="light"] #workshop-content .badge.ch
+{color:#FFFFFF}
+#workshop-content .code-wrap.prompt
+{border-left:3px solid #AD8CFF; border-color:rgba(173,140,255,.38)}
+#workshop-content .code-wrap.prompt .code-head
+{background:rgba(173,140,255,.10)}
+#workshop-content .code-wrap.prompt .code-label
+{color:#C9A2FF; font-weight:700}
+#workshop-content .code-wrap.prompt .code-label::before
+{content:"✳ "; color:#AD8CFF}
+#workshop-content .code-wrap.prompt .copy-btn
+{border-color:rgba(173,140,255,.45); color:#C9A2FF}
+html[data-theme="light"] #workshop-content .code-wrap.prompt
+{border-left-color:#6B46C1; border-color:rgba(107,70,193,.38)}
+html[data-theme="light"] #workshop-content .code-wrap.prompt .code-head
+{background:rgba(107,70,193,.07)}
+html[data-theme="light"] #workshop-content .code-wrap.prompt .code-label
+{color:#6B46C1}
+html[data-theme="light"] #workshop-content .code-wrap.prompt .code-label::before
+{color:#6B46C1}
+html[data-theme="light"] #workshop-content .code-wrap.prompt .copy-btn
+{border-color:rgba(107,70,193,.45); color:#6B46C1}
+html[data-theme="light"] #workshop-content .part-divider
+{background:linear-gradient(135deg,#EFE9FB 0%,#F3F4F7 65%); border-color:#C9B8F0}
+html[data-theme="light"] #workshop-content .part-divider .rules span
+{background:#EDE6FB; border-color:#C9B8F0; color:#5B3FA8}
+@media  print{#workshop-content #themeToggle
+{display:none}}

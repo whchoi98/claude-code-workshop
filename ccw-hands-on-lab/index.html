@@ -1,448 +1,306 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
-<title>Claude Code Deep Dive Workshop - Hands-on Lab Portal</title>
-<style>
-  :root {
-    --bg: #12181F; --card: #1B242E; --code: #0C1117; --line: #2A3542;
-    --text: #E8ECF1; --muted: #8B96A5; --charcoal: #C7CDD6;
-    --orange: #FF9900; --crimson: #B6002E; --green: #3FB950;
-    --purple: #7a3ff2; --lavender: #c9a2ff;
-  }
-  * { box-sizing: border-box; margin: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
-    line-height: 1.6; word-break: keep-all; overflow-wrap: break-word;
-  }
-  a { color: inherit; text-decoration: none; }
-  code.inline {
-    font-family: "D2Coding", "JetBrains Mono", ui-monospace, monospace; font-size: 0.86em;
-    background: #232D38; color: #FFC466; padding: 2px 7px; border-radius: 4px;
-    white-space: normal; overflow-wrap: anywhere;
-  }
+<title>Claude Code Deep Dive Workshop - Hands-on Lab Portal · My Workshop</title>
 
-  /* ── Hero ── */
-  .hero { position: relative; max-width: 1160px; margin: 0 auto; padding: 46px 28px 34px; overflow: hidden; }
-  .hero::after {
-    content: ""; position: absolute; top: -150px; right: -170px; width: 460px; height: 460px;
-    background: radial-gradient(circle, rgba(182,0,46,.30), transparent 62%); pointer-events: none;
-  }
-  .eyebrow {
-    display: inline-block; background: var(--crimson); color: #fff; font-size: 11.5px; font-weight: 800;
-    letter-spacing: .14em; padding: 5px 12px; border-radius: 4px; margin-bottom: 14px;
-  }
-  .hero h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.25; max-width: 1000px; text-wrap: balance; }
-  .hero .subtitle { color: var(--orange); font-weight: 700; font-size: 17px; margin-top: 10px; }
-  .hero .lede { color: var(--charcoal); font-size: 15.5px; margin-top: 12px; }
-  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 20px; color: var(--muted); font-size: 13px; }
-  .hero-meta strong { color: var(--text); font-weight: 700; margin-left: 4px; }
 
-  /* ── 추천 진행 흐름 ── */
-  .flow { max-width: 1160px; margin: 6px auto 0; padding: 0 28px; }
-  .flow-inner {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
-    font-size: 13.5px; color: var(--charcoal);
-  }
-  .flow .day { color: var(--orange); font-weight: 800; letter-spacing: .04em; margin-right: 2px; }
-  .flow .chip { background: var(--code); border: 1px solid var(--line); border-radius: 7px; padding: 4px 10px; white-space: nowrap; }
-  .flow .arrow { color: var(--muted); }
-  .flow .opt { color: var(--lavender); }
 
-  /* ── 공통 섹션 ── */
-  .wrap { max-width: 1160px; margin: 0 auto; padding: 34px 28px 10px; }
-  .sec-title { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
-  .sec-title h2 { font-size: 21px; }
-  .sec-title .tag { color: var(--muted); font-size: 12.5px; letter-spacing: .1em; font-weight: 700; }
-  .sec-desc { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
 
-  /* ── Chapter 목록 ── */
-  .rows { display: grid; gap: 10px; }
-  a.row {
-    display: grid; grid-template-columns: 88px 1fr auto; gap: 16px; align-items: center;
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
-    transition: border-color .15s, transform .15s;
-  }
-  a.row:hover { border-color: var(--orange); transform: translateX(4px); }
-  .row .ch {
-    font-weight: 800; color: var(--orange); font-size: 13px; letter-spacing: .08em;
-    background: var(--code); border: 1px solid var(--line); border-radius: 8px;
-    text-align: center; padding: 10px 0;
-  }
-  .row .body h3 { font-size: 16.5px; }
-  .row .body p { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
-  .row .side { text-align: right; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
-  .row .side .time { display: block; color: var(--text); font-weight: 700; font-size: 14px; }
-  .row .side .go { color: var(--orange); font-weight: 700; }
 
-  /* ── Capstone 카드 ── */
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 14px; }
-  a.card {
-    display: flex; flex-direction: column; gap: 10px;
-    background: var(--card); border: 1px solid var(--line);
-    border-radius: 12px; padding: 18px 18px 16px; transition: border-color .15s, transform .15s;
-  }
-  a.card:hover { border-color: var(--lavender); transform: translateY(-3px); }
-  .card .head { display: flex; align-items: center; gap: 8px; }
-  .card .mnum { color: var(--lavender); font-weight: 800; font-size: 12px; letter-spacing: .12em; }
-  .card .identity {
-    margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--bg);
-    background: var(--lavender); border-radius: 20px; padding: 3px 10px; white-space: nowrap;
-  }
-  .card h3 { font-size: 17px; line-height: 1.4; }
-  .card .desc { color: var(--charcoal); font-size: 13.5px; }
-  .card .finale { font-size: 13px; color: var(--muted); }
-  .card .finale b { color: var(--orange); font-weight: 800; letter-spacing: .06em; margin-right: 6px; }
-  .card .foot {
-    display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 12px;
-    border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px;
-  }
-  .card .foot .go { margin-left: auto; color: var(--lavender); font-weight: 700; }
 
-  .note {
-    max-width: 1160px; margin: 22px auto 0; padding: 0 28px;
-  }
-  .note-inner {
-    border: 1px dashed var(--line); border-radius: 12px; padding: 14px 18px;
-    color: var(--muted); font-size: 13.5px; background: rgba(122,63,242,.05);
-  }
-  .note-inner b { color: var(--lavender); }
 
-  footer {
-    max-width: 1160px; margin: 40px auto 0; padding: 22px 28px 46px;
-    border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; line-height: 1.9;
-  }
-  footer .who { color: var(--charcoal); font-weight: 700; }
-  footer .mail { color: var(--orange); }
-  footer a { color: var(--orange); }
 
-  @media (max-width: 720px) {
-    .hero { padding: 26px 16px 24px; }
-    .wrap, .flow, .note { padding-left: 16px; padding-right: 16px; }
-    a.row { grid-template-columns: 64px 1fr; }
-    .row .side { grid-column: 2; text-align: left; margin-top: 2px; }
-    .row .side .time { display: inline; margin-right: 10px; }
-  }
-</style>
-<style id="hol-theme">
-html[data-theme="light"]{
-  --bg:#F3F4F7; --card:#FFFFFF; --code:#EEF1F5; --line:#D7DDE5;
-  --text:#1B2430; --muted:#5B6472; --charcoal:#3A4453;
-  --orange:#B45309; --green:#1F883D; --purple:#6D28D9; --lavender:#6b46c1;
-  background:#F3F4F7;
-}
-html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
-html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
-#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
-background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
-border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
-font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-#themeToggle:hover{border-color:var(--orange,#FF9900)}
-html[data-theme="light"] .code-wrap code{color:#2A3542}
-html[data-theme="light"] .code-wrap.output code{color:#57606E}
-html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
-html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
-html[data-theme="light"] .k.s{background:#DCEEDC}
-html[data-theme="light"] .k.w{background:#E9E2F7}
-html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
-html[data-theme="light"] .code-wrap .hl{color:#B45309}
-html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
-html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
-html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
-html[data-theme="light"] .head .when{color:#FF9900}
-html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
-html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
-@media print{#themeToggle{display:none}}
-</style>
+<link rel="stylesheet" href="assets/reader.css">
+<link rel="stylesheet" href="assets/legacy/index.css">
+<link rel="stylesheet" href="assets/workshop.css">
+<script src="assets/theme.js"></script>
 </head>
-<body>
+<body data-course-key="6fd7cd9eb237" data-page="index.html">
+<a class="skip-link" href="#workshop-main">실습 본문으로 건너뛰기</a>
 
+<aside id="course-nav" class="sidebar" aria-label="워크샵 과정 목차">
+  <div class="sidebar-brand">
+    <a class="brand" href="index.html">
+      <img class="brand-aws-logo" src="assets/aws-logo.png" alt="AWS" width="48" height="29">
+      <span><strong>Claude Code</strong><span>DEEP DIVE WORKSHOP</span></span>
+    </a>
+    <button class="icon-button mobile-only js-only" type="button" data-nav-close aria-label="목차 닫기"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="sidebar-caption"><span class="eyebrow-dot"></span> HANDS-ON LAB HANDBOOK</div>
+  <label class="nav-search js-only" for="chapter-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+    <input id="chapter-search" type="search" placeholder="실습 제목 검색" autocomplete="off" aria-label="실습 제목 검색"><kbd>/</kbd>
+  </label>
+  <nav class="chapter-navigation" id="chapter-navigation" aria-label="전체 과정">
+    <a class="overview-link" href="index.html" aria-current="page">워크샵 전체 보기 <span>HOME</span></a>
+    <section class="nav-group" data-nav-group><h2><span>시작하기</span><span>2개</span></h2><ol><li data-nav-entry data-search="시작하기 INFO 교육 안내와 일정 Claude Code Deep Dive Workshop"><a class="chapter-link" href="eDM.html" data-chapter-link="eDM" data-core-chapter="false" title="Claude Code Deep Dive Workshop"><span class="nav-number">INFO</span><span class="nav-title">교육 안내와 일정</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="시작하기 PRE 실습 전 환경 점검 핸즈온 랩 시작 전 확인"><a class="chapter-link" href="ClaudeCode_Preflight_Check.html" data-chapter-link="ClaudeCode_Preflight_Check" data-core-chapter="false" title="핸즈온 랩 시작 전 확인"><span class="nav-number">PRE</span><span class="nav-title">실습 전 환경 점검</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>기본 실습</span><span>6개</span></h2><ol><li data-nav-entry data-search="기본 실습 01 설치부터 Headless 자동화까지 Claude Code, 설치부터 Headless 자동화까지"><a class="chapter-link" href="ClaudeCode_Ch1_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch1_HandsOnLab" data-core-chapter="true" title="Claude Code, 설치부터 Headless 자동화까지"><span class="nav-number">01</span><span class="nav-title">설치부터 Headless 자동화까지</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 02 Subagents · 전문 에이전트 Subagents, 전문 에이전트를 만들고 지휘하기"><a class="chapter-link" href="ClaudeCode_Ch2_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch2_HandsOnLab" data-core-chapter="true" title="Subagents, 전문 에이전트를 만들고 지휘하기"><span class="nav-number">02</span><span class="nav-title">Subagents · 전문 에이전트</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 03 Admin Setup · 기업 환경 Admin Setup, 통제 가능한 Enterprise 배포"><a class="chapter-link" href="ClaudeCode_Ch3_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch3_HandsOnLab" data-core-chapter="true" title="Admin Setup, 통제 가능한 Enterprise 배포"><span class="nav-number">03</span><span class="nav-title">Admin Setup · 기업 환경</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 04 Settings · 팀의 플랫폼 Settings, 나의 Claude Code를 팀의 플랫폼으로"><a class="chapter-link" href="ClaudeCode_Ch4_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch4_HandsOnLab" data-core-chapter="true" title="Settings, 나의 Claude Code를 팀의 플랫폼으로"><span class="nav-number">04</span><span class="nav-title">Settings · 팀의 플랫폼</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 05 CLI Reference · 자동화 CLI Reference, Claude Code를 파이프라인의 부품으로"><a class="chapter-link" href="ClaudeCode_Ch5_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch5_HandsOnLab" data-core-chapter="true" title="CLI Reference, Claude Code를 파이프라인의 부품으로"><span class="nav-number">05</span><span class="nav-title">CLI Reference · 자동화</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 06 Agent SDK · 자율 실습 Agent SDK, Claude Code를 코드에서 부른다"><a class="chapter-link" href="ClaudeCode_Ch6_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch6_HandsOnLab" data-core-chapter="false" title="Agent SDK, Claude Code를 코드에서 부른다"><span class="nav-number">06</span><span class="nav-title">Agent SDK · 자율 실습</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>캡스톤 준비</span><span>1개</span></h2><ol><li data-nav-entry data-search="캡스톤 준비 SET 도구와 플러그인 준비 Capstone 시작 전, 설치하면 좋은 것들"><a class="chapter-link" href="ClaudeCode_Capstone_Setup.html" data-chapter-link="ClaudeCode_Capstone_Setup" data-core-chapter="false" title="Capstone 시작 전, 설치하면 좋은 것들"><span class="nav-number">SET</span><span class="nav-title">도구와 플러그인 준비</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>캡스톤 · 프로젝트 선택</span><span>6개</span></h2><ol><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M1 Clawd Jump · 게임 개발 Clawd Jump, 에이전틱 게임 개발"><a class="chapter-link" href="ClaudeCode_Capstone1_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone1_HandsOnLab" data-core-chapter="false" title="Clawd Jump, 에이전틱 게임 개발"><span class="nav-number">M1</span><span class="nav-title">Clawd Jump · 게임 개발</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M2 Market Desk · 시황 대시보드 웹 시황 대시보드"><a class="chapter-link" href="ClaudeCode_Capstone2_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone2_HandsOnLab" data-core-chapter="false" title="웹 시황 대시보드"><span class="nav-number">M2</span><span class="nav-title">Market Desk · 시황 대시보드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M3 Generative Hours · 미디어 아트 Generative Hours, 코드로 그린 전시를 배포하라"><a class="chapter-link" href="ClaudeCode_Capstone3_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone3_HandsOnLab" data-core-chapter="false" title="Generative Hours, 코드로 그린 전시를 배포하라"><span class="nav-number">M3</span><span class="nav-title">Generative Hours · 미디어 아트</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M4 Trend Radar · 유튜브 트렌드 유튜브 급상승 30, 트렌드 레이더"><a class="chapter-link" href="ClaudeCode_Capstone4_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone4_HandsOnLab" data-core-chapter="false" title="유튜브 급상승 30, 트렌드 레이더"><span class="nav-number">M4</span><span class="nav-title">Trend Radar · 유튜브 트렌드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M5 Quake Watch · 지진 모니터링 지구의 맥박, 실시간 지진 워치"><a class="chapter-link" href="ClaudeCode_Capstone5_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone5_HandsOnLab" data-core-chapter="false" title="지구의 맥박, 실시간 지진 워치"><span class="nav-number">M5</span><span class="nav-title">Quake Watch · 지진 모니터링</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M6 Newsroom Lens · 뉴스 비교 뉴스룸 렌즈, 4개 매체 관점 비교"><a class="chapter-link" href="ClaudeCode_Capstone6_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone6_HandsOnLab" data-core-chapter="false" title="뉴스룸 렌즈, 4개 매체 관점 비교"><span class="nav-number">M6</span><span class="nav-title">Newsroom Lens · 뉴스 비교</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>참고 자료</span><span>3개</span></h2><ol><li data-nav-entry data-search="참고 자료 R1 디렉토리 구조 디렉토리 구조, 무엇이 어디에 있는가"><a class="chapter-link" href="ClaudeCode_Reference1_Directory.html" data-chapter-link="ClaudeCode_Reference1_Directory" data-core-chapter="false" title="디렉토리 구조, 무엇이 어디에 있는가"><span class="nav-number">R1</span><span class="nav-title">디렉토리 구조</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="참고 자료 R2 슬래시 커맨드 슬래시 커맨드, 세션을 조종하는 레버들"><a class="chapter-link" href="ClaudeCode_Reference2_Commands.html" data-chapter-link="ClaudeCode_Reference2_Commands" data-core-chapter="false" title="슬래시 커맨드, 세션을 조종하는 레버들"><span class="nav-number">R2</span><span class="nav-title">슬래시 커맨드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="참고 자료 R3 플러그인 플러그인, 팀의 하네스를 배포하는 단위"><a class="chapter-link" href="ClaudeCode_Reference3_Plugins.html" data-chapter-link="ClaudeCode_Reference3_Plugins" data-core-chapter="false" title="플러그인, 팀의 하네스를 배포하는 단위"><span class="nav-number">R3</span><span class="nav-title">플러그인</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section>
+    <p class="search-empty" data-search-empty hidden>검색 결과가 없습니다.</p>
+    <span class="sr-only" role="status" data-search-result></span>
+  </nav>
+  <div class="reading-progress">
+    <div class="progress-label"><span>정규 챕터 읽기</span><strong data-progress-count>0 / 5 읽음</strong></div>
+    <progress max="5" value="0" data-reading-progress aria-label="정규 챕터 읽기 진행률"></progress>
+    <p data-storage-note>읽기 기록은 이 브라우저에 저장됩니다.</p>
+    <button class="text-button js-only" type="button" data-reset-progress hidden>읽기 기록 초기화</button>
+  </div>
+</aside>
+<button class="nav-backdrop" type="button" data-nav-backdrop aria-label="목차 닫기" hidden></button>
+<div class="workspace" data-workspace>
+  <header class="topbar">
+    <div class="topbar-leading">
+      <button class="toolbar-button mobile-only js-only" type="button" data-nav-toggle aria-controls="course-nav" aria-expanded="false" aria-label="과정 목차 열기"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <nav class="breadcrumb" aria-label="현재 위치"><a href="index.html">Claude Code Workshop</a><span aria-hidden="true">/</span><span>전체 과정</span></nav>
+    </div>
+    <div class="toolbar js-only">
+      <button class="toolbar-button" type="button" data-theme-toggle aria-label="어두운 화면으로 전환" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A9 9 0 0 1 9.5 3.5a9 9 0 1 0 11 11Z"/></svg><span data-theme-label>다크</span></button>
+      <button class="toolbar-button" type="button" data-print aria-label="이 페이지 인쇄"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6Z"/></svg><span>인쇄</span></button>
+    </div>
+  </header>
+  <main id="workshop-main" tabindex="-1">
+    <noscript><p class="noscript-note">본문과 목차는 그대로 읽을 수 있습니다. 복사·테마·읽기 기록 기능에는 JavaScript가 필요합니다.</p></noscript>
+    <div class="article-layout">
+      <article class="lesson"><div class="resume-strip"><span>나의 학습 경로</span><a class="button primary-button" data-resume-link href="ClaudeCode_Ch1_HandsOnLab.html"><span data-resume-label>첫 장 읽기, 01</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a><a href="eDM.html" class="agenda-link">교육 안내와 일정 ↗</a></div><div class="legacy-content" id="workshop-content">
 <header class="hero">
-  <span class="eyebrow">CLAUDE CODE DEEP DIVE WORKSHOP / HANDS-ON LAB PORTAL</span>
-  <h1>Claude Code Deep Dive Workshop</h1>
-  <div class="subtitle">Hands-on Lab 포털 - Chapter 1~5 정규 랩 + Capstone Mission 4종</div>
-  <p class="lede">
-    이틀 동안 Claude Code를 설치부터 자동화 부품, 그리고 하나의 서비스 팀원으로 승격시키는 실습 과정입니다.
+<span class="eyebrow">CLAUDE CODE DEEP DIVE WORKSHOP / HANDS-ON LAB PORTAL</span>
+<h1>Claude Code Deep Dive Workshop</h1>
+<div class="subtitle">Hands-on Lab 포털 - Chapter 1~5 정규 랩 + Capstone Mission 4종</div>
+<p class="lede">
+    이틀 동안 Claude Code를 설치하고, 자동화와 서비스 개발에 활용하는 방법을 실습합니다.
     모든 랩은 독립 HTML 문서로, 아래에서 열어 진행 상황을 체크하며 따라갑니다.
     캡스톤은 네 가지 미션 중 <strong>하나를 선택</strong>해 완주하며, 별도 인프라 없이 혼자서도 처음부터 끝까지 수행할 수 있습니다.
   </p>
-  <div class="hero-meta">
-    <span>구성 <strong>준비 2 + Chapter 랩 6 + Capstone 4 + Reference 3</strong></span>
-    <span>환경 <strong>Claude Code on EC2 + Admin 계정</strong></span>
-    <span>리전 <strong>ap-northeast-2</strong></span>
-    <span>모델 <strong>Fable 5, Opus 5, Sonnet 5 (Global CRIS)</strong></span>
-    <span>Update <strong>2026.07</strong></span>
-  </div>
+<div class="hero-meta">
+<span>구성 <strong>준비 2 + Chapter 랩 6 + Capstone 4 + Reference 3</strong></span>
+<span>환경 <strong>Claude Code on EC2 + Admin 계정</strong></span>
+<span>리전 <strong>ap-northeast-2</strong></span>
+<span>모델 <strong>Opus 5.8, Sonnet 5.0, Sonnet 4.6 (Global CRIS)</strong></span>
+<span>Update <strong>2026.09</strong></span>
+</div>
 </header>
+<nav aria-label="추천 진행 순서" class="flow">
+<div class="flow-inner">
+<span class="day">DAY 1</span>
+<span class="chip">시작 전 확인</span><span class="arrow">→</span>
+<span class="chip">Ch1 설치와 Headless</span><span class="arrow">→</span>
+<span class="chip">Ch2 Subagents</span><span class="arrow">→</span>
+<span class="chip">Ch3 Admin 브리핑</span><span class="arrow">→</span>
+<span class="chip">Capstone R1, 게임/미술관/지진</span>
+<span class="day" style="margin-left:14px">DAY 2</span>
+<span class="chip">Ch4 Settings 슈퍼랩</span><span class="arrow">→</span>
+<span class="chip">Ch5 CLI 핵심</span><span class="arrow">→</span>
 
-<nav class="flow" aria-label="추천 진행 순서">
-  <div class="flow-inner">
-    <span class="day">DAY 1</span>
-    <span class="chip">시작 전 확인</span><span class="arrow">→</span>
-    <span class="chip">Ch1 설치와 Headless</span><span class="arrow">→</span>
-    <span class="chip">Ch2 Subagents</span><span class="arrow">→</span>
-    <span class="chip">Ch3 Admin 브리핑</span><span class="arrow">→</span>
-    <span class="chip">Capstone R1, 게임/미술관/지진</span>
-    <span class="day" style="margin-left:14px">DAY 2</span>
-    <span class="chip">Ch4 Settings 슈퍼랩</span><span class="arrow">→</span>
-    <span class="chip">Ch5 CLI 핵심</span><span class="arrow">→</span>
-    <span class="chip">Anthropic 특별 세션</span><span class="arrow">→</span>
-    <span class="chip">Capstone R2, 증시/유튜브/뉴스룸</span><span class="arrow">→</span>
-    <span class="chip">모델 라우팅과 메터링</span>
-  </div>
+<span class="chip">Capstone R2, 증시/유튜브/뉴스룸</span><span class="arrow">→</span>
+<span class="chip">모델 라우팅과 메터링</span>
+</div>
 </nav>
-
-<main>
-
+<div class="original-main">
 <section class="wrap" id="chapters">
-  <div class="sec-title"><h2>Chapter Hands-on Labs</h2><span class="tag">정규 6랩 / 각 40~80분</span></div>
-  <p class="sec-desc">이론 세션 직후 바로 이어지는 실습입니다. 순서대로 진행하며, 각 랩은 이전 랩의 인증 상태를 전제합니다.</p>
-  <div class="rows">
-
-    <a class="row" href="ClaudeCode_Preflight_Check.html">
-      <span class="ch" style="color:var(--green)">PRE</span>
-      <span class="body">
-        <h3>핸즈온 랩 시작 전 확인</h3>
-        <p>Workshop Studio 접속, EC2 2대, 접속 주소, code-server, claude 기동까지 5분 프리플라이트. 화면 캡처 5장 내장.</p>
-      </span>
-      <span class="side"><span class="time">5분</span>체크 5개 <span class="go">열기 →</span></span>
-    </a>
-
-
-    <a class="row" href="ClaudeCode_Ch1_HandsOnLab.html">
-      <span class="ch">CH 01</span>
-      <span class="body">
-        <h3>Claude Code, 설치부터 Headless 자동화까지</h3>
-        <p>설치와 인증, CLAUDE.md, 실제 버그 수정, 그리고 첫 헤드리스 파이프라인 실행까지.</p>
-      </span>
-      <span class="side"><span class="time">40분 내외</span>준비 + 6 Task <span class="go">랩 열기 →</span></span>
-    </a>
-
-    <a class="row" href="ClaudeCode_Ch2_HandsOnLab.html">
-      <span class="ch">CH 02</span>
-      <span class="body">
-        <h3>Subagents, 전문 에이전트를 만들고 지휘하기</h3>
-        <p>code-reviewer 등 서브에이전트 3종 정의, 도구 권한 격리, 자동 위임과 명시 지휘, 병렬 실행.</p>
-      </span>
-      <span class="side"><span class="time">40분 내외</span>준비 + 5 Task <span class="go">랩 열기 →</span></span>
-    </a>
-
-    <a class="row" href="ClaudeCode_Ch3_HandsOnLab.html">
-      <span class="ch">CH 03</span>
-      <span class="body">
-        <h3>Admin Setup, 통제 가능한 Enterprise 배포</h3>
-        <p>관리자의 40분. managed settings와 정책 배포, Bedrock 라우팅, 조직 단위 통제선 구축.</p>
-      </span>
-      <span class="side"><span class="time">40분 내외</span>준비 + 5 Task <span class="go">랩 열기 →</span></span>
-    </a>
-
-    <a class="row" href="ClaudeCode_Ch4_HandsOnLab.html">
-      <span class="ch">CH 04</span>
-      <span class="body">
-        <h3>Settings, 나의 Claude Code를 팀의 플랫폼으로</h3>
-        <p>Part A 설정 계층 4 Task에 이어, Part B 슈퍼랩 4 Mission으로 훅과 스킬을 팀 자산으로 승격.</p>
-      </span>
-      <span class="side"><span class="time">80분</span>A 4 Task + B 4 Mission <span class="go">랩 열기 →</span></span>
-    </a>
-
-    <a class="row" href="ClaudeCode_Ch5_HandsOnLab.html">
-      <span class="ch">CH 05</span>
-      <span class="body">
-        <h3>CLI Reference, Claude Code를 파이프라인의 부품으로</h3>
-        <p>헤드리스 호출 5패턴, JSON 파싱, 로컬 리뷰 봇, CSV와 HTML 대시보드 파이프라인, GitHub Actions 통합.</p>
-      </span>
-      <span class="side"><span class="time">40분 내외</span>준비 + 4 Task <span class="go">랩 열기 →</span></span>
-    </a>
-
-    <a class="row" href="ClaudeCode_Ch6_HandsOnLab.html">
-      <span class="ch">CH 06</span>
-      <span class="body">
-        <h3>Agent SDK, Claude Code를 코드에서 부른다</h3>
-        <p>query 함수, resume 대화 메모리, in-process 커스텀 도구, 프로세스를 넘는 미니 상주 점검원.</p>
-      </span>
-      <span class="side"><span class="time">60분 내외</span>준비 + 4 Task <span class="go">랩 열기 →</span></span>
-    </a>
-
-  </div>
+<div class="sec-title"><h2 id="section-01">Chapter Hands-on Labs</h2><span class="tag">정규 6랩 / 각 40~80분</span></div>
+<p class="sec-desc">이론 세션 직후 바로 이어지는 실습입니다. 순서대로 진행하며, 각 랩은 이전 랩의 인증 상태를 전제합니다.</p>
+<div class="rows">
+<a class="row" href="ClaudeCode_Preflight_Check.html">
+<span class="ch" style="color:var(--green)">PRE</span>
+<span class="body">
+<h3>핸즈온 랩 시작 전 확인</h3>
+<p>Workshop Studio 접속, EC2 2대, 접속 주소, code-server, claude 기동까지 5분 프리플라이트. 화면 캡처 5장 내장.</p>
+</span>
+<span class="side"><span class="time">5분</span>체크 5개 <span class="go">열기 →</span></span>
+</a>
+<a class="row" href="ClaudeCode_Ch1_HandsOnLab.html">
+<span class="ch">CH 01</span>
+<span class="body">
+<h3>Claude Code, 설치부터 Headless 자동화까지</h3>
+<p>설치와 인증, CLAUDE.md, 실제 버그 수정, 그리고 첫 헤드리스 파이프라인 실행까지.</p>
+</span>
+<span class="side"><span class="time">40분 내외</span>준비 + 6 Task <span class="go">랩 열기 →</span></span>
+</a>
+<a class="row" href="ClaudeCode_Ch2_HandsOnLab.html">
+<span class="ch">CH 02</span>
+<span class="body">
+<h3>Subagents, 전문 에이전트를 만들고 지휘하기</h3>
+<p>code-reviewer 등 서브에이전트 3종 정의, 도구 권한 격리, 자동 위임과 명시 지휘, 병렬 실행.</p>
+</span>
+<span class="side"><span class="time">40분 내외</span>준비 + 5 Task <span class="go">랩 열기 →</span></span>
+</a>
+<a class="row" href="ClaudeCode_Ch3_HandsOnLab.html">
+<span class="ch">CH 03</span>
+<span class="body">
+<h3>Admin Setup, 통제 가능한 Enterprise 배포</h3>
+<p>관리자의 40분. managed settings와 정책 배포, Bedrock 라우팅, 조직 단위 통제선 구축.</p>
+</span>
+<span class="side"><span class="time">40분 내외</span>준비 + 5 Task <span class="go">랩 열기 →</span></span>
+</a>
+<a class="row" href="ClaudeCode_Ch4_HandsOnLab.html">
+<span class="ch">CH 04</span>
+<span class="body">
+<h3>Settings, 나의 Claude Code를 팀의 플랫폼으로</h3>
+<p>Part A 설정 계층 4 Task에 이어, Part B 슈퍼랩 4 Mission으로 훅과 스킬을 팀 자산으로 승격.</p>
+</span>
+<span class="side"><span class="time">80분</span>A 4 Task + B 4 Mission <span class="go">랩 열기 →</span></span>
+</a>
+<a class="row" href="ClaudeCode_Ch5_HandsOnLab.html">
+<span class="ch">CH 05</span>
+<span class="body">
+<h3>CLI Reference, Claude Code를 파이프라인의 부품으로</h3>
+<p>헤드리스 호출 5패턴, JSON 파싱, 로컬 리뷰 봇, CSV와 HTML 대시보드 파이프라인, GitHub Actions 통합.</p>
+</span>
+<span class="side"><span class="time">40분 내외</span>준비 + 4 Task <span class="go">랩 열기 →</span></span>
+</a>
+<a class="row" href="ClaudeCode_Ch6_HandsOnLab.html">
+<span class="ch">CH 06</span>
+<span class="body">
+<h3>Agent SDK, Claude Code를 코드에서 부른다</h3>
+<p>query 함수, resume 대화 메모리, in-process 커스텀 도구, 프로세스를 넘는 미니 상주 점검원.</p>
+</span>
+<span class="side"><span class="time">60분 내외</span>준비 + 4 Task <span class="go">랩 열기 →</span></span>
+</a>
+</div>
 </section>
-
 <section class="wrap" id="capstones">
-  <div class="sec-title"><h2>Capstone Missions</h2><span class="tag">이틀 2라운드 / Day 1 택 1 + Day 2 택 1</span></div>
-  <p class="sec-desc">
+<div class="sec-title"><h2 id="section-02">Capstone Missions</h2><span class="tag">이틀 2라운드 / Day 1 택 1 + Day 2 택 1</span></div>
+<p class="sec-desc">
     이틀 동안 두 번 완결합니다. Day 1 라운드 1은 <b>게임</b>, <b>미술관</b>(로컬 완결) 또는 2시간 트랙 <b>지진 워치</b>(CloudFront 실배포) 중 택 1.
     Day 2 라운드 2는 풀 트랙 <b>증시</b>, <b>유튜브</b>(깊이 우선) 또는 2시간 트랙 <b>뉴스룸 렌즈</b>(키 발급 없음, CloudFront 실배포까지) 중 택 1입니다.
     난이도가 아니라 정체성이 다르니 관심사에 맞춰 고르세요. 전부 superpowers의 brainstorm → plan → execute 워크플로로 진행합니다.
   </p>
-  <div class="rows" style="margin-bottom:14px">
-    <a class="row" href="ClaudeCode_Capstone_Setup.html">
-      <span class="ch" style="color:var(--green)">SETUP</span>
-      <span class="body">
-        <h3>Capstone 시작 전, 설치하면 좋은 것들</h3>
-        <p>Claude HUD 계기판, superpowers, Agent Toolkit for AWS 6종, 풀 스택 플러그인 32종 일괄 설치.</p>
-      </span>
-      <span class="side"><span class="time">15분</span>단계 4개 <span class="go">열기 →</span></span>
-    </a>
-  </div>
-
-  <div class="cards">
-
-    <a class="card" href="ClaudeCode_Capstone1_HandsOnLab.html">
-      <span class="mnum">MISSION 1</span>
-      <span class="identity">Press Start</span>
-      <h3>Clawd Jump, 에이전틱 게임 개발</h3>
-      <p class="desc"><b>Day 1, 라운드 1.</b> Claude Code 마스코트 Clawd의 슈퍼마리오풍 플랫포머. 엔진, 물리, 타일 레벨, 코인과 깃발까지
-      전부 superpowers로 시켜서 만들고 CloudFront로 개장합니다. Bedrock 미사용, API 키 불필요.</p>
-      <p class="finale">피날레: <b>내가 만든 게임 URL을 Slack에 공유, 서로 플레이</b></p>
-      <span class="foot"><span>135분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
-    </a>
-
-    <a class="card" href="ClaudeCode_Capstone2_HandsOnLab.html">
-      <span class="mnum">MISSION 2</span>
-      <span class="identity">Market Desk</span>
-      <h3>웹 시황 대시보드</h3>
-      <p class="desc"><b>Day 2, 라운드 2.</b> FastAPI + React + lightweight-charts로 지표 바, 지수 카드, 종목 테이블, 캔들 차트를 짓고,
-      Bedrock 종목 분석이 SSE로 타자기처럼 흐릅니다. 캐시는 single-flight, 실행은 make run 하나. 원작 stock-monitoring 축소판.</p>
-      <p class="finale">피날레: <b>브라우저에서 뛰는 내 데스크 스크린샷을 Slack에</b></p>
-      <span class="foot"><span>135분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
-    </a>
-
-    <a class="card" href="ClaudeCode_Capstone3_HandsOnLab.html">
-      <span class="mnum">MISSION 3</span>
-      <span class="identity">Frame It</span>
-      <h3>Generative Hours, 코드로 그린 전시를 개장하라</h3>
-      <p class="desc"><b>Day 1, 라운드 1.</b> 제너러티브 아트 두 점으로 여는 인터랙티브 미디어 아트 전시. 첫 작품을 추상 없이 끝까지 밀고,
-      두 번째 작품이 도착하는 순간 공통 계약을 추출합니다. 추상이 태어나는 순간을 손으로 겪는 랩. Bedrock 미사용, API 키 불필요.</p>
-      <p class="finale">피날레: <b>내 전시 URL을 Slack에 공유, 서로 관람</b></p>
-      <span class="foot"><span>120분 / 미션 6 + DoD</span><span class="go">시작 →</span></span>
-    </a>
-
-    <a class="card" href="ClaudeCode_Capstone4_HandsOnLab.html">
-      <span class="mnum">MISSION 4</span>
-      <span class="identity">Trend Radar</span>
-      <h3>유튜브 급상승 30, 트렌드 레이더</h3>
-      <p class="desc"><b>Day 2, 라운드 2.</b> 급상승 30을 주기 수집해 스냅샷으로 쌓고, 순위 변동(▲▼)과 NEW, 카테고리 점유율의 흐름을 읽습니다.
-      브리핑은 Bedrock을 SDK 없이 REST로 직접 호출, now/daily 두 모드. 원작 youtube-trend 축소판.</p>
-      <p class="finale">피날레: <b>흐름이 읽히는 레이더 스크린샷을 Slack에</b></p>
-      <span class="foot"><span>135분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
-    </a>
-
-    <a class="card" href="ClaudeCode_Capstone5_HandsOnLab.html">
-      <span class="mnum">MISSION 5</span>
-      <span class="identity">Quake Watch</span>
-      <h3>지구의 맥박, 실시간 지진 워치</h3>
-      <p class="desc"><b>Day 1, 라운드 1 (2시간 트랙).</b> USGS 실시간 피드를 멱등 수집해 세계지도 SVG에 진앙 펄스로 띄우고,
-      Bedrock이 "지난 24시간, 지구는"을 절제된 한국어로 해설합니다. 키 발급 없음, CloudFront 실배포로 개장.</p>
-      <p class="finale">피날레: <b>누구나 열리는 내 지진 워치 URL을 Slack에</b></p>
-      <span class="foot"><span>120분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
-    </a>
-
-    <a class="card" href="ClaudeCode_Capstone6_HandsOnLab.html">
-      <span class="mnum">MISSION 6</span>
-      <span class="identity">Newsroom Lens</span>
-      <h3>뉴스룸 렌즈, 4개 매체 관점 비교</h3>
-      <p class="desc"><b>Day 2, 라운드 2 (2시간 트랙).</b> BBC, Guardian, NHK, 연합뉴스 RSS를 수집해 공통 토픽을 묶고,
-      매체별 프레임을 한국어로 나란히 비교합니다. LLM 출력을 JSON 계약으로 화면에 - 요약을 넘어 관점을 읽는 도구.</p>
-      <p class="finale">피날레: <b>내 미디어 렌즈 URL을 Slack에</b></p>
-      <span class="foot"><span>120분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
-    </a>
-  </div>
+<div class="rows" style="margin-bottom:14px">
+<a class="row" href="ClaudeCode_Capstone_Setup.html">
+<span class="ch" style="color:var(--green)">SETUP</span>
+<span class="body">
+<h3>Capstone 시작 전, 설치하면 좋은 것들</h3>
+<p>Claude HUD 계기판, superpowers, Agent Toolkit for AWS 6종, 풀 스택 플러그인 32종 일괄 설치.</p>
+</span>
+<span class="side"><span class="time">15분</span>단계 4개 <span class="go">열기 →</span></span>
+</a>
+</div>
+<div class="cards">
+<a class="card" href="ClaudeCode_Capstone1_HandsOnLab.html">
+<span class="mnum">MISSION 1</span>
+<span class="identity">Press Start</span>
+<h3>Clawd Jump, 에이전틱 게임 개발</h3>
+<p class="desc"><b>Day 1, 라운드 1.</b> Claude Code 마스코트 Clawd의 슈퍼마리오풍 플랫포머를 만듭니다. superpowers로 엔진, 물리 동작, 타일 레벨, 코인과 깃발을 모두 구현하고 CloudFront로 배포합니다. Bedrock을 사용하지 않으며, API 키는 필요하지 않습니다.</p>
+<p class="finale">피날레: <b>내가 만든 게임 URL을 Slack에 공유하고 서로 플레이합니다.</b></p>
+<span class="foot"><span>135분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
+</a>
+<a class="card" href="ClaudeCode_Capstone2_HandsOnLab.html">
+<span class="mnum">MISSION 2</span>
+<span class="identity">Market Desk</span>
+<h3>웹 시황 대시보드</h3>
+<p class="desc"><b>Day 2, 라운드 2.</b> FastAPI + React + lightweight-charts로 지표 바, 지수 카드, 종목 테이블, 캔들 차트를 구현합니다. Bedrock의 종목 분석은 SSE로 타자기처럼 표시됩니다. 캐시는 single-flight 방식으로 구성하고, make run 하나로 실행합니다. 원작 stock-monitoring을 축소한 실습입니다.</p>
+<p class="finale">피날레: <b>브라우저에서 실행 중인 내 대시보드의 스크린샷을 Slack에 공유합니다.</b></p>
+<span class="foot"><span>135분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
+</a>
+<a class="card" href="ClaudeCode_Capstone3_HandsOnLab.html">
+<span class="mnum">MISSION 3</span>
+<span class="identity">Frame It</span>
+<h3>Generative Hours, 코드로 그린 전시를 배포하라</h3>
+<p class="desc"><b>Day 1, 라운드 1.</b> 제너러티브 아트 두 점으로 인터랙티브 미디어 아트 전시를 만듭니다. 첫 작품은 추상화 없이 완성하고, 두 번째 작품을 추가할 때 공통 계약을 추출합니다. 추상화가 생겨나는 순간을 직접 경험하는 실습입니다. Bedrock을 사용하지 않으며, API 키는 필요하지 않습니다.</p>
+<p class="finale">피날레: <b>내 전시 URL을 Slack에 공유하고 서로 관람합니다.</b></p>
+<span class="foot"><span>120분 / 미션 6 + DoD</span><span class="go">시작 →</span></span>
+</a>
+<a class="card" href="ClaudeCode_Capstone4_HandsOnLab.html">
+<span class="mnum">MISSION 4</span>
+<span class="identity">Trend Radar</span>
+<h3>유튜브 급상승 30, 트렌드 레이더</h3>
+<p class="desc"><b>Day 2, 라운드 2.</b> 급상승 30을 주기적으로 수집해 스냅샷으로 쌓고, 순위 변동(▲▼)과 NEW, 카테고리 점유율의 변화를 확인합니다. 브리핑 기능은 SDK 없이 REST로 Bedrock을 직접 호출하며, now/daily 두 모드를 제공합니다. 원작 youtube-trend를 축소한 실습입니다.</p>
+<p class="finale">피날레: <b>흐름이 읽히는 레이더 스크린샷을 Slack에 공유합니다.</b></p>
+<span class="foot"><span>135분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
+</a>
+<a class="card" href="ClaudeCode_Capstone5_HandsOnLab.html">
+<span class="mnum">MISSION 5</span>
+<span class="identity">Quake Watch</span>
+<h3>지구의 맥박, 실시간 지진 워치</h3>
+<p class="desc"><b>Day 1, 라운드 1 (2시간 트랙).</b> USGS 실시간 피드를 멱등하게 수집해 진앙을 세계지도 SVG에 펄스로 표시합니다. Bedrock이 "지난 24시간, 지구는"을 절제된 한국어로 해설합니다. 키 발급 없이 진행하며, CloudFront에 실제로 배포합니다.</p>
+<p class="finale">피날레: <b>누구나 열어 볼 수 있는 내 지진 워치 URL을 Slack에 공유합니다.</b></p>
+<span class="foot"><span>120분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
+</a>
+<a class="card" href="ClaudeCode_Capstone6_HandsOnLab.html">
+<span class="mnum">MISSION 6</span>
+<span class="identity">Newsroom Lens</span>
+<h3>뉴스룸 렌즈, 4개 매체 관점 비교</h3>
+<p class="desc"><b>Day 2, 라운드 2 (2시간 트랙).</b> BBC, Guardian, NHK, 연합뉴스의 RSS를 수집해 공통 토픽으로 묶고, 매체별 프레임을 한국어로 나란히 비교합니다. LLM 출력은 JSON 계약에 맞춰 화면에 표시합니다. 요약을 넘어 보도 관점의 차이를 살펴보는 도구입니다.</p>
+<p class="finale">피날레: <b>내 미디어 렌즈 URL을 Slack에 공유합니다.</b></p>
+<span class="foot"><span>120분 / 미션 5 + DoD</span><span class="go">시작 →</span></span>
+</a>
+</div>
 </section>
-
-
 <section class="wrap" id="references">
-  <div class="sec-title"><h2>References</h2><span class="tag">찾아보기 3부작</span></div>
-  <p class="sec-desc">랩 진행 중 옆에 띄워 두는 참고 문서입니다. 커맨드 레버, 플러그인, 그리고 파일이 사는 곳.</p>
-  <div class="rows">
-
-    <a class="row" href="ClaudeCode_Reference1_Directory.html">
-      <span class="ch" style="color:var(--lavender)">REF 1</span>
-      <span class="body">
-        <h3>디렉토리 구조, 무엇이 어디에 있는가</h3>
-        <p>~/.claude와 .claude, managed의 세 층 지도와 설정 우선순위, CLAUDE.md 계층 합산.</p>
-      </span>
-      <span class="side"><span class="time">찾아보기</span><span class="go">열기 →</span></span>
-    </a>
-
-    <a class="row" href="ClaudeCode_Reference2_Commands.html">
-      <span class="ch" style="color:var(--lavender)">REF 2</span>
-      <span class="body">
-        <h3>슬래시 커맨드, 세션을 조종하는 레버들</h3>
-        <p>시작/설정, 작업 흐름, 병렬, 검수, 세션 이동, 상태로 묶은 선별 목록과 워크샵 등장 위치.</p>
-      </span>
-      <span class="side"><span class="time">찾아보기</span><span class="go">열기 →</span></span>
-    </a>
-
-    <a class="row" href="ClaudeCode_Reference3_Plugins.html">
-      <span class="ch" style="color:var(--lavender)">REF 3</span>
-      <span class="body">
-        <h3>플러그인, 팀의 하네스를 배포하는 단위</h3>
-        <p>설치 3동사와 워크샵 3종(superpowers, project-init, harness-eval)의 역할, 신뢰 가드.</p>
-      </span>
-      <span class="side"><span class="time">찾아보기</span><span class="go">열기 →</span></span>
-    </a>
-
-
-    <a class="row" href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">
-      <span class="ch" style="color:var(--green)">REPO</span>
-      <span class="body">
-        <h3>Claude Code Deep Dive Workshop 강의자료</h3>
-        <p>이 포털과 랩 HTML 전체의 원본입니다 (20260703 폴더). 이슈와 제안 환영.</p>
-      </span>
-      <span class="side"><span class="time">GitHub</span><span class="go">열기 →</span></span>
-    </a>
-
-    <a class="row" href="https://github.com/whchoi98/claude-code-workshop/tree/main/tech_doc">
-      <span class="ch" style="color:var(--green)">DOC</span>
-      <span class="body">
-        <h3>기타 Tech Doc</h3>
-        <p>워크샵 본편 밖의 기술 문서 모음 (tech_doc 폴더).</p>
-      </span>
-      <span class="side"><span class="time">GitHub</span><span class="go">열기 →</span></span>
-    </a>
-
-  </div>
+<div class="sec-title"><h2 id="section-03">References</h2><span class="tag">찾아보기 3부작</span></div>
+<p class="sec-desc">랩 진행 중 옆에 띄워 두는 참고 문서입니다. 커맨드 레버, 플러그인, 그리고 파일이 사는 곳.</p>
+<div class="rows">
+<a class="row" href="ClaudeCode_Reference1_Directory.html">
+<span class="ch" style="color:var(--lavender)">REF 1</span>
+<span class="body">
+<h3>디렉토리 구조, 무엇이 어디에 있는가</h3>
+<p>~/.claude와 .claude, managed의 세 층 지도와 설정 우선순위, CLAUDE.md 계층 합산.</p>
+</span>
+<span class="side"><span class="time">찾아보기</span><span class="go">열기 →</span></span>
+</a>
+<a class="row" href="ClaudeCode_Reference2_Commands.html">
+<span class="ch" style="color:var(--lavender)">REF 2</span>
+<span class="body">
+<h3>슬래시 커맨드, 세션을 조종하는 레버들</h3>
+<p>시작/설정, 작업 흐름, 병렬, 검수, 세션 이동, 상태로 묶은 선별 목록과 워크샵 등장 위치.</p>
+</span>
+<span class="side"><span class="time">찾아보기</span><span class="go">열기 →</span></span>
+</a>
+<a class="row" href="ClaudeCode_Reference3_Plugins.html">
+<span class="ch" style="color:var(--lavender)">REF 3</span>
+<span class="body">
+<h3>플러그인, 팀의 하네스를 배포하는 단위</h3>
+<p>설치 3동사와 워크샵 3종(superpowers, project-init, harness-eval)의 역할, 신뢰 가드.</p>
+</span>
+<span class="side"><span class="time">찾아보기</span><span class="go">열기 →</span></span>
+</a>
+<a class="row" href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260905">
+<span class="ch" style="color:var(--green)">REPO</span>
+<span class="body">
+<h3>Claude Code Deep Dive Workshop 강의자료</h3>
+<p>이 포털과 랩 HTML 전체의 원본입니다 (20260703 폴더). 이슈와 제안 환영.</p>
+</span>
+<span class="side"><span class="time">GitHub</span><span class="go">열기 →</span></span>
+</a>
+<a class="row" href="https://github.com/whchoi98/claude-code-workshop/tree/main/tech_doc">
+<span class="ch" style="color:var(--green)">DOC</span>
+<span class="body">
+<h3>기타 Tech Doc</h3>
+<p>워크샵 본편 밖의 기술 문서 모음 (tech_doc 폴더).</p>
+</span>
+<span class="side"><span class="time">GitHub</span><span class="go">열기 →</span></span>
+</a>
+</div>
 </section>
-
 <div class="note">
-  <div class="note-inner">
+<div class="note-inner">
     모든 캡스톤의 마지막에는 <b>OPTION 하네스 엔지니어링 (+15분)</b>이 있습니다.
     <code class="inline">project-init</code>으로 작업 환경을 표준 구조로 성숙시키고
     <code class="inline">harness-eval</code>로 6개 차원 등급을 받습니다.
   </div>
 </div>
-
-</main>
-
+</div>
 <footer>
-  <div class="who">Claude Code Deep Dive Workshop, Hands-on Lab Portal</div>
-  <div>자료:
-    <a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">Claude Code Deep Dive Workshop 저장소</a> /
+<div class="who">Claude Code Deep Dive Workshop, Hands-on Lab Portal</div>
+<div>자료:
+    <a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260905">Claude Code Deep Dive Workshop 저장소</a> /
     <a href="https://github.com/whchoi98/claude-code-workshop/tree/main/tech_doc">기타 Tech Doc</a>
-  </div>
-  <div>기준: Claude Code 2.1.x, 2026.07</div>
+</div>
+<div>기준: Claude Code 2.1.267, 2026.09</div>
 </footer>
 
-<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
-<script>
-(function(){
-  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
-  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
-  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
-  if(saved==='light'){ root.setAttribute('data-theme','light'); }
-  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
-  label();
-  btn.addEventListener('click',function(){
-    var light = root.getAttribute('data-theme')==='light';
-    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
-    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
-    label();
-  });
-})();
-</script>
-</body>
-</html>
+
+</div>
+<nav class="page-pagination" aria-label="과정 이동">
+  <a class="pagination-link" href="index.html"><span><small>전체 과정</small><strong>워크샵 홈으로</strong></span></a>
+  <a class="pagination-link next" href="index.html#capstones"><span><small>다음으로</small><strong>전체 실습 살펴보기</strong></span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a>
+</nav></article>
+      <details class="article-toc" data-page-toc open><summary>이 페이지에서<span class="toc-toggle" aria-hidden="true">⌄</span></summary><nav aria-label="페이지 목차"><ol><li><a href="#section-01" data-toc-link>Chapter Hands-on Labs</a></li><li><a href="#section-02" data-toc-link>Capstone Missions</a></li><li><a href="#section-03" data-toc-link>References</a></li></ol></nav><a class="back-to-top" href="#workshop-main">맨 위로 ↑</a></details>
+    </div>
+  </main>
+  <footer class="site-footer"><span>CLAUDE CODE DEEP DIVE WORKSHOP <span class="footer-date">My Workshop Reader</span></span><a href="index.html">전체 과정 ↑</a></footer>
+</div>
+<p class="reader-status" data-reader-status role="status" aria-live="polite"></p>
+
+<script src="assets/reader.js"></script>
+<script src="assets/workshop.js"></script>
+</body></html>

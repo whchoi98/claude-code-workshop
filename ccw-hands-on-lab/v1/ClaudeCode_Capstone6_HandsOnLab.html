@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+<title>Capstone 6, Newsroom Lens - Claude Code Deep Dive Workshop</title>
+<style>
+:root {
+  --bg: #12181F;
+  --bg-card: #1B242E;
+  --bg-code: #0C1117;
+  --bg-inline: #232E3A;
+  --line: #2A3542;
+  --orange: #FF9900;
+  --orange-dim: rgba(255, 153, 0, 0.14);
+  --crimson: #B6002E;
+  --green: #3FB950;
+  --green-dim: rgba(63, 185, 80, 0.12);
+  --text: #E2E4EC;
+  --muted: #A6ABBE;
+  --dim: #7B8198;
+  --font-body: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-code: "D2Coding", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(255, 153, 0, 0.3); }
+a { color: var(--orange); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+/* ============ Hero ============ */
+.hero {
+  position: relative;
+  padding: 64px 32px 44px;
+  max-width: 1160px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -140px; right: -180px;
+  width: 460px; height: 460px;
+  background: radial-gradient(closest-side, rgba(182, 0, 46, 0.28), rgba(255, 153, 0, 0.10) 55%, transparent 75%);
+  pointer-events: none;
+}
+.eyebrow {
+  display: inline-block;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.hero h1 {
+  font-size: clamp(28px, 4.4vw, 42px);
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  max-width: 780px;
+}
+.hero .subtitle {
+  margin-top: 14px;
+  color: var(--orange);
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 700;
+}
+.hero .lede {
+  margin-top: 18px;
+  color: var(--muted);
+  max-width: 720px;
+  font-size: 15.5px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin-top: 26px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.hero-meta strong { color: var(--text); font-weight: 700; }
+
+/* ============ Sticky timeline ============ */
+.timeline {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(12, 17, 23, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.timeline-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.timeline-label {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.timeline-label strong { color: var(--orange); font-size: 13px; }
+.segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  height: 26px;
+}
+.seg {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg-card);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  padding: 0;
+  font-family: var(--font-body);
+}
+.seg:hover { border-color: var(--orange); }
+.seg .fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 153, 0, 0.85), rgba(255, 153, 0, 0.65));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.seg.done .fill { transform: scaleX(1); }
+.seg .seg-txt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.seg.done .seg-txt { color: #12181F; }
+.seg.active { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
+
+/* ============ Layout ============ */
+.layout {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 44px 32px 80px;
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 52px;
+  align-items: start;
+}
+.sidenav {
+  position: sticky;
+  top: 66px;
+  font-size: 13.5px;
+}
+.sidenav .nav-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  margin-bottom: 14px;
+}
+.sidenav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 7px 10px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+.sidenav a:hover { color: var(--text); background: var(--bg-card); text-decoration: none; }
+.sidenav a.active { color: var(--orange); border-left-color: var(--orange); background: var(--bg-card); }
+.sidenav .dot {
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dim);
+}
+.sidenav a.done .dot { background: var(--green); border-color: var(--green); }
+.sidenav .nav-time { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+/* ============ Task sections ============ */
+.task { margin-bottom: 72px; }
+.task-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.task-num {
+  font-family: var(--font-code);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 0.1em;
+}
+.task-head h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.time-badge {
+  margin-left: auto;
+  flex: none;
+  background: var(--orange-dim);
+  color: var(--orange);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.task-goal {
+  color: var(--muted);
+  margin-bottom: 24px;
+  max-width: 760px;
+}
+.task-goal strong { color: var(--text); }
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16.5px;
+  font-weight: 800;
+  margin: 34px 0 12px;
+}
+.step-title .step-no {
+  flex: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #12181F;
+  font-size: 12.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+p.body { color: var(--muted); margin: 10px 0 14px; max-width: 760px; }
+p.body strong, li strong { color: var(--text); }
+code.inline {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  background: var(--bg-inline);
+  color: #FFC466;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+kbd {
+  font-family: var(--font-code);
+  font-size: 0.82em;
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: var(--text);
+}
+
+/* ============ Code blocks ============ */
+.code-wrap {
+  background: var(--bg-code);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 14px 0 20px;
+  overflow: hidden;
+}
+.code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+.code-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.copy-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.code-wrap pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.code-wrap code { font-family: inherit; color: #D8DEE9; }
+.code-wrap.output pre { color: var(--dim); }
+.code-wrap .cmt { color: #5E6B7E; }
+.code-wrap .hl { color: #FFC466; }
+.code-wrap .ok { color: var(--green); }
+
+/* ============ Callouts ============ */
+.callout {
+  border-radius: 8px;
+  background: var(--bg-card);
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14.5px;
+  color: var(--muted);
+  max-width: 760px;
+}
+.callout strong { color: var(--text); }
+.callout.tip .co-title { color: var(--orange); }
+
+.callout .co-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 5px;
+}
+
+.callout.warn .co-title { color: #FF5C85; }
+
+/* ============ Checkpoint ============ */
+.checkpoint {
+  background: var(--green-dim);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 28px;
+}
+.checkpoint .cp-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+.cp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+.cp-item input {
+  flex: none;
+  margin-top: 5px;
+  width: 15px; height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+.cp-item input:checked + span { color: var(--text); }
+
+/* ============ Tabs ============ */
+.tabs { margin: 18px 0 6px; }
+.tab-btns {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dim);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 9px 16px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+.tab-pane { display: none; padding-top: 16px; }
+.tab-pane.active { display: block; }
+
+/* ============ Tables ============ */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 14px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tbl th, .tbl td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid #FFFFFF14;
+}
+.tbl th {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+  background: rgba(255, 255, 255, 0.03);
+}
+.tbl td { color: var(--muted); vertical-align: middle; }
+.tbl td:first-child { color: var(--text); font-weight: 700; white-space: nowrap; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl code { font-family: var(--font-code); font-size: 0.9em; color: #FFC466; }
+
+/* ============ Wrap-up ============ */
+.wrapup {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 32px 34px;
+  margin-bottom: 56px;
+}
+.wrapup h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.wrapup .sub { color: var(--muted); font-size: 14.5px; margin-bottom: 18px; }
+.next-box {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(182, 0, 46, 0.16), rgba(255, 153, 0, 0.08));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 26px;
+}
+.next-box .nx-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--orange);
+}
+.next-box h3 { font-size: 19px; font-weight: 800; }
+.next-box p { color: var(--muted); font-size: 14px; }
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 30px 32px 46px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.9;
+}
+footer .who { color: var(--muted); font-weight: 700; }
+footer .mail { color: var(--orange); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 20px 64px; }
+  .sidenav { display: none; }
+  .hero { padding: 44px 20px 32px; }
+  .timeline-inner { padding: 10px 20px; }
+  .seg .seg-txt { font-size: 9px; }
+  .task-head h2 { font-size: 20px; }
+}
+
+/* ===== Chapter 4 additions: Super Lab ===== */
+.part-divider { margin: 72px 0 12px; padding: 30px 34px; border-radius: 14px;
+  background: linear-gradient(135deg, #1d1433 0%, #12181F 65%); border: 1px solid #45306b; }
+.part-divider .pd-eyebrow { display: inline-block; background: #7a3ff2; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: .14em; padding: 4px 12px; border-radius: 4px; }
+.part-divider h2 { margin: 14px 0 8px; font-size: 26px; color: var(--text); }
+.part-divider p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.75; max-width: 860px; }
+.part-divider .rules { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+.part-divider .rules span { background: #241a3d; border: 1px solid #45306b; color: #d9c9ff;
+  font-size: 12.5px; padding: 6px 12px; border-radius: 999px; }
+.task.mission .task-num { color: #c9a2ff; }
+.task.mission { border-color: #3a2a57; }
+.checkpoint.dod { border-color: #7a3ff2; background: rgba(122, 63, 242, .06); }
+.checkpoint.dod .cp-title { color: #c9a2ff; }
+details.solution { margin: 18px 0; border: 1px dashed #FF9900; border-radius: 10px; background: rgba(255,153,0,.04); }
+details.solution summary { cursor: pointer; padding: 12px 16px; color: var(--accent); font-weight: 700; font-size: 13.5px; list-style: none; }
+details.solution summary::before { content: "▸ "; }
+details.solution[open] summary::before { content: "▾ "; }
+details.solution .sol-body { padding: 0 16px 14px; }
+
+/* ── Korean typography fix: 단어 단위 줄바꿈, 히어로 정돈 ── */
+body { word-break: keep-all; overflow-wrap: break-word; }
+.hero h1 { max-width: 980px; font-size: clamp(26px, 4vw, 38px); text-wrap: balance; }
+.hero .subtitle, .hero .lede, .task-goal, .wrapup .sub { text-wrap: pretty; }
+
+/* ── 잘림 방지 v2: 히어로 압축 + 좁은 화면 대응 ── */
+.hero { padding: 44px 28px 34px; }
+.eyebrow { margin-bottom: 14px; }
+.hero h1 { line-height: 1.3; }
+.hero .subtitle { margin-top: 10px; }
+.hero .lede { margin-top: 12px; }
+.seg-txt { text-overflow: ellipsis; }
+@media (max-width: 620px) {
+  .hero { padding: 26px 16px 24px; }
+  .hero h1 { font-size: 23px; }
+  .hero .subtitle { font-size: 15px; }
+  .hero .lede { font-size: 14px; }
+  .hero-meta { gap: 6px 14px; font-size: 12px; }
+  .seg .seg-txt { display: none; }
+  .timeline-inner { padding: 0 10px; }
+}
+
+/* ── 잘림 방지 v3: 좁은 화면 가로 넘침 제거 ── */
+.tbl { display: block; overflow-x: auto; max-width: 100%; }
+.hero, .layout, .timeline-inner, main, section { min-width: 0; }
+@media (max-width: 620px) {
+  .timeline-label:last-child { display: none; }
+}
+
+/* ── 잘림 방지 v4: 인라인 코드 칩의 최소폭 강제 해제 ── */
+code.inline { white-space: normal; overflow-wrap: anywhere; }
+
+/* ── v5: 소개문/본문 전체 폭 사용 (가독성 캡 해제) ── */
+.hero .lede, .task-goal, p.body, .callout, .part-divider p, .wrapup .sub { max-width: none; }
+.hero .lede { text-wrap: wrap; }
+
+/* ── macOS 터미널 스타일: 신호등 3버튼 ── */
+.code-head { position: relative; padding-left: 76px; }
+.code-head::before {
+  content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 11px; height: 11px; border-radius: 50%; background: #FF5F57;
+  box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
+}
+</style>
+<style id="hol-theme">
+html[data-theme="light"]{
+  --bg:#F3F4F7; --bg-card:#FFFFFF; --bg-code:#EEF1F5; --bg-inline:#E4E9EF; --line:#D7DDE5;
+  --orange:#B45309; --orange-dim:rgba(180,83,9,.12);
+  --green:#1F883D; --green-dim:rgba(31,136,61,.12);
+  --text:#1B2430; --muted:#5B6472; --dim:#75808F;
+  background:#F3F4F7;
+}
+html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
+html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
+#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
+background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
+border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
+font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#themeToggle:hover{border-color:var(--orange,#FF9900)}
+html[data-theme="light"] .code-wrap code{color:#2A3542}
+html[data-theme="light"] .code-wrap.output code{color:#57606E}
+html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
+html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
+html[data-theme="light"] .k.s{background:#DCEEDC}
+html[data-theme="light"] .k.w{background:#E9E2F7}
+html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
+html[data-theme="light"] .code-wrap .hl{color:#B45309}
+html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
+html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
+html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
+html[data-theme="light"] .head .when{color:#FF9900}
+html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
+html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
+html[data-theme="light"] .part-divider{background:linear-gradient(135deg,#EDE6FA 0%,#FFFFFF 65%);border-color:#B79CEF}
+html[data-theme="light"] .part-divider h2{color:#1B2430}
+html[data-theme="light"] .part-divider .rules span{background:#EDE6FA;border-color:#B79CEF;color:#5B21C7}
+html[data-theme="light"] .tbl code{color:#B45309}
+html[data-theme="light"] .task.mission .task-num{color:#6b46c1}
+html[data-theme="light"] .checkpoint.dod .cp-title{color:#6b46c1}
+@media print{#themeToggle{display:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">CAPSTONE 6 / NEWSROOM LENS / 120 MIN</span>
+  <h1>뉴스룸 렌즈, 4개 매체 관점 비교</h1>
+  <div class="subtitle">RSS 수집 → 토픽 클러스터 → 매체별 프레이밍 비교, LLM이 아니면 못 만드는 화면</div>
+  <p class="lede">
+    같은 사건도 뉴스룸마다 다르게 부릅니다. BBC, The Guardian, NHK World, 연합뉴스의 헤드라인을
+    <strong>주기 수집해 나란히 놓고</strong>, Bedrock이 공통 토픽을 묶어 <strong>매체별 프레임을 한국어로 비교</strong>합니다.
+    요약을 넘어 관점을 읽는 도구 - 이것이 LLM 고유의 화면입니다. 키 발급 없음, 마감은 CloudFront 실배포,
+    120분에 완결합니다.
+  </p>
+  <div class="hero-meta">
+    <span>소요 시간 <strong>120분</strong></span>
+    <span>미션 <strong>5개 + DoD</strong></span>
+    <span>산출물 <strong>공개 URL로 열리는 내 미디어 렌즈</strong></span>
+    <span>Update <strong>2026.08</strong></span>
+  </div>
+</header>
+
+<nav class="timeline" aria-label="미션 타임라인">
+  <div class="timeline-inner">
+    <span class="timeline-label">진행 <strong id="progress-count">0/8</strong></span>
+    <div class="segments" id="segments">
+      <button class="seg" data-task="m0" style="flex:5" title="M0 사전 준비, 5분"><span class="fill"></span><span class="seg-txt">M0</span></button>
+      <button class="seg" data-task="m1" style="flex:15" title="M1 설계, 15분"><span class="fill"></span><span class="seg-txt">M1 설계</span></button>
+      <button class="seg" data-task="m2" style="flex:30" title="M2 수집기, 30분"><span class="fill"></span><span class="seg-txt">M2 수집기</span></button>
+      <button class="seg" data-task="m3" style="flex:30" title="M3 뉴스룸 그리드, 30분"><span class="fill"></span><span class="seg-txt">M3 그리드</span></button>
+      <button class="seg" data-task="m4" style="flex:40" title="M4 렌즈와 개장, 40분"><span class="fill"></span><span class="seg-txt">M4 렌즈와 개장</span></button>
+    </div>
+    <span class="timeline-label">120 min</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+<aside class="sidenav" aria-label="미션 목차">
+  <div class="nav-title">MISSIONS / 120분</div>
+  <a href="#brief" data-nav="brief"><span class="dot"></span>브리핑<span class="nav-time"></span></a>
+  <a href="#blueprint" data-nav="blueprint"><span class="dot"></span>구현 청사진<span class="nav-time">참고</span></a>
+  <a href="#m0" data-nav="m0"><span class="dot"></span>M0 사전 준비<span class="nav-time">5분</span></a>
+  <a href="#m1" data-nav="m1"><span class="dot"></span>M1 설계<span class="nav-time">15분</span></a>
+  <a href="#m2" data-nav="m2"><span class="dot"></span>M2 수집기와 스토어<span class="nav-time">30분</span></a>
+  <a href="#m3" data-nav="m3"><span class="dot"></span>M3 뉴스룸 그리드<span class="nav-time">30분</span></a>
+  <a href="#m4" data-nav="m4"><span class="dot"></span>M4 렌즈와 개장<span class="nav-time">40분</span></a>
+  <a href="#gq" data-nav="gq"><span class="dot"></span>BONUS 퀄리티 강화<span class="nav-time">+α</span></a>
+  <a href="#opt-h" data-nav="opt-h"><span class="dot"></span>OPT 하네스 엔지니어링<span class="nav-time">+15분</span></a>
+  <a href="#wrapup" data-nav="wrapup"><span class="dot"></span>마무리<span class="nav-time"></span></a>
+</aside>
+
+<main>
+
+<section class="task" id="brief">
+  <div class="task-head"><span class="task-num">MISSION BRIEFING</span><h2>관점을 비교하는 법</h2><span class="time-badge">숙지</span></div>
+  <p class="task-goal">
+    <strong>빈 폴더에서 superpowers 워크플로로</strong> 설계하고 Phase 단위로 빌드합니다.
+    2시간 트랙이라 키 발급이 없고(4개 매체 공개 RSS), 마감은 <strong>CloudFront 실배포</strong>입니다.
+    소스는 영문 3개 + 한국어 1개지만, <strong>화면의 토픽과 비교 브리핑은 전부 한국어</strong>입니다(원문 제목 병기).
+  </p>
+  <table class="tbl">
+    <tr><th>레이어</th><th>구성</th><th>핵심 원칙</th></tr>
+    <tr><td>수집</td><td>BBC / Guardian / NHK World / 연합뉴스 RSS를 120초 폴링</td><td>소스별 실패 격리, 피드 하나가 죽어도 뉴스룸은 산다</td></tr>
+    <tr><td>저장</td><td>기사 link 멱등 딕셔너리(소스별 50건)</td><td>본문은 저장하지 않는다, 헤드라인 + 요약 + 링크만</td></tr>
+    <tr><td>렌즈</td><td>공통 토픽 클러스터 + 매체별 프레임을 <strong>JSON 계약</strong>으로</td><td>LLM 출력이 곧 화면 데이터, 계약이 무너지면 화면도 무너진다</td></tr>
+    <tr><td>개장</td><td>CDK로 CF → prefix SG → ALB → Fargate</td><td>Bearer는 Secrets 기동 주입, 이미지에 비밀 없음</td></tr>
+  </table>
+
+  <p class="body"><strong>1. 뉴스룸 (기본 뷰)</strong></p>
+  <table class="tbl">
+    <tr><th>기능</th><th>설명</th></tr>
+    <tr><td>4열 그리드</td><td>매체별 최신 헤드라인 카드, 원문 링크 새 탭, 상대 시각("12분 전")</td></tr>
+    <tr><td>소스 상태 바</td><td>매체별 마지막 수집 시각과 건수, 실패 시 경고 배지</td></tr>
+    <tr><td>듀얼 테마</td><td>시스템 기본 + 토글 + localStorage</td></tr>
+  </table>
+  <p class="body"><strong>2. 렌즈 (이 캡스톤의 심장)</strong></p>
+  <table class="tbl">
+    <tr><th>기능</th><th>설명</th></tr>
+    <tr><td>토픽 클러스터</td><td>2개 이상 매체가 다룬 공통 토픽 3~5개, 공통 사실 요약</td></tr>
+    <tr><td>프레임 비교</td><td>토픽마다 <strong>4개 매체의 프레임을 나란히</strong>, 미보도는 회색 - 침묵도 관점이다</td></tr>
+    <tr><td>근거 링크</td><td>모든 프레임 칩에 원문 기사 링크, 출처 없는 주장 없음</td></tr>
+    <tr><td>렌즈 캐시</td><td>같은 10분 버킷 동안 재사용</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">L</span>학습 목표, Level 200</div>
+  <p class="body">이 캡스톤을 마치면 다음 네 가지를 <strong>설명할 수 있고, 다시 만들 수 있습니다</strong>.</p>
+  <table class="tbl">
+    <tr><th>목표</th><th>검증되는 순간</th></tr>
+    <tr><td>이질적 소스를 하나의 스키마로 정규화하는 법</td><td>M2에서 4개 피드가 같은 모양의 JSON으로 나란히 설 때</td></tr>
+    <tr><td>LLM 출력에 JSON 계약을 거는 법</td><td>M4에서 클러스터 응답이 파싱 한 번에 화면 데이터가 될 때</td></tr>
+    <tr><td>요약을 넘어 관점 비교를 시키는 프롬프트 설계</td><td>같은 토픽의 매체별 프레임이 실제로 다르게 읽힐 때</td></tr>
+    <tr><td>컨테이너 앱을 CF → ALB → Fargate로 개장하는 법</td><td>내 CloudFront URL이 다른 사람 브라우저에서 열릴 때</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">R</span>챕터 연결 지도, 배운 내용이 재등장하는 곳</div>
+  <table class="tbl">
+    <tr><td><a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1 설치부터 Headless까지</a></td><td>M0~전체: 세션 운용, 지시 → 실행 → 검증 루프</td></tr>
+    <tr><td><a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2 Subagents</a></td><td>M2~M3: 수집기 리뷰를 code-reviewer에게, 그리드와 상태 바 병행</td></tr>
+    <tr><td><a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3 Admin Setup</a></td><td>M4: Bearer 자격과 Secrets 주입이 도는 통제선의 배경</td></tr>
+    <tr><td><a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4 Settings, 훅과 스킬</a></td><td>OPT: 하네스 성숙화, 훅과 스킬의 프로젝트 자산화</td></tr>
+    <tr><td><a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5 CLI Reference</a></td><td>확장 방향: 아침 렌즈를 헤드리스로 뽑아 Slack에 배달하는 파이프라인</td></tr>
+    <tr><td><a href="ClaudeCode_Ch6_HandsOnLab.html" style="color:#c9a2ff">Ch6 Agent SDK</a></td><td>확장 방향: 렌즈 생성을 코드에서 부르는 상주 미디어 데스크</td></tr>
+  </table>
+  <div class="callout tip">
+    <span class="co-title">규칙, 캡스톤 공통</span>
+    ① 코드와 파일 구성을 직접하지 않고, Claude에게 지시해서 만듭니다 ② 각 Phase의 DoD를 통과해야 다음으로
+    ③ 막히면 "막힐 때 열어보기"의 힌트를 씁니다. 다른 참가자와의 의존성은 없습니다.
+  </div>
+</section>
+
+<section class="task" id="blueprint">
+  <div class="task-head"><span class="task-num">BLUEPRINT</span><h2>구현 청사진</h2><span class="time-badge">참고</span></div>
+  <p class="task-goal">M1 설계가 이 구조로 수렴하도록 방향을 잡아 주는 <strong>구현 지도</strong>입니다.</p>
+
+  <div class="step-title"><span class="step-no">0</span>세 개의 경로 한 눈에</div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">수집 루프, 조회 경로, 렌즈 경로</span></div>
+    <pre><code>[수집 루프]  120초마다, 소스별 격리
+Scheduler ──> Collector: BBC / Guardian / NHK / 연합 RSS ──> 정규화(source, title, link, published, summary)
+                                │ (한 피드 실패는 그 피드만)              │
+                                +── 소스 상태 기록          Store <── link 멱등 upsert ──+
+
+[조회 경로]  브라우저가 당길 때
+Browser ── fetch ──> FastAPI: /api/articles ──> 4열 그리드 + 소스 상태 바
+
+[렌즈 경로]  버튼 눌렀을 때만, 이 캡스톤의 심장
+FastAPI ── 4소스 헤드라인 묶음 ──> httpx POST converse(Bearer) ──> JSON만:
+   clusters[{topic, summary, frames{bbc/guardian/nhk/yna}, sources}] + overview
+   │
+   +── 10분 버킷 캐시 ──> 클러스터 뷰(프레임 나란히, 미보도 회색, 근거 링크)</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">1</span>소스 계약 (2026.08 확인 기준)</div>
+  <table class="tbl">
+    <tr><th>매체</th><th>언어</th><th>피드</th><th>비고</th></tr>
+    <tr><td>BBC World</td><td>영어</td><td>feeds.bbci.co.uk의 world 편 RSS</td><td>공식 제공, 안정</td></tr>
+    <tr><td>The Guardian World</td><td>영어</td><td>theguardian.com/world/rss</td><td>섹션 URL + /rss 관례, 공식</td></tr>
+    <tr><td>NHK World</td><td>영어</td><td>www3.nhk.or.jp 영문 뉴스 RSS</td><td>일본 관점의 영문 발신</td></tr>
+    <tr><td>연합뉴스 국제</td><td>한국어</td><td>yna.co.kr 국제 섹션 RSS</td><td>유일한 한국어 소스</td></tr>
+  </table>
+  <p class="body">참고: Reuters는 공식 RSS를 2020년에 중단해 소스에서 제외했습니다. 피드 URL은 변할 수 있는 값이라
+  <strong>구현 시 각 사 RSS 허브에서 확인해 config에 확인일과 함께 기록</strong>하는 것이 M2의 첫 작업입니다 - 상류 계약을
+  문서화하는 습관 자체가 학습입니다.</p>
+
+  <div class="step-title"><span class="step-no">2</span>렌즈 JSON 계약 (LLM 출력 = 화면 데이터)</div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">POST /api/lens 응답 형태</span></div>
+    <pre><code>{
+  "clusters": [
+    {
+      "topic": "한국어 토픽명",
+      "summary": "매체들이 공통으로 전하는 사실, 2문장",
+      "frames": {
+        "bbc": "이 매체가 무엇을 앞세우는지 1문장",
+        "guardian": "...", "nhk": "...", "yna": "미보도"
+      },
+      "sources": { "bbc": [0, 3], "guardian": [1], "nhk": [2], "yna": [] }
+    }
+  ],
+  "overview": "오늘의 미디어 지형, 3문장"
+}</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">3</span>기술 선택 4</div>
+  <table class="tbl">
+    <tr><th>선택</th><th>이유</th></tr>
+    <tr><td>link 멱등 + 본문 미저장</td><td>중복 없는 스토어와 출처 존중을 한 번에, 우리는 렌즈지 아카이브가 아니다</td></tr>
+    <tr><td>소스별 실패 격리</td><td>RSS는 언제든 한 곳이 느려진다, 4분의 1의 장애가 4분의 4가 되면 안 된다</td></tr>
+    <tr><td>JSON 전용 LLM 계약</td><td>자유 산문은 사람용, 화면용 출력은 스키마 - 파싱 가능성이 곧 신뢰성</td></tr>
+    <tr><td>CF → ALB → Fargate 개장 형식</td><td>prefix list SG와 X-Origin-Verify 이중 방어를 갖춘, 공개 URL까지 가는 최단 경로</td></tr>
+  </table>
+</section>
+
+<section class="task" id="m0">
+  <div class="task-head"><span class="task-num">MISSION 00</span><h2>사전 준비</h2><span class="time-badge">5분</span></div>
+  <p class="task-goal">이 트랙은 <strong>외부 키 발급이 없습니다</strong>. Bedrock Bearer와 AWS 자격만 확인하면 출발입니다.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>mkdir -p ~/capstone/capstone-6 &amp;&amp; cd ~/capstone/capstone-6
+set -a; source ~/capstone/.env; set +a
+python3 -c "import os; print('Bearer:', 'OK' if os.environ.get('AWS_BEARER_TOKEN_BEDROCK') else 'MISSING')"
+aws sts get-caller-identity --query Account --output text</code></pre>
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m0"><span>Bearer OK와 AWS 계정 ID가 출력되었습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m1">
+  <div class="task-head"><span class="task-num">MISSION 01</span><h2>설계, 브레인스토밍</h2><span class="time-badge">15분</span></div>
+  <p class="task-goal">소스 4개, 정규화, JSON 렌즈 계약, 배포까지 <strong>요구 9조항</strong>으로 넘깁니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 세션 운용과 Capstone Setup의 superpowers 워크플로.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal (~/capstone/capstone-6)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>claude</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:brainstorming 다음 요구사항으로 "Newsroom Lens", 4개 매체의 관점 비교 뉴스룸을 설계하자.
+1) 구조: backend/(Python 3.11+ FastAPI, app/collector 수집, app/store, app/api, app/llm, config.py)
+   + frontend/index.html(빌드 없는 정적 SPA 한 장). FastAPI가 정적 파일을 함께 서빙해 :8000 완결.
+   Dockerfile 한 장
+2) 소스 4개(전부 공개 RSS, 키 불요), config.py 상수로:
+   BBC World, The Guardian World, NHK World(영문), 연합뉴스 국제 - 각 항목은 {id, 이름, 언어, rss_url}.
+   피드 URL은 구현 시점에 각 사 공식 RSS 허브에서 확인해 채운다(하드코딩하되 주석으로 확인일 기록)
+3) 수집기: feedparser로 4개 피드를 120초 주기 수집, 소스별 최신 15건을
+   {source, title, link, published(UTC ISO), summary(HTML 태그 제거, 300자 절단)}로 정규화.
+   피드 하나가 실패해도 나머지는 계속(소스별 실패 격리), 마지막 성공 시각을 소스별로 기록
+4) 스토어: link를 멱등 키로 하는 인메모리 딕셔너리(소스별 최대 50건). 같은 기사는 published만 갱신
+5) API 계약: GET /healthz, GET /api/articles(소스별 최신 목록 + 소스 상태),
+   POST /api/lens (아래 6, 같은 10분 버킷 캐시)
+6) 렌즈(LLM, 이 캡스톤의 심장): Bedrock Converse를 SDK 없이 httpx 직접 REST로.
+   POST https://bedrock-runtime.ap-northeast-2.amazonaws.com/model/global.anthropic.claude-sonnet-4-6/converse
+   Authorization: Bearer(환경변수 AWS_BEARER_TOKEN_BEDROCK), maxTokens 1500.
+   입력은 4개 소스의 최신 헤드라인+요약 묶음. 출력은 반드시 JSON만:
+   {"clusters":[{"topic":"한국어 토픽명","summary":"공통 사실 2문장",
+     "frames":{"bbc":"이 매체의 프레임 1문장","guardian":"...","nhk":"...","yna":"..."},
+     "sources":{"bbc":[기사 인덱스],...}}], "overview":"오늘의 미디어 지형 3문장"}
+   클러스터는 2개 이상 매체가 다룬 공통 토픽만 3~5개. 다루지 않은 매체의 frame은 "미보도".
+   모든 생성 텍스트는 한국어, 기사 제목 원문은 화면에서 병기
+7) 화면(텍스트 스펙): 라이트/다크 듀얼 테마. 상단 소스 상태 바(4개 매체, 마지막 수집, 건수).
+   기본 뷰는 4열 카드 그리드(매체별 최신 헤드라인, 원문 링크 새 탭, 상대 시각).
+   "렌즈" 버튼 → 클러스터 뷰: 토픽 카드마다 공통 요약 + 4개 매체 프레임을 나란히,
+   미보도는 회색 처리, 근거 기사 링크 칩. 뷰 전환 토글
+8) 키와 윤리: Bearer는 환경변수로만. 기사 본문을 저장하지 않는다(헤드라인+요약+링크만),
+   화면 모든 카드에 원문 출처 링크 필수
+9) 배포와 순서: CDK로 CloudFront → (prefix list SG + X-Origin-Verify) ALB → Fargate 를 구성,
+   Secrets 기동 주입. Phase 1(수집 + 스토어 + /api/articles) → Phase 2(4열 그리드)
+   → Phase 3(렌즈 JSON + 클러스터 뷰) → Phase 4(cdk deploy 개장). 2시간 제약: 테스트 생략,
+   curl과 브라우저로 검증. 결정이 필요하면 이 범위 안에서 최소한으로만 물어봐.</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">자동화 옵션, auto mode</span>
+    세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
+    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    시간이 빠듯할 때 유용합니다. 되돌리려면 <code class="inline">auto mode off</code>입니다.
+  </div>
+  <p class="body"><code class="inline">/superpowers:write-plan</code>으로 Phase 4개 계획을 승인하고, 위 <strong>구현 청사진</strong>과 대조하세요.</p>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m1"><span>Phase 4개 계획이 승인되었고 worktree가 열렸습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m2">
+  <div class="task-head"><span class="task-num">MISSION 02</span><h2>Phase 1, 수집기와 스토어</h2><span class="time-badge">30분</span></div>
+  <p class="task-goal">4개 피드가 <strong>같은 모양으로 정규화되어</strong> 쌓이고, 한 피드가 죽어도 나머지가 살면 끝입니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프. 여유가 있다면 <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 code-reviewer에게 정규화 로직 리뷰를 맡겨 보세요.</p>
+
+  <div class="callout tip">
+    <span class="co-title">2시간의 열쇠, 인프라 선배포</span>
+    <code class="inline">cdk deploy</code>는 첫 회 12~15분이 걸립니다. <strong>Phase 1을 시작하자마자
+    별도 터미널에서 인프라 배포를 먼저 걸어 두세요</strong>. 빌드와 배포 대기가 겹치면
+    M4는 이미지 푸시와 서비스 갱신만 남아 10분 안에 개장합니다.
+  </div>  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal 2, 인프라 선배포 (백그라운드)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/capstone/capstone-6 &amp;&amp; npx aws-cdk@2 deploy --require-approval never   # Claude가 infra를 만든 직후 실행</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 1만 구현하고 멈춰줘. 시작 전에 4개 피드 URL을 각 사 공식 RSS 허브에서 확인해 config.py에 확인일 주석과 함께 기록. backend venv + requirements(fastapi, uvicorn, httpx, feedparser, apscheduler), 소스별 격리 수집기(120초), link 멱등 스토어(소스별 50건), /api/articles(목록 + 소스 상태)와 /healthz, Dockerfile과 infra 골격까지. uvicorn과 curl 검증 방법 포함.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 스모크</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd backend &amp;&amp; .venv/bin/uvicorn app.main:app --port 8000 &amp;
+sleep 8
+curl -s localhost:8000/api/articles | head -c 500; echo</code></pre>
+  </div>
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 정규화가 비교를 만든다</span>
+    BBC와 연합뉴스의 RSS는 필드도, 날짜 형식도, 인코딩 습관도 다릅니다. 4개 피드를
+    <strong>{source, title, link, published, summary} 한 가지 모양</strong>으로 다듬는 순간에야
+    "나란히 놓기"가 가능해지고, 렌즈 프롬프트도 단순해집니다. 통합의 8할은 정규화입니다 -
+    그리고 summary의 HTML 태그 제거와 절단은 프롬프트 토큰 예산을 지키는 실무 규율입니다.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m2a"><span>4개 소스 전부에서 기사가 정규화되어 조회됩니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m2b"><span>피드 URL 하나를 일부러 틀려도 나머지 3개는 계속 수집됩니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m3">
+  <div class="task-head"><span class="task-num">MISSION 03</span><h2>Phase 2, 뉴스룸 그리드</h2><span class="time-badge">30분</span></div>
+  <p class="task-goal">4열 그리드에 <strong>세계의 지금이 나란히</strong> 뜨면, 비교의 무대가 완성됩니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 그리드를 만드는 동안 소스 상태 바를 서브에이전트로 병행할 수 있습니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 2를 구현해줘. frontend/index.html 정적 SPA 한 장: 요구 7의 기본 뷰(듀얼 테마, 소스 상태 바, 4열 카드 그리드 - 매체명 헤더, 헤드라인, 상대 시각, 원문 새 탭 링크). 모바일에서는 2열로 접히게. FastAPI 정적 서빙 mount까지.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 미리보기</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code># 브라우저에서 /proxy/8000/ 열기, 4개 매체의 지금이 나란히 선다</code></pre>
+  </div>
+  <div class="callout warn">
+    <span class="co-title">이 미션의 3대 함정</span>
+    ① 한글이 깨진다 = 응답 인코딩을 feedparser에 맡기고, 화면은 UTF-8 meta를 확인하세요.
+    ② 요약에 태그 조각이 보인다 = summary가 HTML입니다, 정규화에서 태그 제거가 빠진 것.
+    ③ 시각이 뒤죽박죽 = published 포맷이 소스마다 다릅니다, 정규화에서 UTC ISO로 통일했는지 확인하세요.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m3a"><span>4열 그리드에 매체별 헤드라인과 상대 시각이 표시됩니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m3b"><span>모든 카드가 원문으로 연결되고 소스 상태 바가 살아 있습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m4">
+  <div class="task-head"><span class="task-num">MISSION 04</span><h2>Phase 3 + 4, 렌즈와 개장</h2><span class="time-badge">40분</span></div>
+  <p class="task-goal"><strong>LLM의 JSON이 그대로 화면이 되고</strong>, 내 CloudFront URL이 열리면 미션 완료입니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3</a>에서 본 Bedrock 자격과 Secrets 주입의 배경, 그 위에서 도는 REST 계약.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 렌즈</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 3(렌즈)을 구현해줘. llm 모듈: httpx POST converse(Bearer, maxTokens 1500, 타임아웃 504/파싱 502), 시스템 프롬프트에 요구 6의 JSON 스키마와 "JSON 외 출력 금지, 코드펜스 금지"를 명시, 응답은 json.loads 전에 백틱/여백 방어적 제거. POST /api/lens(10분 버킷 캐시). 화면 렌즈 뷰: 토픽 카드에 공통 요약 + 4개 프레임 나란히, 미보도 회색, sources 인덱스로 근거 기사 링크 칩, 뷰 전환 토글.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 렌즈 스모크</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>curl -s -X POST localhost:8000/api/lens | head -c 400; echo</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 개장</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 4(개장)를 진행해줘. 선배포한 인프라에 앱 이미지를 빌드/푸시하고 서비스 갱신, CloudFront 도메인 출력. X-Origin-Verify와 Secrets 주입 확인 절차 포함.</code></pre>
+  </div>
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 관점을 묻는 프롬프트</span>
+    "요약해줘"는 아무 모델이나 합니다. 이 캡스톤의 프롬프트는 세 가지가 다릅니다:
+    ① <strong>비교 지시</strong> - "각 매체가 무엇을 앞세우고 무엇을 생략하는지"를 명시적으로 묻고,
+    ② <strong>침묵의 처리</strong> - 다루지 않은 매체를 "미보도"로 표기하게 해 부재 자체를 정보로 만들며,
+    ③ <strong>JSON 계약</strong> - 출력이 화면 데이터이므로 스키마 밖 산문을 금지합니다.
+    그리고 근거 인덱스(sources)를 요구하는 순간, 렌즈는 주장이 아니라 <strong>링크로 검증 가능한 화면</strong>이 됩니다.
+  </div>
+  <div class="callout warn">
+    <span class="co-title">렌즈나 개장이 막힐 때</span>
+    ① JSON 파싱 실패 = 응답 앞뒤의 코드펜스가 남은 것, 방어적 제거를 확인하세요.
+    ② 클러스터가 1개뿐 = 정상일 수 있습니다, 조용한 뉴스 시간대엔 공통 토픽이 적습니다.
+    ③ ALB 직접 접근 403 = 정상(이중 방어), ④ 브리핑만 실패 = 태스크 정의의 secrets 블록에서 Bearer 주입 확인.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m4a"><span>렌즈 뷰에 토픽별 4매체 프레임 비교가 근거 링크와 함께 뜹니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m4b"><span>내 CloudFront URL을 Slack에 공유했습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="gq">
+  <div class="task-head"><span class="task-num">BONUS</span><h2>렌즈 퀄리티 강화 라운드, 시선을 벼려라</h2><span class="time-badge">+α 자유</span></div>
+  <p class="task-goal">
+    렌즈가 열렸다면 이제 <strong>렌즈를 내 것으로 만드는 시간</strong>입니다. 강화 카드 중 끌리는 것을 골라
+    하나씩 주문하세요. 요령은 같습니다: 한 번에 하나, 화면으로 확인하고, 마음에 들면 커밋과 재배포.
+  </p>
+
+  <div class="step-title"><span class="step-no">A</span>강화 카드 1, 다섯 번째 시선</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>Al Jazeera English를 다섯 번째 소스로 추가하자. config에 피드를 등록하면
+수집기, 스토어, 그리드(5열), 렌즈 프롬프트와 frames 스키마까지 자동으로 확장되는지가
+이 카드의 진짜 시험이다. 하드코딩이 남아 있으면 이 기회에 소스 목록 주도로 리팩터.</code></pre>
+  </div>
+
+  <p class="body"><strong>추가 소스 후보 메뉴판</strong> (한국 / 미국, 2026.08 기준 - NPR와 NYT는 웹 확인, 나머지는 등록 시 각 사 허브에서 피드 URL을 확인해 config에 확인일을 남기세요)</p>
+  <table class="tbl">
+    <tr><th>국가</th><th>매체</th><th>피드 허브</th><th>비고</th></tr>
+    <tr><td>한국</td><td>KBS 뉴스</td><td>news.kbs.co.kr RSS</td><td>공영 기준선, 안정</td></tr>
+    <tr><td>한국</td><td>한겨레</td><td>hani.co.kr RSS</td><td>공식 제공 오래 유지</td></tr>
+    <tr><td>한국</td><td>경향신문</td><td>khan.co.kr RSS</td><td>섹션별 제공</td></tr>
+    <tr><td>한국</td><td>조선일보</td><td>chosun.com RSS</td><td>섹션별 제공</td></tr>
+    <tr><td>한국</td><td>SBS 뉴스</td><td>news.sbs.co.kr RSS</td><td>방송사 중 충실</td></tr>
+    <tr><td>한국</td><td>매일경제 / 한국경제</td><td>mk.co.kr, hankyung.com RSS</td><td>경제 섹션 렌즈용</td></tr>
+    <tr><td>미국</td><td>NPR</td><td>feeds.npr.org</td><td>미국 매체 중 RSS 지원 최상급</td></tr>
+    <tr><td>미국</td><td>NYT</td><td>rss.nytimes.com</td><td>헤드라인 + 요약 무료, 렌즈는 본문 미저장이라 충분</td></tr>
+    <tr><td>미국</td><td>Fox News</td><td>feeds.foxnews.com</td><td>공식 제공</td></tr>
+    <tr><td>미국</td><td>Washington Post</td><td>feeds.washingtonpost.com</td><td>제공, 개편 잦은 편</td></tr>
+  </table>
+  <p class="body">참고: AP는 공식 RSS 미제공, CNN 피드는 레거시라 후순위입니다. 렌즈는 프레이밍 비교가 심장이므로
+  <strong>관점의 거리가 있는 짝</strong>(예: NPR + Fox, 국내라면 KBS + 한겨레 + 조선)일수록 화면이 살아납니다.</p>
+
+  <div class="step-title"><span class="step-no">B</span>강화 카드 2, 키워드 추적</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>관심 키워드 추적을 추가하자. 헤더의 입력창에 키워드(예: AI, 반도체)를 핀하면
+그리드에서 매칭 헤드라인이 하이라이트되고, "이 키워드만" 필터 토글이 생긴다.
+핀 목록은 localStorage에, 매칭은 대소문자 무시.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">C</span>강화 카드 3, 어조 온도계</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>렌즈 응답에 어조 온도를 더하자. 각 프레임에 tone 필드(-2 차분 ~ +2 격앙)를 JSON 계약에 추가하고,
+화면은 프레임 옆에 작은 온도 바로 표시. 같은 사건에 대한 온도 차가 한눈에 보이면
+프레이밍이라는 개념이 몸에 들어온다. 프롬프트에 "근거 문구 없이 극단값 금지"를 명시.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">D</span>강화 카드 4, 아침 렌즈 배달</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>렌즈를 텍스트로 내보내자. "복사용 브리핑" 버튼 → overview와 클러스터를
+Slack에 붙여넣기 좋은 플레인 텍스트(토픽별 3줄 + 링크)로 만들어 클립보드에 복사.
+매일 아침 팀 채널에 배달하는 내 미디어 브리핑의 원형이다.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">E</span>강화 카드 5, 나만의 렌즈로</div>
+  <p class="body">여기부터는 정해진 카드가 없습니다. <strong>당신이 편집장입니다</strong>. 뉴스룸을 보며 궁금했던 것
+  하나를 골라, 위 카드들처럼 직접 요구사항을 써서 주문하세요. 아이디어가 필요하면: 테크 섹션 전용 렌즈,
+  시간대별 헤드라인 변화, 매체별 다룬 지역 지도, 토픽 히스토리(오전 vs 오후), 읽음 표시, DynamoDB로 스토어 승격(재배포와 다중 태스크에도 기사 이력이 유지되고, 토픽 히스토리 카드의 토대가 됩니다).</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 빈칸을 내 아이디어로</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>내 렌즈에 [내가 원하는 기능]을 추가하자. 규칙:
+1) 데이터: [필요한 필드, 새 소스라면 공식 RSS 확인]
+2) 화면: [어디에 어떻게 보이는지]
+3) 계약: 본문 미저장과 원문 링크 필수 원칙, JSON 스키마 호환은 깨지 않는다
+4) 배포: 완성되면 재배포까지
+구현 전에 이 규칙을 네 계획으로 다시 말해주고, 승인하면 진행해.</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">강화 라운드의 요령</span>
+    ① 카드 하나 = 커밋 하나, 되돌아갈 지점을 만들며 갑니다. ② 화면으로 확인하고 <strong>다른 점을 말로</strong> 다듬으세요.
+    ③ 마지막엔 재배포로 Slack의 내 URL을 최신으로.
+  </div>
+  <div class="checkpoint dod">
+    <div class="cp-title">BONUS DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="gq1"><span>강화 카드 하나 이상을 적용해 화면으로 확인하고 커밋했습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="opt-h">
+  <div class="task-head"><span class="task-num">OPTION</span><h2>하네스 엔지니어링</h2><span class="time-badge">+15분</span></div>
+  <p class="task-goal">완주한 프로젝트를 <strong>표준 하네스</strong>로 성숙시킵니다 (project-init으로 구조를 잡고 harness-eval로 6개 차원 등급을 받습니다).</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4</a>의 훅과 스킬을 팀 자산으로 승격하는 감각, 그리고 <a href="ClaudeCode_Reference3_Plugins.html" style="color:#c9a2ff">Reference 3</a>의 플러그인 생태계.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/project-init:init-project .</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 이어서</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/harness-eval:quick</code></pre>
+  </div>
+  <p class="body">등급표에서 낮은 차원 하나를 골라 <code class="inline">/add-adr</code> 또는 <code class="inline">/add-runbook</code>으로 보강하고 재평가해 보세요.</p>
+  <div class="checkpoint dod">
+    <div class="cp-title">OPTION DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="opt1"><span>project-init으로 표준 구조가 생성되었습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="opt2"><span>harness-eval 등급표를 받고 한 차원을 보강했습니다</span></label>
+  </div>
+</section>
+
+<section class="wrapup" id="wrapup">
+  <h2>미션 종료</h2>
+  <p class="sub">소스는 정규화로 나란히, 출력은 JSON 계약으로, 침묵은 미보도로. 요약을 넘어 관점을 읽었습니다.</p>
+  <table class="tbl">
+    <tr><th>가져가는 것</th><th>내용</th></tr>
+    <tr><td>정규화의 힘</td><td>이질적 소스 통합의 8할은 한 가지 모양으로 다듬는 일이다</td></tr>
+    <tr><td>LLM JSON 계약</td><td>화면용 출력은 스키마로 계약한다, 파싱 가능성이 곧 신뢰성</td></tr>
+    <tr><td>프레이밍 프롬프트</td><td>비교 지시, 침묵의 처리, 근거 링크 - LLM 고유 화면의 설계 문법</td></tr>
+  </table>
+  <div class="next-box">
+    <div>
+      <div class="nx-label">NEXT</div>
+      <h3>포털로</h3>
+      <p><a href="index.html" style="color:#c9a2ff">워크샵 포털</a>에서 다음 미션을 고르세요.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<footer>
+  <div class="who">Claude Code Deep Dive Workshop, Capstone 6</div>
+  <div>기준: Claude Code 2.1.x + FastAPI + Bedrock REST, Sonnet 4.6, 2026.08</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".code-wrap").querySelector("pre");
+      var text = pre.textContent.replace(/\n{3,}/g, "\n\n").trim();
+      function done() {
+        var old = btn.textContent;
+        btn.textContent = "복사됨 ✓";
+        btn.classList.add("copied");
+        setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () { fallback(); });
+      } else { fallback(); }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+  var taskGroups = { m0:["m0"], m1:["m1"], m2:["m2a","m2b"], m3:["m3a","m3b"], m4:["m4a","m4b"] };
+  /* 챕터형 예: { t0:["t0"], t1:["t1a","t1b"], ... } 진행 라벨 "0/5"
+     캡스톤형 예: { m0:["m0a","m0b"], m1:["m1"], ... m5:["m5"] } 진행 라벨 "0/6" */
+  var state = {};
+  function refresh() {
+    var doneCount = 0;
+    Object.keys(taskGroups).forEach(function (task) {
+      var allDone = taskGroups[task].every(function (cp) { return state[cp]; });
+      if (allDone) doneCount++;
+      var seg = document.querySelector('.seg[data-task="' + task + '"]');
+      if (seg) seg.classList.toggle("done", allDone);
+      var nav = document.querySelector('.sidenav a[data-nav="' + task + '"]');
+      if (nav) nav.classList.toggle("done", allDone);
+    });
+    var pc = document.getElementById("progress-count");
+    if (pc) pc.textContent = doneCount + "/8";
+  }
+  document.querySelectorAll('.cp-item input[type="checkbox"]').forEach(function (cb) {
+    cb.addEventListener("change", function () { state[cb.dataset.cp] = cb.checked; refresh(); });
+  });
+  document.querySelectorAll(".seg").forEach(function (seg) {
+    seg.addEventListener("click", function () {
+      var el = document.getElementById(seg.dataset.task);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidenav a[data-nav]");
+  var segs = document.querySelectorAll(".seg[data-task]");
+  if ("IntersectionObserver" in window) {
+    var current = null;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) current = entry.target.id; });
+      if (!current) return;
+      navLinks.forEach(function (a) { a.classList.toggle("active", a.dataset.nav === current); });
+      segs.forEach(function (s) { s.classList.toggle("active", s.dataset.task === current); });
+    }, { rootMargin: "-20% 0px -65% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
+<script>
+(function(){
+  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
+  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
+  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
+  if(saved==='light'){ root.setAttribute('data-theme','light'); }
+  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
+  label();
+  btn.addEventListener('click',function(){
+    var light = root.getAttribute('data-theme')==='light';
+    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
+    label();
+  });
+})();
+</script>
+</body>
+</html>

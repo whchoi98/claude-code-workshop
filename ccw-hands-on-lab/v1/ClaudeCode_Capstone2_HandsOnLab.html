@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+<title>Capstone 2, Market Desk on Web - Claude Code Deep Dive Workshop</title>
+<style>
+:root {
+  --bg: #12181F;
+  --bg-card: #1B242E;
+  --bg-code: #0C1117;
+  --bg-inline: #232E3A;
+  --line: #2A3542;
+  --orange: #FF9900;
+  --orange-dim: rgba(255, 153, 0, 0.14);
+  --crimson: #B6002E;
+  --green: #3FB950;
+  --green-dim: rgba(63, 185, 80, 0.12);
+  --text: #E2E4EC;
+  --muted: #A6ABBE;
+  --dim: #7B8198;
+  --font-body: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-code: "D2Coding", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(255, 153, 0, 0.3); }
+a { color: var(--orange); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+/* ============ Hero ============ */
+.hero {
+  position: relative;
+  padding: 64px 32px 44px;
+  max-width: 1160px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -140px; right: -180px;
+  width: 460px; height: 460px;
+  background: radial-gradient(closest-side, rgba(182, 0, 46, 0.28), rgba(255, 153, 0, 0.10) 55%, transparent 75%);
+  pointer-events: none;
+}
+.eyebrow {
+  display: inline-block;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.hero h1 {
+  font-size: clamp(28px, 4.4vw, 42px);
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  max-width: 780px;
+}
+.hero .subtitle {
+  margin-top: 14px;
+  color: var(--orange);
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 700;
+}
+.hero .lede {
+  margin-top: 18px;
+  color: var(--muted);
+  max-width: 720px;
+  font-size: 15.5px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin-top: 26px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.hero-meta strong { color: var(--text); font-weight: 700; }
+
+/* ============ Sticky timeline ============ */
+.timeline {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(12, 17, 23, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.timeline-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.timeline-label {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.timeline-label strong { color: var(--orange); font-size: 13px; }
+.segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  height: 26px;
+}
+.seg {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg-card);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  padding: 0;
+  font-family: var(--font-body);
+}
+.seg:hover { border-color: var(--orange); }
+.seg .fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 153, 0, 0.85), rgba(255, 153, 0, 0.65));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.seg.done .fill { transform: scaleX(1); }
+.seg .seg-txt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.seg.done .seg-txt { color: #12181F; }
+.seg.active { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
+
+/* ============ Layout ============ */
+.layout {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 44px 32px 80px;
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 52px;
+  align-items: start;
+}
+.sidenav {
+  position: sticky;
+  top: 66px;
+  font-size: 13.5px;
+}
+.sidenav .nav-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  margin-bottom: 14px;
+}
+.sidenav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 7px 10px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+.sidenav a:hover { color: var(--text); background: var(--bg-card); text-decoration: none; }
+.sidenav a.active { color: var(--orange); border-left-color: var(--orange); background: var(--bg-card); }
+.sidenav .dot {
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dim);
+}
+.sidenav a.done .dot { background: var(--green); border-color: var(--green); }
+.sidenav .nav-time { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+/* ============ Task sections ============ */
+.task { margin-bottom: 72px; }
+.task-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.task-num {
+  font-family: var(--font-code);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 0.1em;
+}
+.task-head h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.time-badge {
+  margin-left: auto;
+  flex: none;
+  background: var(--orange-dim);
+  color: var(--orange);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.task-goal {
+  color: var(--muted);
+  margin-bottom: 24px;
+  max-width: 760px;
+}
+.task-goal strong { color: var(--text); }
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16.5px;
+  font-weight: 800;
+  margin: 34px 0 12px;
+}
+.step-title .step-no {
+  flex: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #12181F;
+  font-size: 12.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+p.body { color: var(--muted); margin: 10px 0 14px; max-width: 760px; }
+p.body strong, li strong { color: var(--text); }
+code.inline {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  background: var(--bg-inline);
+  color: #FFC466;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+kbd {
+  font-family: var(--font-code);
+  font-size: 0.82em;
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: var(--text);
+}
+
+/* ============ Code blocks ============ */
+.code-wrap {
+  background: var(--bg-code);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 14px 0 20px;
+  overflow: hidden;
+}
+.code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+.code-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.copy-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.code-wrap pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.code-wrap code { font-family: inherit; color: #D8DEE9; }
+.code-wrap.output pre { color: var(--dim); }
+.code-wrap .cmt { color: #5E6B7E; }
+.code-wrap .hl { color: #FFC466; }
+.code-wrap .ok { color: var(--green); }
+
+/* ============ Callouts ============ */
+.callout {
+  border-radius: 8px;
+  background: var(--bg-card);
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14.5px;
+  color: var(--muted);
+  max-width: 760px;
+}
+.callout strong { color: var(--text); }
+.callout.tip .co-title { color: var(--orange); }
+
+.callout .co-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 5px;
+}
+
+.callout.warn .co-title { color: #FF5C85; }
+
+/* ============ Checkpoint ============ */
+.checkpoint {
+  background: var(--green-dim);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 28px;
+}
+.checkpoint .cp-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+.cp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+.cp-item input {
+  flex: none;
+  margin-top: 5px;
+  width: 15px; height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+.cp-item input:checked + span { color: var(--text); }
+
+/* ============ Tabs ============ */
+.tabs { margin: 18px 0 6px; }
+.tab-btns {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dim);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 9px 16px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+.tab-pane { display: none; padding-top: 16px; }
+.tab-pane.active { display: block; }
+
+/* ============ Tables ============ */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 14px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tbl th, .tbl td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid #FFFFFF14;
+}
+.tbl th {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+  background: rgba(255, 255, 255, 0.03);
+}
+.tbl td { color: var(--muted); vertical-align: middle; }
+.tbl td:first-child { color: var(--text); font-weight: 700; white-space: nowrap; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl code { font-family: var(--font-code); font-size: 0.9em; color: #FFC466; }
+
+/* ============ Wrap-up ============ */
+.wrapup {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 32px 34px;
+  margin-bottom: 56px;
+}
+.wrapup h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.wrapup .sub { color: var(--muted); font-size: 14.5px; margin-bottom: 18px; }
+.next-box {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(182, 0, 46, 0.16), rgba(255, 153, 0, 0.08));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 26px;
+}
+.next-box .nx-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--orange);
+}
+.next-box h3 { font-size: 19px; font-weight: 800; }
+.next-box p { color: var(--muted); font-size: 14px; }
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 30px 32px 46px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.9;
+}
+footer .who { color: var(--muted); font-weight: 700; }
+footer .mail { color: var(--orange); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 20px 64px; }
+  .sidenav { display: none; }
+  .hero { padding: 44px 20px 32px; }
+  .timeline-inner { padding: 10px 20px; }
+  .seg .seg-txt { font-size: 9px; }
+  .task-head h2 { font-size: 20px; }
+}
+
+/* ===== Chapter 4 additions: Super Lab ===== */
+.part-divider { margin: 72px 0 12px; padding: 30px 34px; border-radius: 14px;
+  background: linear-gradient(135deg, #1d1433 0%, #12181F 65%); border: 1px solid #45306b; }
+.part-divider .pd-eyebrow { display: inline-block; background: #7a3ff2; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: .14em; padding: 4px 12px; border-radius: 4px; }
+.part-divider h2 { margin: 14px 0 8px; font-size: 26px; color: var(--text); }
+.part-divider p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.75; max-width: 860px; }
+.part-divider .rules { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+.part-divider .rules span { background: #241a3d; border: 1px solid #45306b; color: #d9c9ff;
+  font-size: 12.5px; padding: 6px 12px; border-radius: 999px; }
+.task.mission .task-num { color: #c9a2ff; }
+.task.mission { border-color: #3a2a57; }
+.checkpoint.dod { border-color: #7a3ff2; background: rgba(122, 63, 242, .06); }
+.checkpoint.dod .cp-title { color: #c9a2ff; }
+details.solution { margin: 18px 0; border: 1px dashed #FF9900; border-radius: 10px; background: rgba(255,153,0,.04); }
+details.solution summary { cursor: pointer; padding: 12px 16px; color: var(--accent); font-weight: 700; font-size: 13.5px; list-style: none; }
+details.solution summary::before { content: "▸ "; }
+details.solution[open] summary::before { content: "▾ "; }
+details.solution .sol-body { padding: 0 16px 14px; }
+
+/* ── Korean typography fix: 단어 단위 줄바꿈, 히어로 정돈 ── */
+body { word-break: keep-all; overflow-wrap: break-word; }
+.hero h1 { max-width: 980px; font-size: clamp(26px, 4vw, 38px); text-wrap: balance; }
+.hero .subtitle, .hero .lede, .task-goal, .wrapup .sub { text-wrap: pretty; }
+
+/* ── 잘림 방지 v2: 히어로 압축 + 좁은 화면 대응 ── */
+.hero { padding: 44px 28px 34px; }
+.eyebrow { margin-bottom: 14px; }
+.hero h1 { line-height: 1.3; }
+.hero .subtitle { margin-top: 10px; }
+.hero .lede { margin-top: 12px; }
+.seg-txt { text-overflow: ellipsis; }
+@media (max-width: 620px) {
+  .hero { padding: 26px 16px 24px; }
+  .hero h1 { font-size: 23px; }
+  .hero .subtitle { font-size: 15px; }
+  .hero .lede { font-size: 14px; }
+  .hero-meta { gap: 6px 14px; font-size: 12px; }
+  .seg .seg-txt { display: none; }
+  .timeline-inner { padding: 0 10px; }
+}
+
+/* ── 잘림 방지 v3: 좁은 화면 가로 넘침 제거 ── */
+.tbl { display: block; overflow-x: auto; max-width: 100%; }
+.hero, .layout, .timeline-inner, main, section { min-width: 0; }
+@media (max-width: 620px) {
+  .timeline-label:last-child { display: none; }
+}
+
+/* ── 잘림 방지 v4: 인라인 코드 칩의 최소폭 강제 해제 ── */
+code.inline { white-space: normal; overflow-wrap: anywhere; }
+
+/* ── v5: 소개문/본문 전체 폭 사용 (가독성 캡 해제) ── */
+.hero .lede, .task-goal, p.body, .callout, .part-divider p, .wrapup .sub { max-width: none; }
+.hero .lede { text-wrap: wrap; }
+
+/* ── macOS 터미널 스타일: 신호등 3버튼 ── */
+.code-head { position: relative; padding-left: 76px; }
+.code-head::before {
+  content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 11px; height: 11px; border-radius: 50%; background: #FF5F57;
+  box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
+}
+</style>
+<style id="hol-theme">
+html[data-theme="light"]{
+  --bg:#F3F4F7; --bg-card:#FFFFFF; --bg-code:#EEF1F5; --bg-inline:#E4E9EF; --line:#D7DDE5;
+  --orange:#B45309; --orange-dim:rgba(180,83,9,.12);
+  --green:#1F883D; --green-dim:rgba(31,136,61,.12);
+  --text:#1B2430; --muted:#5B6472; --dim:#75808F;
+  background:#F3F4F7;
+}
+html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
+html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
+#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
+background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
+border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
+font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#themeToggle:hover{border-color:var(--orange,#FF9900)}
+html[data-theme="light"] .code-wrap code{color:#2A3542}
+html[data-theme="light"] .code-wrap.output code{color:#57606E}
+html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
+html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
+html[data-theme="light"] .k.s{background:#DCEEDC}
+html[data-theme="light"] .k.w{background:#E9E2F7}
+html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
+html[data-theme="light"] .code-wrap .hl{color:#B45309}
+html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
+html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
+html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
+html[data-theme="light"] .head .when{color:#FF9900}
+html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
+html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
+html[data-theme="light"] .part-divider{background:linear-gradient(135deg,#EDE6FA 0%,#FFFFFF 65%);border-color:#B79CEF}
+html[data-theme="light"] .part-divider h2{color:#1B2430}
+html[data-theme="light"] .part-divider .rules span{background:#EDE6FA;border-color:#B79CEF;color:#5B21C7}
+html[data-theme="light"] .tbl code{color:#B45309}
+html[data-theme="light"] .task.mission .task-num{color:#6b46c1}
+html[data-theme="light"] .checkpoint.dod .cp-title{color:#6b46c1}
+@media print{#themeToggle{display:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">CAPSTONE 2 / MARKET DESK ON WEB / 135 MIN</span>
+  <h1>웹 시황 대시보드</h1>
+  <div class="subtitle">FastAPI + React + Bedrock SSE, 브라우저에서 뛰는 시황 데스크</div>
+  <p class="lede">
+    시세와 차트가 브라우저에 흐르고, AI 분석이 <strong>타자기처럼 스트리밍</strong>되는 웹 시황 데스크를
+    빈 폴더에서 빌드합니다. FastAPI 백엔드가 yfinance/pykrx를 캐시 뒤에 정리하고, React 대시보드가
+    45초마다 숨 쉬고, Bedrock의 종목 분석이 SSE로 한 글자씩 도착합니다. 배포 없이 로컬 완결,
+    다른 참가자와의 의존성도 없습니다.
+  </p>
+  <div class="hero-meta">
+    <span>소요 시간 <strong>135분</strong></span>
+    <span>미션 <strong>5개 + DoD</strong></span>
+    <span>산출물 <strong>브라우저에서 뛰는 내 시황 데스크</strong></span>
+    <span>Update <strong>2026.08</strong></span>
+  </div>
+</header>
+
+<nav class="timeline" aria-label="미션 타임라인">
+  <div class="timeline-inner">
+    <span class="timeline-label">진행 <strong id="progress-count">0/9</strong></span>
+    <div class="segments" id="segments">
+      <button class="seg" data-task="m0" style="flex:10" title="M0 사전 준비, 10분"><span class="fill"></span><span class="seg-txt">M0 준비</span></button>
+      <button class="seg" data-task="m1" style="flex:15" title="M1 설계, 15분"><span class="fill"></span><span class="seg-txt">M1 설계</span></button>
+      <button class="seg" data-task="m2" style="flex:35" title="M2 백엔드 코어, 35분"><span class="fill"></span><span class="seg-txt">M2 백엔드 코어</span></button>
+      <button class="seg" data-task="m3" style="flex:45" title="M3 대시보드와 상세, 45분"><span class="fill"></span><span class="seg-txt">M3 대시보드 + 상세</span></button>
+      <button class="seg" data-task="m4" style="flex:30" title="M4 AI 스트리밍과 개장, 30분"><span class="fill"></span><span class="seg-txt">M4 AI 스트리밍</span></button>
+    </div>
+    <span class="timeline-label">135 min</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+<aside class="sidenav" aria-label="미션 목차">
+  <div class="nav-title">MISSIONS / 135분</div>
+  <a href="#brief" data-nav="brief"><span class="dot"></span>브리핑<span class="nav-time"></span></a>
+  <a href="#blueprint" data-nav="blueprint"><span class="dot"></span>구현 청사진<span class="nav-time">참고</span></a>
+  <a href="#m0" data-nav="m0"><span class="dot"></span>M0 사전 준비<span class="nav-time">10분</span></a>
+  <a href="#m1" data-nav="m1"><span class="dot"></span>M1 설계<span class="nav-time">15분</span></a>
+  <a href="#m2" data-nav="m2"><span class="dot"></span>M2 백엔드 코어<span class="nav-time">35분</span></a>
+  <a href="#m3" data-nav="m3"><span class="dot"></span>M3 대시보드와 상세<span class="nav-time">45분</span></a>
+  <a href="#m4" data-nav="m4"><span class="dot"></span>M4 AI 스트리밍<span class="nav-time">30분</span></a>
+  <a href="#gq" data-nav="gq"><span class="dot"></span>BONUS 퀄리티 강화<span class="nav-time">+α</span></a>
+  <a href="#vibe" data-nav="vibe"><span class="dot"></span>BONUS 바이브 코딩<span class="nav-time">+α</span></a>
+  <a href="#opt-h" data-nav="opt-h"><span class="dot"></span>OPT 하네스 엔지니어링<span class="nav-time">+15분</span></a>
+  <a href="#wrapup" data-nav="wrapup"><span class="dot"></span>마무리<span class="nav-time"></span></a>
+</aside>
+
+<main>
+
+<section class="task" id="brief">
+  <div class="task-head"><span class="task-num">MISSION BRIEFING</span><h2>목표물과 기조</h2><span class="time-badge">숙지</span></div>
+  <p class="task-goal">
+    다른 캡스톤과 같은 기조입니다: <strong>빈 폴더에서 superpowers 워크플로로</strong> 설계하고 Phase 단위로 빌드합니다.
+    목표물은 실존 프로젝트 stock-monitoring(FastAPI + React + Bedrock, AWS ECS 운영)을 135분 스코프로 압축한
+    웹 시황 데스크입니다. 실데이터이며, 45초마다 바뀝니다.
+  </p>
+  <table class="tbl">
+    <tr><th>레이어</th><th>구성</th><th>핵심 원칙</th></tr>
+    <tr><td>백엔드</td><td>FastAPI, /api/market/*, /api/stocks/*, 인메모리 TTL 캐시</td><td>업스트림 호출은 캐시 뒤로, 같은 키 동시 요청은 한 번만(single-flight)</td></tr>
+    <tr><td>프런트</td><td>React(Vite) + react-query + lightweight-charts</td><td>화면은 우리 API만 본다, 45초 폴링, AI만 fetch 직접</td></tr>
+    <tr><td>AI</td><td>Bedrock converse_stream, SSE(phase → delta → final)</td><td>AWS_BEARER_TOKEN_BEDROCK, 키 없으면 503과 패널 비활성</td></tr>
+    <tr><td>완결성</td><td>make run 한 번으로 :8000 통합 서빙, 배포 없음</td><td>프록시(/proxy/8000/)로 확인, 스크린샷이 피날레</td></tr>
+  </table>
+
+  <p class="body"><strong>1. Dashboard (메인 화면)</strong></p>
+  <table class="tbl">
+    <tr><th>기능</th><th>설명</th></tr>
+    <tr><td>경제지표 바</td><td>WTI, Gold, 환율, 금리, Bitcoin 등 config의 지표를 실시간 표시</td></tr>
+    <tr><td>시장 지수</td><td>S&amp;P 500, NASDAQ, DOW / KOSPI, KOSDAQ - 카드 5장, 등락색</td></tr>
+    <tr><td>종목 테이블</td><td>US/KR 탭 전환, Symbol/Name/Price/Change/%/Volume, 상승 초록/하락 빨강</td></tr>
+    <tr><td>자동 갱신</td><td>react-query 45초 폴링, 장 마감 시간대는 백엔드가 600초 절전</td></tr>
+  </table>
+  <p class="body"><strong>2. StockDetail (종목 상세)</strong></p>
+  <table class="tbl">
+    <tr><th>기능</th><th>설명</th></tr>
+    <tr><td>가격 헤더</td><td>현재가, 등락률, 거래량 (StockHeader)</td></tr>
+    <tr><td>캔들 차트</td><td>lightweight-charts, 1W/1M/3M/1Y 기간 탭 (PriceChart)</td></tr>
+    <tr><td>수익률과 52주</td><td>기간 수익률 4종(ReturnsRow) + 52주 범위 내 현재 위치(Week52Bar)</td></tr>
+    <tr><td>AI 종목 분석</td><td>버튼 → SSE 스트리밍, 기술적 분석/투자 포인트/리스크 3절 (AIPanel)</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">L</span>학습 목표, Level 200</div>
+  <p class="body">이 캡스톤을 마치면 다음 네 가지를 <strong>설명할 수 있고, 다시 만들 수 있습니다</strong>.</p>
+  <table class="tbl">
+    <tr><th>목표</th><th>검증되는 순간</th></tr>
+    <tr><td>업스트림 API를 캐시와 single-flight 뒤로 정리하는 백엔드 계약 설계</td><td>M2에서 같은 curl 두 번, 두 번째가 즉시 도착할 때</td></tr>
+    <tr><td>폴링(react-query)과 스트리밍(SSE)을 구분해 쓰는 프런트 데이터 전략</td><td>M3의 45초 폴링과 M4의 델타 누적이 다른 코드 경로로 공존할 때</td></tr>
+    <tr><td>Bedrock 스트리밍(converse_stream)을 제품 기능으로 포장하는 법</td><td>M4에서 phase 배지와 타자기 렌더가 동작할 때</td></tr>
+    <tr><td>superpowers Phase 리듬으로 풀스택을 조립하는 법</td><td>M1의 계획이 M2~M4에서 그대로 소화될 때</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">R</span>챕터 연결 지도, 배운 내용이 재등장하는 곳</div>
+  <p class="body">이 캡스톤은 새 기술을 가르치지 않습니다. <strong>Ch1~6에서 배운 것을 실전 배치</strong>합니다.</p>
+  <table class="tbl">
+    <tr><th>챕터</th><th>이 캡스톤에서 재등장하는 곳</th></tr>
+    <tr><td><a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1 설치부터 Headless까지</a></td><td>M0~전체: 세션 운용, 지시 → 실행 → 검증 루프, CLAUDE.md를 존중하는 습관</td></tr>
+    <tr><td><a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2 Subagents</a></td><td>M2~M3: code-reviewer 서브에이전트로 Phase 산출물 리뷰, 백엔드/프런트 병렬 진행</td></tr>
+    <tr><td><a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3 Admin Setup</a></td><td>M0/M4: Bedrock 라우팅과 자격의 배경, Bearer 키가 조직 통제선 안에서 도는 이유</td></tr>
+    <tr><td><a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4 Settings, 훅과 스킬</a></td><td>OPT: 하네스 성숙화, 훅과 스킬을 프로젝트 자산으로 승격하는 마무리 의식</td></tr>
+    <tr><td><a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5 CLI Reference</a></td><td>확장 방향: 헤드리스 패턴으로 /api/health 스모크를 파이프라인화</td></tr>
+    <tr><td><a href="ClaudeCode_Ch6_HandsOnLab.html" style="color:#c9a2ff">Ch6 Agent SDK</a></td><td>확장 방향: 백엔드에 in-process 도구로 Claude를 심는 다음 단계의 방향</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <span class="co-title">규칙, 캡스톤 공통</span>
+    ① 코드와 파일 구성을 직접하지 않고, Claude에게 지시해서 만듭니다 ② 각 Phase의 DoD를 통과해야 다음으로
+    ③ 막히면 "막힐 때 열어보기"의 힌트를 씁니다. 다른 참가자와의 의존성은 없습니다.
+  </div>
+</section>
+
+<section class="task" id="blueprint">
+  <div class="task-head"><span class="task-num">BLUEPRINT</span><h2>구현 청사진, 원작 상세 분석</h2><span class="time-badge">참고</span></div>
+  <p class="task-goal">
+    원작 stock-monitoring의 실코드를 분석해 뽑은 <strong>구현 지도</strong>입니다. M1 설계가 이 구조로
+    수렴하도록 방향을 잡아 주고, 계획이 이상하게 흐르면 여기로 돌아와 대조하세요.
+  </p>
+
+  <div class="step-title"><span class="step-no">0</span>요청 흐름 한 눈에</div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">두 개의 데이터 경로, 폴링과 스트리밍</span></div>
+    <pre><code>[폴링 경로]  45초마다 (장 마감 시 600초)
+Browser ── react-query ──> FastAPI ──> TTL Cache ──(miss, single-flight)──> yfinance / pykrx
+   ^                          |            |
+   +──── JSON 완결 응답 ──────+      (hit) 즉시 반환, 업스트림 무호출
+
+[스트리밍 경로]  버튼 눌렀을 때만
+Browser ── fetch(SSE) ──> FastAPI ── converse_stream ──> Bedrock (Sonnet 4.6)
+   ^                          |
+   +── phase → delta* → final +   (한 글자씩, react-query를 쓰지 않는 유일한 경로)</code></pre>
+  </div>
+  <p class="body">Level 200의 핵심 구분입니다: <strong>완결된 결과를 주기적으로 당기는 경로</strong>(폴링)와
+  <strong>부분 결과를 밀어 받는 경로</strong>(스트리밍)는 캐시 전략도, 프런트 도구도 다릅니다. 이 캡스톤은 둘을 한 앱에서 병용합니다.</p>
+
+  <div class="step-title"><span class="step-no">1</span>화면과 컴포넌트 지도 (원작 실물)</div>
+  <table class="tbl">
+    <tr><th>화면</th><th>구성 컴포넌트</th><th>전환</th></tr>
+    <tr><td>Dashboard</td><td>지표 바, 지수 카드, 종목 테이블(US/KR 탭)</td><td>종목 클릭 → StockDetail</td></tr>
+    <tr><td>StockDetail</td><td>StockHeader, FundamentalCards, PriceChart(캔들), ReturnsRow, Week52Bar, OrderBook, InvestorPanel, StockNews, AIPanel</td><td>react-router, 뒤로 가기 복귀</td></tr>
+    <tr><td>ArticleAnalysis</td><td>기사 본문 + AI 분석(react-markdown 렌더)</td><td>뉴스에서 진입</td></tr>
+  </table>
+  <p class="body">워크샵 스코프는 <strong>핵심 구성</strong>만: StockHeader + PriceChart + ReturnsRow + Week52Bar + AIPanel.
+  OrderBook/InvestorPanel/StockNews/ArticleAnalysis는 바이브 코딩 라운드의 확장 과제로 남깁니다.</p>
+
+  <div class="step-title"><span class="step-no">2</span>API 계약 (원작 라우트 실측)</div>
+  <table class="tbl">
+    <tr><th>라우트</th><th>역할</th></tr>
+    <tr><td>GET /api/health</td><td>살아있음 확인</td></tr>
+    <tr><td>GET /api/market/overview</td><td>지수 5종 + 경제지표 (Dashboard 상단)</td></tr>
+    <tr><td>GET /api/market/quotes</td><td>US/KR 종목 시세 일괄</td></tr>
+    <tr><td>GET /api/stocks/{symbol}</td><td>가격 헤더 + 기간 수익률 + 52주 범위</td></tr>
+    <tr><td>GET /api/stocks/{symbol}/chart?range=</td><td>캔들 OHLC (1w/1m/3m/1y, 원작은 기간별 TTL 캐시)</td></tr>
+    <tr><td>POST /api/ai/stocks/{symbol}</td><td>SSE 스트리밍 분석 (원작은 기사 분석 POST /api/ai/articles도 제공)</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">3</span>데이터와 운영 계약</div>
+  <table class="tbl">
+    <tr><th>계약</th><th>내용</th></tr>
+    <tr><td>갱신 주기</td><td>주가 45초, 뉴스 120초, <strong>장 마감 시간대 600초 절전</strong> (market-hours-aware)</td></tr>
+    <tr><td>캐시</td><td>원작은 L1 메모리 + L2 DynamoDB 티어드(TTL: 차트 기간별, 펀더멘털 12h, AI 6h, L2 24h) + single-flight 잠금 + 60초 시세 오버레이. 워크샵은 <strong>L1 메모리 + single-flight</strong>만</td></tr>
+    <tr><td>AI 스트리밍</td><td>호출 프리미티브는 converse_stream 하나(블로킹 invoke_model은 삭제됨). SSE 이벤트 phase → delta* → final, 시나리오별 maxTokens 상한 분리(잘림 신호 ai_stream_truncated)</td></tr>
+    <tr><td>프런트 데이터</td><td>react-query가 45초 폴링으로 화면을 살리되, <strong>AI 스트리밍만 fetch 직접</strong>: react-query는 "완결된 결과 하나"를 캐시하는 모델이라 델타 누적에 맞지 않는다(원작 주석)</td></tr>
+    <tr><td>키의 거처</td><td>Bedrock 인증은 boto3 기본 해석에 맡긴다 = AWS_BEARER_TOKEN_BEDROCK 환경변수를 그대로 인식. 자격 실패는 503으로 매핑, 앱은 정상</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">4</span>기술 선택 5</div>
+  <table class="tbl">
+    <tr><th>선택</th><th>이유</th></tr>
+    <tr><td>FastAPI</td><td>라우트 = 계약, pydantic 응답 모델로 프론트가 그대로 그린다</td></tr>
+    <tr><td>react-query</td><td>폴링/캐시/로딩 상태를 선언형으로, 45초 갱신이 한 줄</td></tr>
+    <tr><td>lightweight-charts</td><td>금융 캔들 차트의 표준, 가볍고 기간 전환이 빠르다</td></tr>
+    <tr><td>SSE</td><td>AI 응답을 한 글자씩, WebSocket보다 단순한 단방향 스트림</td></tr>
+    <tr><td>make run</td><td>프론트 빌드를 backend/static에 넣어 :8000 하나로 통합 서빙</td></tr>
+  </table>
+</section>
+
+<section class="task" id="m0">
+  <div class="task-head"><span class="task-num">MISSION 00</span><h2>사전 준비</h2><span class="time-badge">10분</span></div>
+  <p class="task-goal">Python과 Node 확인, 프로젝트 폴더, 그리고 <strong>Bearer 키(.env)</strong>까지. Phase 4의 AI 스트리밍에 필요합니다.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>python3 --version &amp;&amp; node --version    # Python 3.11+, Node 20+
+mkdir -p ~/capstone/capstone-2 &amp;&amp; cd ~/capstone/capstone-2
+git init -q 2&gt;/dev/null; git config user.name "capstone"; git config user.email "capstone@lab.local"</code></pre>
+  </div>
+  <p class="body">다른 캡스톤에서 이미 만들었다면 <code class="inline">~/capstone/.env</code>가 있으니 1/2는 건너뛰세요.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal 1/2, .env에 Bearer 토큰 저장</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>mkdir -p ~/capstone
+grep -q AWS_BEARER_TOKEN_BEDROCK ~/capstone/.env 2&gt;/dev/null || cat &gt;&gt; ~/capstone/.env &lt;&lt; 'ENVEOF'
+AWS_BEARER_TOKEN_BEDROCK=&lt;발급받은 Bedrock API 키&gt;
+ENVEOF</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal 2/2, 로드 + Converse 스모크</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>set -a; source ~/capstone/.env; set +a
+aws bedrock-runtime converse \
+  --region ap-northeast-2 \
+  --model-id global.anthropic.claude-sonnet-4-6 \
+  --messages '[{"role":"user","content":[{"text":"ping"}]}]' \
+  --inference-config '{"maxTokens":30}' \
+  --query 'output.message.content[0].text' --output text</code></pre>
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m0a"><span>Converse 스모크가 응답했습니다 (키 유효)</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m0b"><span>capstone-2 폴더와 git 신원이 준비되었습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m1">
+  <div class="task-head"><span class="task-num">MISSION 01</span><h2>설계, 브레인스토밍</h2><span class="time-badge">15분</span></div>
+  <p class="task-goal">API 계약, 캐시, SSE 스트리밍, Phase 순서까지 <strong>요구 9조항</strong>으로 넘깁니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 세션 운용과 Capstone Setup의 superpowers 워크플로.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal (~/capstone/capstone-2)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/capstone/capstone-2 &amp;&amp; claude</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력 1/2, 설계</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:brainstorming 다음 요구사항으로 "Market Desk on Web", 웹 시황 대시보드를 설계하자.
+1) 구조: backend/(Python 3.11+ FastAPI, app/api 라우트, app/services 데이터, app/core/config.py 상수,
+   venv + requirements.txt: fastapi, uvicorn, yfinance, pykrx, httpx, boto3) +
+   frontend/(Vite + React + TypeScript, 의존성: @tanstack/react-query, lightweight-charts)
+2) 데이터: yfinance(미국 주식 + 지수 ^GSPC/^IXIC/^DJI + 경제지표), pykrx(한국 주식, 지수는 yfinance
+   ^KS11/^KQ11). 종목/지표 목록은 config.py 상수로, 실데이터 목록은 설계 직후 이어서 제공한다.
+   시작은 US 20 + KR 20으로 잘라 쓰고 전체 50 + 50은 config에서 여는 구조로.
+   개별 심볼 실패는 건너뛰고, US 시세는 yf.download 벌크로
+3) API 계약(FastAPI 라우트): GET /api/health, GET /api/market/overview(지수 5 + 지표),
+   GET /api/market/quotes(US/KR 시세), GET /api/stocks/{symbol}(가격 헤더 + 기간 수익률 + 52주 범위),
+   GET /api/stocks/{symbol}/chart?range=1w|1m|3m|1y(캔들 OHLC). 응답은 프론트가 그대로 그릴 수 있는 JSON
+4) 캐시: 인메모리 TTL 캐시 하나로 시작(시세 45초, 차트는 기간별로 길게), 같은 키 동시 요청은 한 번만
+   부르는 single-flight 잠금. 장 마감 시간대에는 갱신 주기를 600초로 늦춘다
+5) Dashboard 화면: 상단 경제지표 바, 지수 카드 5장(등락색), 종목 테이블(US/KR 탭, Symbol/Name/Price/
+   Change/%/Volume, 상승 초록/하락 빨강), react-query로 45초 자동 갱신
+6) StockDetail 화면: 테이블에서 클릭 진입. StockHeader(현재가, 등락률, 거래량), lightweight-charts
+   캔들 차트(1W/1M/3M/1Y 기간 탭), ReturnsRow(기간 수익률 4종), Week52Bar(52주 범위 내 현재 위치),
+   뒤로 가기로 대시보드 복귀
+7) AI 분석(SSE 스트리밍): POST /api/ai/stocks/{symbol}가 Bedrock converse_stream
+   (global.anthropic.claude-sonnet-4-6, maxTokens 1024)으로 기술적 분석/투자 포인트/리스크를 한국어로
+   생성하며 text/event-stream으로 흘린다. 이벤트는 phase → delta(부분 텍스트)* → final 순서.
+   프론트 AIPanel은 델타를 누적해 타자기처럼 렌더하고, 이 호출만 react-query 대신 fetch를 직접 쓴다
+   (react-query는 완결된 결과 캐시 모델이라 점진 델타에 맞지 않는다).
+   인증은 환경변수 AWS_BEARER_TOKEN_BEDROCK(발급 API 키), boto3 클라이언트에 자격 인자를 넣지 않고
+   리전 ap-northeast-2. Bedrock IAM 정책은 만들지 않으며, 키가 없으면 503을 주고 패널만 비활성
+8) UI 무드(텍스트 스펙): 다크 딥네이비, 숫자 우측 정렬, 상승 초록 ▲ / 하락 빨강 ▼,
+   AI 패널은 스트리밍 중 phase 배지(fetching/analyzing)를 보여준다
+9) 구현 순서는 Phase 1(백엔드 코어: overview/quotes/{symbol}/chart + 캐시, uvicorn과 curl 검증) →
+   Phase 2(Dashboard, dev 서버로 미리보기) → Phase 3(StockDetail + 캔들 차트) →
+   Phase 4(AI SSE + 프론트 빌드를 backend/static으로 넣어 :8000 통합 서빙).
+   시간 제약 2시간: 테스트 생략, curl과 브라우저로 검증. 호가/투자자 동향/뉴스는 후순위(확장 과제로만 남긴다)
+결정이 필요하면 이 범위 안에서 최소한으로만 물어봐.</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력 2/2, config 실데이터 (설계 대화에 이어서)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>이어서, 방금 설계에 쓸 config.py 실데이터야. 이 상수들을 config.py에 그대로 반영해줘.
+이름 매핑(US_STOCK_NAMES)과 섹터 매핑(US_STOCK_SECTORS)은 네가 아는 대로 채워.
+
+REFRESH_INTERVAL = 45
+CLOSED_REFRESH_INTERVAL = 600  # 장 마감 시 절전 주기
+NEWS_REFRESH_INTERVAL = 120
+
+US_INDICES = {"^GSPC": "S&amp;P 500", "^IXIC": "NASDAQ", "^DJI": "DOW"}
+KR_INDICES = {"^KS11": "KOSPI", "^KQ11": "KOSDAQ"}
+
+US_STOCKS = [
+  "AAPL","MSFT","GOOGL","AMZN","NVDA","META","TSLA","BRK-B","JPM","V",
+  "JNJ","UNH","WMT","MA","PG","HD","XOM","CVX","LLY","ABBV",
+  "PFE","KO","PEP","MRK","COST","AVGO","AMD","ORCL","CRM","NFLX",
+  "ADBE","CSCO","ACN","TXN","INTC","QCOM","INTU","AMAT","BKNG","ISRG",
+  "MDLZ","ADP","REGN","VRTX","GILD","PANW","LRCX","MU","KLAC","SNPS",
+]
+
+KR_STOCKS = {  # 코드: 이름 (섹터는 아래 어휘로 네가 매핑)
+  "005930":"Samsung Electronics","000660":"SK Hynix","373220":"LG Energy Solution",
+  "005380":"Hyundai Motor","000270":"Kia","207940":"Samsung Biologics",
+  "006400":"Samsung SDI","035420":"NAVER","035720":"Kakao","005490":"POSCO Holdings",
+  "068270":"Celltrion","028260":"Samsung C&amp;T","105560":"KB Financial","055550":"Shinhan Financial",
+  "012330":"Hyundai Mobis","066570":"LG Electronics","003670":"POSCO Future M","051910":"LG Chem",
+  "096770":"SK Innovation","034730":"SK","000810":"Samsung Fire","003550":"LG",
+  "032830":"Samsung Life","009150":"Samsung Electro","086790":"Hana Financial","010130":"Korea Zinc",
+  "033780":"KT&amp;G","011200":"HMM","247540":"Ecopro BM","377300":"Kakao Pay",
+  "030200":"KT","017670":"SK Telecom","018260":"Samsung SDS","036570":"NCsoft",
+  "316140":"Woori Financial","003490":"Korea Shipbuilding","034020":"Doosan Enerbility",
+  "011170":"Lotte Chemical","024110":"Industrial Bank of Korea","010950":"S-Oil",
+  "006800":"Mirae Asset Securities","004020":"Hyundai Steel","000720":"Hyundai E&amp;C",
+  "002790":"Amore Pacific","138040":"Meritz Financial","259960":"Krafton",
+  "326030":"SK Biopharm","323410":"Kakao Bank","361610":"SK IE Technology","352820":"Hive",
+}
+KR 섹터 어휘: Semiconductor, Battery, Auto, Auto Parts, Bio, Internet, Steel, Holding, Financial,
+Insurance, Securities, Fintech, Electronics, Materials, Chemical, Energy, Telecom, IT Services,
+Gaming, Shipbuilding, Industrial, Shipping, Construction, Cosmetics, Entertainment, Tobacco,
+Non-Ferrous, Components
+
+INDICATORS = {  # 심볼: (이름, 단위)
+  "CL=F": ("WTI Oil","$"), "GC=F": ("Gold","$"), "SI=F": ("Silver","$"), "HG=F": ("Copper","$"),
+  "EURUSD=X": ("EUR/USD",""), "KRW=X": ("USD/KRW","W"), "JPY=X": ("USD/JPY",""),
+  "CNY=X": ("USD/CNY",""), "^TNX": ("US 10Y","%"), "BTC-USD": ("Bitcoin","$"), "ETH-USD": ("Ethereum","$"),
+}
+
+SECTOR_INDICATOR_MAP = {  # 종목 섹터 -&gt; 관련 지표 (Detail의 관련 지표 매핑)
+  "Technology": ["^IXIC","BTC-USD"], "Semiconductor": ["^IXIC","BTC-USD"],
+  "Internet": ["^IXIC","BTC-USD"], "Communication": ["^IXIC","BTC-USD"],
+  "Energy": ["CL=F","HG=F"], "Chemical": ["CL=F","HG=F"], "Materials": ["CL=F","HG=F"],
+  "Financial": ["^TNX","EURUSD=X"], "Insurance": ["^TNX","EURUSD=X"], "Fintech": ["^TNX","BTC-USD"],
+  "Consumer": ["GC=F","EURUSD=X"], "Auto": ["KRW=X","CL=F"], "Healthcare": ["GC=F","^TNX"],
+  "Bio": ["GC=F","^TNX"], "Battery": ["HG=F","SI=F"], "Steel": ["HG=F","CNY=X"],
+  "Telecom": ["^TNX","KRW=X"], "Holding": ["^TNX","KRW=X"], "Electronics": ["^IXIC","KRW=X"],
+}
+
+NEWS_FEEDS = {
+  "yahoo": "https://finance.yahoo.com/news/rssindex",
+  "yahoo_markets": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC&amp;region=US&amp;lang=en-US",
+  "hankyung": "https://www.hankyung.com/feed/economy",
+  "mk": "https://www.mk.co.kr/rss/30100041/",
+}</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">자동화 옵션, auto mode</span>
+    세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
+    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    시간이 빠듯할 때 유용합니다. 단계마다 직접 검토하려면 기본(수동)을 유지하고, 되돌리려면
+    <code class="inline">auto mode off</code>입니다.
+  </div>
+  <p class="body">브레인스토밍 후 <code class="inline">/superpowers:write-plan</code>으로 계획을 만들고
+  Phase 4개 구성을 승인하세요. 계획이 위 <strong>구현 청사진</strong>(화면/라우트/운영 계약)과 대체로 합치하는지,
+  그리고 <strong>후순위 규칙</strong>(호가/투자자 동향/뉴스는 확장 과제로)이 반영됐는지 확인하세요.</p>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m1"><span>Phase 4개 계획이 승인되었고 worktree가 열렸습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m2">
+  <div class="task-head"><span class="task-num">MISSION 02</span><h2>Phase 1, 백엔드 코어</h2><span class="time-badge">35분</span></div>
+  <p class="task-goal">FastAPI가 <strong>overview / quotes / 종목 상세 / 차트</strong>를 캐시 뒤에서 돌려주면 이 Phase는 끝입니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프. 여유가 있다면 <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 code-reviewer 서브에이전트에게 캐시 모듈 리뷰를 맡겨 보세요.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 1만 구현하고 멈춰줘. backend venv + requirements, config.py(제공한 실데이터, US/KR 각 20개 활성), services(yfinance 벌크 + pykrx, 개별 실패 스킵), 인메모리 TTL 캐시 + single-flight, 라우트 4종(overview, quotes, stocks/{symbol}, chart?range=). uvicorn 실행과 curl 검증 방법까지.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 실행과 스모크</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd backend &amp;&amp; .venv/bin/uvicorn app.main:app --port 8000 &amp;
+sleep 3
+curl -s localhost:8000/api/market/overview | head -c 300; echo
+curl -s "localhost:8000/api/stocks/AAPL/chart?range=1m" | head -c 200; echo</code></pre>
+  </div>
+  
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 캐시와 single-flight</span>
+    TTL 캐시는 "45초 안에는 같은 답을 다시 묻지 않는다"는 약속이고, single-flight는
+    "같은 질문이 <strong>동시에</strong> 40개 와도 업스트림엔 한 번만 간다"는 잠금입니다.
+    워크샵장에서 전원이 동시에 새로고침해도 yfinance가 평온한 이유가 이 두 줄에 있습니다.
+    원작은 여기에 DynamoDB L2를 얹어 컨테이너가 재시작돼도 캐시가 살아남게 합니다.
+  </div>
+  <details class="solution">
+    <summary>막힐 때 열어보기, single-flight 캐시 핵심 힌트</summary>
+    <div class="sol-body">
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">cache.py 골격 (참고 조각)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>import time, threading
+_store, _locks = {}, {}
+def get_or_fetch(key: str, ttl: int, fetch):
+    now = time.time()
+    hit = _store.get(key)
+    if hit and now - hit[0] &lt; ttl:
+        return hit[1]
+    lock = _locks.setdefault(key, threading.Lock())
+    with lock:                       # 같은 키 동시 요청은 한 번만
+        hit = _store.get(key)
+        if hit and time.time() - hit[0] &lt; ttl:
+            return hit[1]
+        val = fetch()
+        _store[key] = (time.time(), val)
+        return val</code></pre>
+  </div>
+    </div>
+  </details>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m2a"><span>overview와 quotes가 실데이터 JSON으로 도착합니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m2b"><span>같은 curl을 연달아 치면 두 번째가 캐시로 즉시 옵니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m3">
+  <div class="task-head"><span class="task-num">MISSION 03</span><h2>Phase 2 + 3, 대시보드와 상세</h2><span class="time-badge">45분</span></div>
+  <p class="task-goal">React 대시보드가 45초마다 숨 쉬고, 종목을 클릭하면 <strong>캔들 차트가 있는 상세 화면</strong>이 열립니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 프런트를 빌드하는 동안 백엔드 응답 필드 보강을 서브에이전트로 병행할 수 있습니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 2</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 2만 구현해줘. frontend(Vite React TS): 요구 5의 Dashboard(지표 바, 지수 카드 5장 등락색, US/KR 탭 종목 테이블), react-query 45초 폴링, dev 프록시(:5173 → :8000). 실행 방법을 알려줘.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 미리보기</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd frontend &amp;&amp; npm run dev   # 브라우저에서 /proxy/5173/</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 3</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 3(StockDetail)을 구현해줘. 테이블 클릭 → react-router 진입: StockHeader(현재가/등락률/거래량), lightweight-charts 캔들(1W/1M/3M/1Y 기간 탭), ReturnsRow(기간 수익률 4종), Week52Bar(52주 범위 내 위치), 뒤로 가기 복귀까지.</code></pre>
+  </div>
+  
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 폴링 vs 스트리밍</span>
+    <strong>폴링</strong>(react-query refetchInterval)은 완결된 스냅샷을 주기적으로 당깁니다, 시세처럼 "최신 한 장"이면 충분할 때.
+    <strong>SSE</strong>는 서버가 부분 결과를 밀어 줍니다, AI 답변처럼 "생성되는 과정"이 가치일 때.
+    <strong>WebSocket</strong>은 양방향이 필요할 때만 꺼내는 무거운 도구입니다. 이 앱이 폴링과 SSE를 병용하고
+    WebSocket을 쓰지 않는 것 자체가 하나의 설계 결정입니다.
+  </div>
+  <div class="callout warn">
+    <span class="co-title">이 미션의 3대 함정</span>
+    ① 프론트에서 API가 404 = dev 프록시 미설정, vite.config의 proxy로 /api를 :8000에 물리세요.
+    ② 차트가 빈 화면 = OHLC 시간 포맷 불일치, lightweight-charts는 time을 유닉스 초 또는 "YYYY-MM-DD"로 받습니다.
+    ③ KR 종목이 0원 = 장 마감 시간대의 정상 동작, 백엔드도 600초 절전 주기로 도는 중입니다.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m3a"><span>대시보드가 실데이터로 뜨고 45초(또는 새로고침)마다 갱신됩니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m3b"><span>종목 클릭 → 캔들 차트 기간 전환 → 뒤로 가기 복귀까지 동작합니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m4">
+  <div class="task-head"><span class="task-num">MISSION 04</span><h2>Phase 4, AI 스트리밍과 개장</h2><span class="time-badge">30분</span></div>
+  <p class="task-goal">분석 버튼을 누르면 <strong>Bedrock의 답이 한 글자씩 흘러드는 것</strong>, 이 캡스톤의 하이라이트입니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3</a>에서 본 Bedrock 라우팅과 자격의 배경, 그 위에서 도는 스트리밍 계약.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 4(AI SSE)를 구현해줘. POST /api/ai/stocks/{symbol}: Bedrock converse_stream(global.anthropic.claude-sonnet-4-6, maxTokens 1024, 리전 ap-northeast-2, 자격 인자 없이 환경변수 AWS_BEARER_TOKEN_BEDROCK, IAM 정책 금지)으로 기술적 분석/투자 포인트/리스크 3절을 text/event-stream으로: 이벤트 phase → delta* → final. 프론트 AIPanel은 fetch 직접 + 델타 누적 타자기 렌더 + phase 배지. 키 없으면 503과 패널 비활성. 마지막으로 npm run build 산출물을 backend/static으로 넣어 :8000 통합 서빙(make run 또는 스크립트)까지.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 키 로드 후 통합 실행</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>set -a; source ~/capstone/.env; set +a   # Bearer 키 로드
+make run    # 프론트 빌드 → :8000 통합 서빙, 브라우저에서 /proxy/8000/</code></pre>
+  </div>
+  
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), SSE 와이어 포맷</span>
+    스트리밍이 도는지 눈으로 확인하고 싶다면 curl로 원문을 보세요:
+    <code class="inline">curl -N -X POST localhost:8000/api/ai/stocks/AAPL</code>.
+    <code class="inline">event: phase</code> 한 줄, 이어서 <code class="inline">event: delta</code>와
+    <code class="inline">data: {"text": "..."}</code>가 반복되다가 <code class="inline">event: final</code>로 닫힙니다.
+    프런트의 타자기는 이 delta들을 이어 붙인 것뿐입니다, 마법이 아니라 계약입니다.
+  </div>
+  <div class="callout warn">
+    <span class="co-title">스트리밍이 침묵하거나 인증 에러라면</span>
+    ① uvicorn을 띄운 셸에 키가 로드됐는지(위 로드 라인 후 재실행) ② 503이 즉시 오면 키 미로드/오탈자,
+    UnrecognizedClient는 만료 ③ 델타가 한 번에 몰려서 오면 프록시 버퍼링, SSE 응답에
+    <code class="inline">X-Accel-Buffering: no</code> 헤더와 미디어타입 text/event-stream을 확인하세요.
+  </div>
+  <p class="body">대시보드 → 종목 상세 → 분석 스트리밍까지 한 바퀴 돌리고, <strong>흐르는 화면의 스크린샷을 Slack에 공유</strong>하세요.
+  그게 개장입니다. 원작은 여기에 티어드 캐시(DynamoDB L2)와 ECS Fargate 배포까지 얹혀 운영 중입니다, 다음 단계가 궁금하다면 그 방향입니다. 그리고 <a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5</a>의 헤드리스 패턴으로 /api/health 스모크를 파이프라인화하면 운영의 첫 발입니다.</p>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m4a"><span>AI 분석이 델타 단위로 스트리밍되어 타자기처럼 렌더됩니다 (Bearer 인증)</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m4b"><span>make run 통합 서빙(:8000) 화면의 스크린샷을 Slack에 공유했습니다</span></label>
+  </div>
+</section>
+
+
+<section class="task" id="gq">
+  <div class="task-head"><span class="task-num">BONUS</span><h2>데스크 퀄리티 강화 라운드, 기능을 올려라</h2><span class="time-badge">+α 자유</span></div>
+  <p class="task-goal">
+    핵심 구성이 돌았다면 이제 <strong>데스크를 내 것으로 만드는 시간</strong>입니다. 원작에 실존하는 기능들을
+    강화 카드로 준비했습니다, 끌리는 것을 골라 하나씩 주문하세요. 요령은 같습니다: 한 번에 하나, 화면으로 확인하고, 마음에 들면 커밋.
+  </p>
+
+  <div class="step-title"><span class="step-no">A</span>강화 카드 1, 호가창</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>StockDetail에 호가창(OrderBook)을 추가하자. GET /api/stocks/{symbol}/orderbook:
+현재가를 중심으로 매도 10단계(파란 막대, 왼쪽으로) / 매수 10단계(빨간 막대, 오른쪽으로),
+공개 실데이터가 없으니 random.seed(int(price * 100))로 가격에 고정된 그럴듯한 시뮬레이션.
+프론트는 3열(매도잔량 | 가격 | 매수잔량) 레이아웃, 45초 폴링에 동참.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">B</span>강화 카드 2, 투자자 동향</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>StockDetail에 투자자 동향(InvestorPanel)을 추가하자. GET /api/stocks/{symbol}/investors:
+개인/외국인/기관의 최근 10일 순매수 추정치 표. 실데이터가 없으니 일별 거래량과 캔들 방향에서
+개인 60 / 외국인 30 / 기관 10 비율로 추정하고 개인은 역방향 가정(원작 방식).
+순매수 초록 / 순매도 빨강, 날짜 내림차순.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">C</span>강화 카드 3, 종목 뉴스와 기사 분석</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>종목 뉴스(StockNews)와 기사 AI 분석 화면(ArticleAnalysis)을 추가하자.
+1) GET /api/stocks/{symbol}/news: Yahoo Finance RSS에서 해당 심볼 뉴스 5건(제목, 링크, 시각)
+2) 뉴스 클릭 → /article 라우트: httpx로 본문 추출(외부 URL만 허용하는 SSRF 가드) 후
+   POST /api/ai/articles가 SSE로 요약/시장 영향/투자 인사이트를 스트리밍(기존 delta 계약 재사용)
+3) 영어 기사는 한국어 번역을 맨 앞에.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">D</span>강화 카드 4, 라이트/다크 테마</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>라이트/다크 듀얼 테마를 추가하자. 기본은 prefers-color-scheme, 헤더 토글로 전환,
+선택은 localStorage에 기억. 색은 전부 CSS 변수로 빼서 두 테마 모두에서
+등락색(초록/빨강)과 차트 캔들의 대비가 유지되게. lightweight-charts의 배경/그리드 색도 테마를 따라가게.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">E</span>강화 카드 5, 나만의 데스크로</div>
+  <p class="body">여기부터는 정해진 카드가 없습니다. <strong>당신이 프로덕트 오너입니다</strong>. 시황을 보며 아쉬웠던 것
+  하나를 골라, 위 카드들처럼 직접 요구사항을 써서 주문하세요. 아이디어가 필요하면: 관심종목 즐겨찾기,
+  등락률 알림 하이라이트, 섹터 등락 바, 시장 요약(Top 상승/하락), 지표 스파크라인, 뉴스 키워드 필터.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 빈칸을 내 아이디어로</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>내 데스크에 [내가 원하는 기능]을 추가하자. 규칙:
+1) API 계약: [필요한 라우트와 응답 형태 한두 문장]
+2) 화면: [어디에 어떻게 보이는지, 갱신 주기]
+3) 데이터: [출처, 실데이터가 없으면 시뮬레이션 방식]
+4) 기존 캐시/폴링/스트리밍 계약은 깨지 않는다
+구현 전에 이 규칙을 네 계획으로 다시 말해주고, 승인하면 진행해.</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">강화 라운드의 요령</span>
+    ① 카드 하나 = 커밋 하나, 되돌아갈 지점을 만들며 갑니다. ② 화면으로 확인하고 <strong>다른 점을 말로</strong> 다듬으세요.
+    ③ 마지막엔 <code class="inline">make run</code>으로 통합 서빙을 다시 굳혀 Slack의 스크린샷을 최신으로.
+  </div>
+  <div class="checkpoint dod">
+    <div class="cp-title">BONUS DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="gq1"><span>강화 카드 하나 이상을 적용해 화면으로 확인하고 커밋했습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="vibe">
+  <div class="task-head"><span class="task-num">BONUS</span><h2>바이브 코딩 라운드, 원작을 향해</h2><span class="time-badge">+α 자유</span></div>
+  <p class="task-goal">
+    Phase 빌드가 끝났다면 이제 <strong>바이브 코딩</strong>입니다: 완성 화면의 묘사를 주고 "이렇게 나오게 해줘"를
+    반복하는 루프. 아래 세 장면은 원작이 실제로 도달한 모습을 글로 옮긴 것입니다. 내 화면과 다른 점을 찾아 하나씩 주문하세요.
+  </p>
+
+  <div class="step-title"><span class="step-no">1</span>장면 A, Dashboard의 마감 디테일</div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">타깃 묘사, 프롬프트에 붙여 쓰세요</span></div>
+    <pre><code>- 상단 경제지표 바: 지표들이 가로로 흐르고 등락은 색과 ▲▼로
+- 지수 카드 5장: 값 크게, 등락률 작게, 카드 보더나 포인트 컬러가 등락을 따른다
+- 종목 테이블: US/KR 탭, 숫자 전부 우측 정렬 모노 감각, 행 호버 하이라이트
+- footer 또는 헤더에 "마지막 갱신 시각"과 다음 갱신까지의 감각</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">2</span>장면 B, StockDetail의 마감 디테일</div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">타깃 묘사, 프롬프트에 붙여 쓰세요</span></div>
+    <pre><code>- StockHeader: 심볼과 이름, 현재가 크게, 등락은 색+▲▼, 거래량은 축약(1.2M)
+- 캔들 차트: 기간 탭(1W/1M/3M/1Y) 중 활성 탭 하이라이트, 상승 초록/하락 빨강 캔들
+- ReturnsRow: 1W/1M/3M/1Y 수익률이 한 줄에, 양수 초록/음수 빨강
+- Week52Bar: 52주 저가~고가 바 위에 현재가 마커
+- 확장 후보(원작에 있는 것): 호가창 OrderBook, 투자자 동향 InvestorPanel, 종목 뉴스 StockNews,
+  기사 AI 분석 화면 ArticleAnalysis - 끌리는 것 하나를 같은 리듬으로 추가</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">3</span>장면 C, AI 패널의 마감 디테일</div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">타깃 묘사, 프롬프트에 붙여 쓰세요</span></div>
+    <pre><code>- 분석 버튼을 누르면 phase 배지가 fetching → analyzing 으로 바뀌고
+- 본문은 delta가 도착하는 대로 타자기처럼 자라며, 마크다운(## 절, 굵은 키워드)이 살아 있다
+- 스트리밍 중 다시 누르면 진행 중인 요청을 취소하고 새로 시작
+- 키가 없을 때는 "AI 분석 비활성" 안내만 조용히</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">바이브 코딩의 요령</span>
+    ① 한 번에 한 화면, 한 번에 한 디테일. ② 실행해 보고 <strong>다른 점을 말로</strong> 알려주는 반복이 핵심입니다,
+    "델타가 뭉쳐서 온다"처럼. ③ 마음에 든 순간마다 커밋해 되돌아갈 지점을 만드세요.
+    스펙은 방향을 잡고, 바이브는 마감을 만듭니다.
+  </div>
+  <div class="checkpoint dod">
+    <div class="cp-title">BONUS DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="vb1"><span>세 장면 중 하나 이상을 타깃 묘사 수준으로 끌어올렸습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="opt-h">
+  <div class="task-head">
+    <span class="task-num">OPTION</span>
+    <h2>하네스 엔지니어링, 작품을 성숙시키고 등급을 받다</h2>
+    <span class="time-badge">+15분 옵션</span>
+  </div>
+  <p class="task-goal">
+    지금까지 만든 것은 <strong>결과물</strong>입니다. 이 옵션은 그 결과물을 만든 <strong>작업 환경, 즉 하네스</strong>
+    (CLAUDE.md, hooks, skills, commands, agents)를 표준 구조로 성숙시키고(project-init),
+    그 품질을 6개 차원(정확성, 안전성, 완전성, 실행 가능성, 일관성, 검증 가능성)에서
+    채점받는(harness-eval) 단계입니다. superpowers의 3단(brainstorm, write-plan, execute-plan) 뒤에
+    <strong>4단 성숙화와 5단 평가</strong>를 붙이는 셈입니다. 캡스톤 공통의 마무리 의식입니다.
+  </p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4</a>의 훅과 스킬을 팀 자산으로 승격하는 감각, 그리고 <a href="ClaudeCode_Reference3_Plugins.html" style="color:#c9a2ff">Reference 3</a>의 플러그인 생태계.</p>
+
+  <div class="step-title"><span class="step-no">1</span>플러그인 2종 설치</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>claude plugin marketplace add https://github.com/whchoi98/project-init
+claude plugin install project-init@project-init
+claude plugin marketplace add https://github.com/whchoi98/harness-eval
+claude plugin install harness-eval@harness-eval
+claude plugin list</code></pre>
+  </div>
+  <p class="body">설치 후 새 Claude 세션을 시작하세요, superpowers 때와 같은 규칙입니다.</p>
+
+  <div class="step-title"><span class="step-no">2</span>성숙화, /project-init:init-project와 /project-init:sync-docs</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력 (새 세션, worktree에서)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/project-init:init-project .</code></pre>
+  </div>
+  <p class="body">
+    이 프로젝트의 하네스는 아직 얇습니다(FastAPI 앱과 React 앱 하나씩). 기존 프로젝트 감지 모드가
+    있는 것은 보존하고, 없는 것(문서 스캐폴딩, 시크릿 스캔 훅, /review 커맨드, 테스트 골격 등)만 채웁니다.
+    CLAUDE.md가 이미 있으면 덮어쓰기 전에 물어봅니다. 끝나면 이어서:
+  </p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/project-init:sync-docs</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">출력 예시 (요약)</span></div>
+    <pre><code>## Sync Report
+### Quality Scores (Before -&gt; After)
+| ./CLAUDE.md           | D (48) | B (82) | +34 |
+| ./backend/CLAUDE.md   | F (10) | C (61) | +51 |
+### Changes Made
+- Files created: 4 / Files updated: 2 / Runbooks missing: 1</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">3</span>평가, /harness-eval로 등급 받기</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/harness-eval:quick</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">출력 예시</span></div>
+    <pre><code>{"mode": "quick", "scores": {"overall": 7.0, "grade": "B"}, "checklist": {"pass": 12, "warn": 3, "fail": 1}}</code></pre>
+  </div>
+  <p class="body">
+    이 캡스톤의 비자명한 지식은 <strong>스트리밍 계약</strong>입니다. "왜 AI만 fetch를 직접 쓰는가,
+    왜 장 마감엔 600초로 늦추는가"를
+    CLAUDE.md의 패턴으로 기록해 두면 sync-docs 점수가 오르고, 다음에 이 저장소를 여는 Claude가
+    같은 원칙으로 확장합니다. 여유가 있다면 결정을 기록으로 남기세요:
+  </p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/add-adr streaming-ai-contract
+/add-runbook market-web-run</code></pre>
+  </div>
+  <div class="callout warn">
+    <span class="co-title">시간과 신뢰 가드</span>
+    잔여 시간이 빠듯하면 설치와 /harness-eval:quick(30초 체크리스트)만으로 충분합니다,
+    /project-init:init-project는 17단계라 수 분이 걸립니다. /harness-eval:standard의 동적 분석은
+    <strong>대상 프로젝트의 훅과 테스트를 실제로 실행</strong>합니다. 방금 본인이 만든 프로젝트라 안전하지만,
+    남의 저장소를 평가할 때는 --static-only 플래그가 예의이자 안전입니다.
+  </div>
+
+  <div class="checkpoint dod">
+    <div class="cp-title">OPTION DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="opt1"><span>/project-init:sync-docs의 Before/After 품질 점수를 확인했다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="opt2"><span>/harness-eval:quick 등급을 받았다</span></label>
+  </div>
+</section>
+
+
+
+<section class="wrapup" id="wrapup">
+  <h2>미션 종료</h2>
+  <p class="sub">시세는 캐시 뒤에, 키는 서버에, AI는 스트림으로. 웹 시황 데스크의 문법입니다.</p>
+  <table class="tbl">
+    <tr><th>가져가는 것</th><th>내용</th></tr>
+    <tr><td>캐시가 곧 예의</td><td>업스트림은 캐시 뒤에서 한 번만, single-flight로 동시 요청도 한 번만</td></tr>
+    <tr><td>스트리밍 계약</td><td>phase → delta → final, 그리고 "점진 델타에는 react-query가 아니라 fetch"라는 도구 선택의 근거</td></tr>
+    <tr><td>절전 설계</td><td>장이 닫히면 600초로 늦춘다, 시스템은 세상의 리듬을 알아야 한다</td></tr>
+  </table>
+  <div class="next-box">
+    <div>
+      <div class="nx-label">NEXT</div>
+      <h3>포털로</h3>
+      <p>다른 캡스톤(1 Press Start, 3 Frame It, 4 Trend Radar)도 같은 리듬입니다. <a href="index.html" style="color:#c9a2ff">워크샵 포털</a>에서 다음 미션을 고르세요.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<footer>
+  <div class="who">Claude Code Deep Dive Workshop, Capstone 2</div>
+  <div>기준: Claude Code 2.1.x + FastAPI + React(Vite) + Bedrock SSE, Sonnet 4.6, 2026.08</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".code-wrap").querySelector("pre");
+      var text = pre.textContent.replace(/\n{3,}/g, "\n\n").trim();
+      function done() {
+        var old = btn.textContent;
+        btn.textContent = "복사됨 ✓";
+        btn.classList.add("copied");
+        setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () { fallback(); });
+      } else { fallback(); }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+  var taskGroups = { m0:["m0a","m0b"], m1:["m1"], m2:["m2a","m2b"], m3:["m3a","m3b"], m4:["m4a","m4b"] };
+  /* 챕터형 예: { t0:["t0"], t1:["t1a","t1b"], ... } 진행 라벨 "0/5"
+     캡스톤형 예: { m0:["m0a","m0b"], m1:["m1"], ... m5:["m5"] } 진행 라벨 "0/6" */
+  var state = {};
+  function refresh() {
+    var doneCount = 0;
+    Object.keys(taskGroups).forEach(function (task) {
+      var allDone = taskGroups[task].every(function (cp) { return state[cp]; });
+      if (allDone) doneCount++;
+      var seg = document.querySelector('.seg[data-task="' + task + '"]');
+      if (seg) seg.classList.toggle("done", allDone);
+      var nav = document.querySelector('.sidenav a[data-nav="' + task + '"]');
+      if (nav) nav.classList.toggle("done", allDone);
+    });
+    var pc = document.getElementById("progress-count");
+    if (pc) pc.textContent = doneCount + "/9";
+  }
+  document.querySelectorAll('.cp-item input[type="checkbox"]').forEach(function (cb) {
+    cb.addEventListener("change", function () { state[cb.dataset.cp] = cb.checked; refresh(); });
+  });
+  document.querySelectorAll(".seg").forEach(function (seg) {
+    seg.addEventListener("click", function () {
+      var el = document.getElementById(seg.dataset.task);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidenav a[data-nav]");
+  var segs = document.querySelectorAll(".seg[data-task]");
+  if ("IntersectionObserver" in window) {
+    var current = null;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) current = entry.target.id; });
+      if (!current) return;
+      navLinks.forEach(function (a) { a.classList.toggle("active", a.dataset.nav === current); });
+      segs.forEach(function (s) { s.classList.toggle("active", s.dataset.task === current); });
+    }, { rootMargin: "-20% 0px -65% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
+<script>
+(function(){
+  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
+  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
+  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
+  if(saved==='light'){ root.setAttribute('data-theme','light'); }
+  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
+  label();
+  btn.addEventListener('click',function(){
+    var light = root.getAttribute('data-theme')==='light';
+    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
+    label();
+  });
+})();
+</script>
+</body>
+</html>

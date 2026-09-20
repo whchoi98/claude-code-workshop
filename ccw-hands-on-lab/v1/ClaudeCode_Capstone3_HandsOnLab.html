@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+<title>Capstone 3, Frame It - Claude Code Deep Dive Workshop</title>
+<style>
+:root {
+  --bg: #12181F;
+  --bg-card: #1B242E;
+  --bg-code: #0C1117;
+  --bg-inline: #232E3A;
+  --line: #2A3542;
+  --orange: #FF9900;
+  --orange-dim: rgba(255, 153, 0, 0.14);
+  --crimson: #B6002E;
+  --green: #3FB950;
+  --green-dim: rgba(63, 185, 80, 0.12);
+  --text: #E2E4EC;
+  --muted: #A6ABBE;
+  --dim: #7B8198;
+  --font-body: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-code: "D2Coding", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(255, 153, 0, 0.3); }
+a { color: var(--orange); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+/* ============ Hero ============ */
+.hero {
+  position: relative;
+  padding: 64px 32px 44px;
+  max-width: 1160px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -140px; right: -180px;
+  width: 460px; height: 460px;
+  background: radial-gradient(closest-side, rgba(182, 0, 46, 0.28), rgba(255, 153, 0, 0.10) 55%, transparent 75%);
+  pointer-events: none;
+}
+.eyebrow {
+  display: inline-block;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.hero h1 {
+  font-size: clamp(28px, 4.4vw, 42px);
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  max-width: 780px;
+}
+.hero .subtitle {
+  margin-top: 14px;
+  color: var(--orange);
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 700;
+}
+.hero .lede {
+  margin-top: 18px;
+  color: var(--muted);
+  max-width: 720px;
+  font-size: 15.5px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin-top: 26px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.hero-meta strong { color: var(--text); font-weight: 700; }
+
+/* ============ Sticky timeline ============ */
+.timeline {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(12, 17, 23, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.timeline-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.timeline-label {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.timeline-label strong { color: var(--orange); font-size: 13px; }
+.segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  height: 26px;
+}
+.seg {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg-card);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  padding: 0;
+  font-family: var(--font-body);
+}
+.seg:hover { border-color: var(--orange); }
+.seg .fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 153, 0, 0.85), rgba(255, 153, 0, 0.65));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.seg.done .fill { transform: scaleX(1); }
+.seg .seg-txt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.seg.done .seg-txt { color: #12181F; }
+.seg.active { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
+
+/* ============ Layout ============ */
+.layout {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 44px 32px 80px;
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 52px;
+  align-items: start;
+}
+.sidenav {
+  position: sticky;
+  top: 66px;
+  font-size: 13.5px;
+}
+.sidenav .nav-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  margin-bottom: 14px;
+}
+.sidenav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 7px 10px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+.sidenav a:hover { color: var(--text); background: var(--bg-card); text-decoration: none; }
+.sidenav a.active { color: var(--orange); border-left-color: var(--orange); background: var(--bg-card); }
+.sidenav .dot {
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dim);
+}
+.sidenav a.done .dot { background: var(--green); border-color: var(--green); }
+.sidenav .nav-time { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+/* ============ Task sections ============ */
+.task { margin-bottom: 72px; }
+.task-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.task-num {
+  font-family: var(--font-code);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 0.1em;
+}
+.task-head h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.time-badge {
+  margin-left: auto;
+  flex: none;
+  background: var(--orange-dim);
+  color: var(--orange);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.task-goal {
+  color: var(--muted);
+  margin-bottom: 24px;
+  max-width: 760px;
+}
+.task-goal strong { color: var(--text); }
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16.5px;
+  font-weight: 800;
+  margin: 34px 0 12px;
+}
+.step-title .step-no {
+  flex: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #12181F;
+  font-size: 12.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+p.body { color: var(--muted); margin: 10px 0 14px; max-width: 760px; }
+p.body strong, li strong { color: var(--text); }
+code.inline {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  background: var(--bg-inline);
+  color: #FFC466;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+kbd {
+  font-family: var(--font-code);
+  font-size: 0.82em;
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: var(--text);
+}
+
+/* ============ Code blocks ============ */
+.code-wrap {
+  background: var(--bg-code);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 14px 0 20px;
+  overflow: hidden;
+}
+.code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+.code-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.copy-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.code-wrap pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.code-wrap code { font-family: inherit; color: #D8DEE9; }
+.code-wrap.output pre { color: var(--dim); }
+.code-wrap .cmt { color: #5E6B7E; }
+.code-wrap .hl { color: #FFC466; }
+.code-wrap .ok { color: var(--green); }
+
+/* ============ Callouts ============ */
+.callout {
+  border-radius: 8px;
+  background: var(--bg-card);
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14.5px;
+  color: var(--muted);
+  max-width: 760px;
+}
+.callout strong { color: var(--text); }
+.callout.tip .co-title { color: var(--orange); }
+
+.callout .co-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 5px;
+}
+
+.callout.warn .co-title { color: #FF5C85; }
+
+/* ============ Checkpoint ============ */
+.checkpoint {
+  background: var(--green-dim);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 28px;
+}
+.checkpoint .cp-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+.cp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+.cp-item input {
+  flex: none;
+  margin-top: 5px;
+  width: 15px; height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+.cp-item input:checked + span { color: var(--text); }
+
+/* ============ Tabs ============ */
+.tabs { margin: 18px 0 6px; }
+.tab-btns {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dim);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 9px 16px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+.tab-pane { display: none; padding-top: 16px; }
+.tab-pane.active { display: block; }
+
+/* ============ Tables ============ */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 14px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tbl th, .tbl td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid #FFFFFF14;
+}
+.tbl th {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+  background: rgba(255, 255, 255, 0.03);
+}
+.tbl td { color: var(--muted); vertical-align: middle; }
+.tbl td:first-child { color: var(--text); font-weight: 700; white-space: nowrap; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl code { font-family: var(--font-code); font-size: 0.9em; color: #FFC466; }
+
+/* ============ Wrap-up ============ */
+.wrapup {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 32px 34px;
+  margin-bottom: 56px;
+}
+.wrapup h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.wrapup .sub { color: var(--muted); font-size: 14.5px; margin-bottom: 18px; }
+.next-box {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(182, 0, 46, 0.16), rgba(255, 153, 0, 0.08));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 26px;
+}
+.next-box .nx-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--orange);
+}
+.next-box h3 { font-size: 19px; font-weight: 800; }
+.next-box p { color: var(--muted); font-size: 14px; }
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 30px 32px 46px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.9;
+}
+footer .who { color: var(--muted); font-weight: 700; }
+footer .mail { color: var(--orange); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 20px 64px; }
+  .sidenav { display: none; }
+  .hero { padding: 44px 20px 32px; }
+  .timeline-inner { padding: 10px 20px; }
+  .seg .seg-txt { font-size: 9px; }
+  .task-head h2 { font-size: 20px; }
+}
+
+/* ===== Chapter 4 additions: Super Lab ===== */
+.part-divider { margin: 72px 0 12px; padding: 30px 34px; border-radius: 14px;
+  background: linear-gradient(135deg, #1d1433 0%, #12181F 65%); border: 1px solid #45306b; }
+.part-divider .pd-eyebrow { display: inline-block; background: #7a3ff2; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: .14em; padding: 4px 12px; border-radius: 4px; }
+.part-divider h2 { margin: 14px 0 8px; font-size: 26px; color: var(--text); }
+.part-divider p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.75; max-width: 860px; }
+.part-divider .rules { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+.part-divider .rules span { background: #241a3d; border: 1px solid #45306b; color: #d9c9ff;
+  font-size: 12.5px; padding: 6px 12px; border-radius: 999px; }
+.task.mission .task-num { color: #c9a2ff; }
+.task.mission { border-color: #3a2a57; }
+.checkpoint.dod { border-color: #7a3ff2; background: rgba(122, 63, 242, .06); }
+.checkpoint.dod .cp-title { color: #c9a2ff; }
+details.solution { margin: 18px 0; border: 1px dashed #FF9900; border-radius: 10px; background: rgba(255,153,0,.04); }
+details.solution summary { cursor: pointer; padding: 12px 16px; color: var(--accent); font-weight: 700; font-size: 13.5px; list-style: none; }
+details.solution summary::before { content: "▸ "; }
+details.solution[open] summary::before { content: "▾ "; }
+details.solution .sol-body { padding: 0 16px 14px; }
+
+/* ── Korean typography fix: 단어 단위 줄바꿈, 히어로 정돈 ── */
+body { word-break: keep-all; overflow-wrap: break-word; }
+.hero h1 { max-width: 980px; font-size: clamp(26px, 4vw, 38px); text-wrap: balance; }
+.hero .subtitle, .hero .lede, .task-goal, .wrapup .sub { text-wrap: pretty; }
+
+/* ── 잘림 방지 v2: 히어로 압축 + 좁은 화면 대응 ── */
+.hero { padding: 44px 28px 34px; }
+.eyebrow { margin-bottom: 14px; }
+.hero h1 { line-height: 1.3; }
+.hero .subtitle { margin-top: 10px; }
+.hero .lede { margin-top: 12px; }
+.seg-txt { text-overflow: ellipsis; }
+@media (max-width: 620px) {
+  .hero { padding: 26px 16px 24px; }
+  .hero h1 { font-size: 23px; }
+  .hero .subtitle { font-size: 15px; }
+  .hero .lede { font-size: 14px; }
+  .hero-meta { gap: 6px 14px; font-size: 12px; }
+  .seg .seg-txt { display: none; }
+  .timeline-inner { padding: 0 10px; }
+}
+
+/* ── 잘림 방지 v3: 좁은 화면 가로 넘침 제거 ── */
+.tbl { display: block; overflow-x: auto; max-width: 100%; }
+.hero, .layout, .timeline-inner, main, section { min-width: 0; }
+@media (max-width: 620px) {
+  .timeline-label:last-child { display: none; }
+}
+
+/* ── 잘림 방지 v4: 인라인 코드 칩의 최소폭 강제 해제 ── */
+code.inline { white-space: normal; overflow-wrap: anywhere; }
+
+/* ── v5: 소개문/본문 전체 폭 사용 (가독성 캡 해제) ── */
+.hero .lede, .task-goal, p.body, .callout, .part-divider p, .wrapup .sub { max-width: none; }
+.hero .lede { text-wrap: wrap; }
+
+/* ── macOS 터미널 스타일: 신호등 3버튼 ── */
+.code-head { position: relative; padding-left: 76px; }
+.code-head::before {
+  content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 11px; height: 11px; border-radius: 50%; background: #FF5F57;
+  box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
+}
+</style>
+<style id="hol-theme">
+html[data-theme="light"]{
+  --bg:#F3F4F7; --bg-card:#FFFFFF; --bg-code:#EEF1F5; --bg-inline:#E4E9EF; --line:#D7DDE5;
+  --orange:#B45309; --orange-dim:rgba(180,83,9,.12);
+  --green:#1F883D; --green-dim:rgba(31,136,61,.12);
+  --text:#1B2430; --muted:#5B6472; --dim:#75808F;
+  background:#F3F4F7;
+}
+html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
+html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
+#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
+background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
+border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
+font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#themeToggle:hover{border-color:var(--orange,#FF9900)}
+html[data-theme="light"] .code-wrap code{color:#2A3542}
+html[data-theme="light"] .code-wrap.output code{color:#57606E}
+html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
+html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
+html[data-theme="light"] .k.s{background:#DCEEDC}
+html[data-theme="light"] .k.w{background:#E9E2F7}
+html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
+html[data-theme="light"] .code-wrap .hl{color:#B45309}
+html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
+html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
+html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
+html[data-theme="light"] .head .when{color:#FF9900}
+html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
+html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
+html[data-theme="light"] .part-divider{background:linear-gradient(135deg,#EDE6FA 0%,#FFFFFF 65%);border-color:#B79CEF}
+html[data-theme="light"] .part-divider h2{color:#1B2430}
+html[data-theme="light"] .part-divider .rules span{background:#EDE6FA;border-color:#B79CEF;color:#5B21C7}
+html[data-theme="light"] .tbl code{color:#B45309}
+html[data-theme="light"] .task.mission .task-num{color:#6b46c1}
+html[data-theme="light"] .checkpoint.dod .cp-title{color:#6b46c1}
+@media print{#themeToggle{display:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">CAPSTONE 3 / FRAME IT / 120 MIN</span>
+  <h1>Generative Hours, 코드로 그린 전시를 개장하라</h1>
+  <div class="subtitle">두 점의 제너러티브 아트로 여는 인터랙티브 미디어 아트 전시</div>
+  <p class="lede">
+    미디어 아트는 <strong>화면이 곧 테스트</strong>입니다. 벡터장이 틀리면 흐름이 뭉치고, 이중 버퍼를
+    빼먹으면 무늬가 자라지 않습니다. 이 캡스톤에서는 작품 한 점을 <strong>추상 없이</strong> 끝까지
+    밀어붙인 다음, 두 번째 작품이 도착하는 순간 <strong>공통 계약을 추출</strong>합니다.
+    추상은 선포되는 것이 아니라 필요해질 때 태어난다는 것을, 손으로 겪는 랩입니다.
+    이 캡스톤은 <strong>Bedrock을 쓰지 않으므로 API 키가 필요 없습니다</strong>.
+  </p>
+  <div class="hero-meta">
+    <span>소요 시간 <strong>120분</strong></span>
+    <span>미션 <strong>6개 + DoD</strong></span>
+    <span>산출물 <strong>전시 URL</strong></span>
+    <span>Update <strong>2026.07</strong></span>
+  </div>
+</header>
+
+<nav class="timeline" aria-label="미션 타임라인">
+  <div class="timeline-inner">
+    <span class="timeline-label">진행 <strong id="progress-count">0/6</strong></span>
+    <div class="segments" id="segments">
+      <button class="seg active" data-task="m0" style="flex:10" title="M0 사전 준비, 10분"><span class="fill"></span><span class="seg-txt">M0 준비</span></button>
+      <button class="seg" data-task="m1" style="flex:15" title="M1 설계, 15분"><span class="fill"></span><span class="seg-txt">M1 설계</span></button>
+      <button class="seg" data-task="m2" style="flex:25" title="M2 첫 픽셀, 25분"><span class="fill"></span><span class="seg-txt">M2 첫 픽셀</span></button>
+      <button class="seg" data-task="m3" style="flex:30" title="M3 계약의 탄생, 30분"><span class="fill"></span><span class="seg-txt">M3 계약</span></button>
+      <button class="seg" data-task="m4" style="flex:20" title="M4 전시관 개장, 20분"><span class="fill"></span><span class="seg-txt">M4 전시관</span></button>
+      <button class="seg" data-task="m5" style="flex:20" title="M5 배포, 20분"><span class="fill"></span><span class="seg-txt">M5 배포</span></button>
+    </div>
+    <span class="timeline-label">120 min</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+<aside class="sidenav" aria-label="미션 목차">
+  <div class="nav-title">MISSIONS / 120분</div>
+  <a href="#brief" data-nav="brief" class=""><span class="dot"></span>브리핑<span class="nav-time"></span></a>
+  <a href="#blueprint" data-nav="blueprint"><span class="dot"></span>구현 청사진<span class="nav-time">참고</span></a>
+  <a href="#m0" data-nav="m0" class="active"><span class="dot"></span>M0 사전 준비<span class="nav-time">10분</span></a>
+  <a href="#m1" data-nav="m1" class=""><span class="dot"></span>M1 설계<span class="nav-time">15분</span></a>
+  <a href="#m2" data-nav="m2" class=""><span class="dot"></span>M2 첫 픽셀<span class="nav-time">25분</span></a>
+  <a href="#m3" data-nav="m3" class=""><span class="dot"></span>M3 계약의 탄생<span class="nav-time">30분</span></a>
+  <a href="#m4" data-nav="m4" class=""><span class="dot"></span>M4 전시관 개장<span class="nav-time">20분</span></a>
+  <a href="#m5" data-nav="m5" class=""><span class="dot"></span>M5 배포와 개장<span class="nav-time">20분</span></a>
+  <a href="#gq" data-nav="gq"><span class="dot"></span>BONUS 퀄리티 강화<span class="nav-time">+α</span></a>
+  <a href="#opt-h" data-nav="opt-h" class=""><span class="dot"></span>OPT 하네스 엔지니어링<span class="nav-time">+15분</span></a>
+  <a href="#cut" data-nav="cut" class=""><span class="dot"></span>컷라인과 트러블슈팅<span class="nav-time"></span></a>
+  <a href="#wrapup" data-nav="wrapup" class=""><span class="dot"></span>마무리<span class="nav-time"></span></a>
+</aside>
+
+<main>
+
+<!-- ============================ BRIEFING ============================ -->
+<section class="task" id="brief">
+  <div class="task-head"><span class="task-num">MISSION BRIEFING</span><h2>두 점으로 개장하는 전시</h2><span class="time-badge">숙지</span></div>
+  <p class="task-goal">
+    <strong>Generative Hours</strong>라는 이름의 전시관을 엽니다. 아트리움으로 들어와 갤러리에서 작품을 고르고,
+    전시실에서 작품 하나를 전체화면으로 만집니다. 개장 시점의 소장품은 <strong>단 두 점</strong>이지만,
+    구조는 예순 점을 걸 수 있게 짭니다.
+  </p>
+
+  <div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin:6px 0 14px;">
+    <svg width="212" height="72" viewBox="0 0 212 72" xmlns="http://www.w3.org/2000/svg" aria-label="두 작품 미리보기">
+      <rect x="0" y="0" width="100" height="72" fill="#07070a"></rect>
+      <g stroke="#7cc6ff" fill="none" stroke-width="0.9" opacity="0.85">
+        <path d="M2 14 C 22 6, 44 26, 62 16 S 88 4, 98 12"></path>
+        <path d="M2 24 C 24 16, 46 36, 64 26 S 90 14, 98 22"></path>
+        <path d="M2 36 C 26 30, 44 50, 66 38 S 88 28, 98 34"></path>
+        <path d="M2 48 C 22 42, 48 60, 68 48 S 90 40, 98 46"></path>
+        <path d="M2 60 C 26 54, 46 68, 66 58 S 88 52, 98 58"></path>
+      </g>
+      <circle cx="46" cy="30" r="9" fill="none" stroke="#7cc6ff" stroke-width="0.7" opacity="0.5"></circle>
+      <rect x="112" y="0" width="100" height="72" fill="#07070a"></rect>
+      <g fill="#8fe39a">
+        <circle cx="132" cy="18" r="7" opacity="0.75"></circle><circle cx="152" cy="12" r="5" opacity="0.6"></circle>
+        <circle cx="172" cy="22" r="8" opacity="0.8"></circle><circle cx="194" cy="14" r="4" opacity="0.55"></circle>
+        <circle cx="124" cy="40" r="5" opacity="0.6"></circle><circle cx="146" cy="36" r="9" opacity="0.85"></circle>
+        <circle cx="168" cy="44" r="6" opacity="0.65"></circle><circle cx="190" cy="38" r="7" opacity="0.7"></circle>
+        <circle cx="134" cy="60" r="8" opacity="0.8"></circle><circle cx="158" cy="58" r="5" opacity="0.55"></circle>
+        <circle cx="180" cy="62" r="7" opacity="0.7"></circle><circle cx="200" cy="54" r="4" opacity="0.5"></circle>
+      </g>
+    </svg>
+    <p class="body" style="margin:0; flex:1; min-width:250px;">
+      왼쪽이 <strong>01 Whispering Currents</strong>, 노이즈 벡터장 위를 흐르는 수만 개의 입자.
+      오른쪽이 <strong>02 Morphogenesis</strong>, 두 화학종이 서로를 먹으며 자라는 격자.
+      전자는 <em>에이전트를 매 프레임 옮기고</em>, 후자는 <em>격자 전체를 수식으로 갱신</em>합니다.
+      일부러 코드 모양이 정반대인 짝을 골랐습니다.
+    </p>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">이 랩의 진짜 주제</span>
+    Phase 1에서는 <strong>일부러 추상을 만들지 않습니다</strong>. 작품 하나를 한 파일에 몰아넣고 끝까지 밀어붙입니다.
+    Phase 2에서 두 번째 작품을 <strong>또 한 번 통째로 베껴 쓴 다음</strong>, 그 중복을 보고 나서야 공통 계약을 뽑아냅니다.
+    "먼저 추상을 설계하라"는 조언이 왜 자주 틀리는지 - 두 번째 사례 없이는 무엇이 공통인지 알 수 없다는 것을,
+    30분 안에 손으로 확인하게 됩니다.
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">규칙, 캡스톤 공통</span>
+    ① 파일을 손으로 짜지 말고 Claude에게 시켜서 만든다 ② 각 Phase의 DoD를 통과해야 다음으로
+    ③ 막히면 "막힐 때 열어보기"의 힌트를 쓴다. 구현 경로는 자유입니다.
+  </div>
+
+  <div class="step-title"><span class="step-no">L</span>학습 목표, Level 200</div>
+  <p class="body">이 캡스톤을 마치면 다음 네 가지를 <strong>설명할 수 있고, 다시 만들 수 있습니다</strong>.</p>
+  <table class="tbl">
+    <tr><th>목표</th><th>검증되는 순간</th></tr>
+    <tr><td>"선 구체, 후 추상"의 리팩터 감각</td><td>M3에서 중복 두 벌을 눈으로 본 뒤 계약을 뽑는데, 화면은 전과 똑같을 때</td></tr>
+    <tr><td>공통 엔진 위의 인터페이스(Piece) 설계</td><td>코드 모양이 정반대인 두 작품이 같은 계약으로 한 전시에서 돌 때</td></tr>
+    <tr><td>데이터 주도 확장 구조</td><td>작품 추가가 "data.js 한 항목 + 파일 하나"로 끝날 때 (강화 카드 A에서 체감)</td></tr>
+    <tr><td>기계 검증을 배포 게이트로 세우는 법</td><td>M5에서 verify.mjs가 전부 PASS한 뒤에만 전시가 열릴 때</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">R</span>챕터 연결 지도, 배운 내용이 재등장하는 곳</div>
+  <p class="body">이 캡스톤은 새 기술을 가르치지 않습니다. <strong>Ch1~6에서 배운 것을 실전 배치</strong>합니다.</p>
+  <table class="tbl">
+    <tr><th>챕터</th><th>이 캡스톤에서 재등장하는 곳</th></tr>
+    <tr><td><a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1 설치부터 Headless까지</a></td><td>M0~전체: 세션 운용, 지시 → 실행 → 검증 루프</td></tr>
+    <tr><td><a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2 Subagents</a></td><td>M3~M4: 계약 추출 리팩터의 diff 리뷰를 code-reviewer에게, 전시 구조와 작품 다듬기 병행</td></tr>
+    <tr><td><a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3 Admin Setup</a></td><td>배치 결정의 배경: 이 캡스톤은 Bedrock을 쓰지 않아 모델 통제선 밖에서도 완주됩니다, "AI가 필요 없는 곳엔 안 쓴다"도 설계입니다</td></tr>
+    <tr><td><a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4 Settings, 훅과 스킬</a></td><td>OPT: 하네스 성숙화, 훅과 스킬을 프로젝트 자산으로 승격하는 마무리 의식</td></tr>
+    <tr><td><a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5 CLI Reference</a></td><td>확장 방향: verify.mjs를 헤드리스 파이프라인의 게이트로, "PASS 없이는 배포 없음"의 자동화</td></tr>
+    <tr><td><a href="ClaudeCode_Ch6_HandsOnLab.html" style="color:#c9a2ff">Ch6 Agent SDK</a></td><td>확장 방향: 작품 생성기, query 한 번이 새 Piece 파일과 data.js 항목을 만드는 다음 단계</td></tr>
+  </table>
+
+</section>
+<section class="task" id="blueprint">
+  <div class="task-head"><span class="task-num">BLUEPRINT</span><h2>구현 청사진, 전시의 뼈대</h2><span class="time-badge">참고</span></div>
+  <p class="task-goal">
+    M1 설계가 이 구조로 수렴하도록 방향을 잡아 주는 <strong>구현 지도</strong>입니다. 계획이 이상하게 흐르면
+    여기로 돌아와 대조하세요.
+  </p>
+
+  <div class="step-title"><span class="step-no">0</span>세 개의 경로 한 눈에</div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">프레임 루프, 관람 경로, 출고 경로</span></div>
+    <pre><code>[프레임 루프]  requestAnimationFrame, 매 프레임
+engine.js: 리사이즈/DPR ──> dt/t 시계 ──> piece.update(dt) ──> piece.draw(ctx)
+                                              │
+              전시실 전환 시: 이전 piece.dispose() ──> 새 Piece 생성   (누수 없이, 속도 그대로)
+
+[관람 경로]  방문자의 동선
+아트리움(랜딩) ──> 갤러리(data.js 카탈로그 → 카드 그리드) ──> 전시실(#work-NN 해시 딥링크)
+
+[출고 경로]  단 한 번, 열기 전에
+verify.mjs(카탈로그 무결 + Piece 계약 검사) ── 전부 PASS ──> cdk deploy ──> S3(비공개) + CloudFront(OAC)</code></pre>
+  </div>
+  <p class="body">Level 200의 핵심 구분입니다: 매 프레임 도는 <strong>루프</strong>, 데이터가 이끄는 <strong>동선</strong>,
+  기계가 지키는 <strong>게이트</strong>. 작품은 그리기에만 집중하고 나머지는 엔진과 카탈로그와 검사기가 맡습니다.</p>
+
+  <div class="step-title"><span class="step-no">1</span>구조 지도</div>
+  <table class="tbl">
+    <tr><th>구성</th><th>파일</th><th>핵심 계약</th></tr>
+    <tr><td>엔진</td><td>site/js/engine.js</td><td>캔버스 리사이즈, DPR, RAF 루프, dt/t 시계를 공통 제공, 작품은 그리기만</td></tr>
+    <tr><td>작품 01</td><td>site/js/pieces/01-currents.js</td><td>벡터장 흐름결, 마우스를 끌면 결이 휘어진다</td></tr>
+    <tr><td>작품 02</td><td>site/js/pieces/02-morphogenesis.js</td><td>길게 누르면 소용돌이가 자라고 놓으면 방출, 01과 코드 모양이 정반대인 짝</td></tr>
+    <tr><td>계약</td><td>Piece 기반 클래스</td><td>두 작품이 상속하는 공통 인터페이스, M3에서 중복을 보고 나서야 추출한다</td></tr>
+    <tr><td>카탈로그</td><td>site/js/data.js</td><td>순수 데이터, 작품 추가 = 항목 하나 + 파일 하나</td></tr>
+    <tr><td>전시</td><td>site/index.html + main.js</td><td>아트리움 → 갤러리 → 전시실 3단, #work-NN 해시 라우팅</td></tr>
+    <tr><td>검증과 인프라</td><td>verify.mjs + CDK 스택</td><td>카탈로그/계약 검사가 배포 게이트, S3 비공개 + CloudFront OAC</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">2</span>기술 선택 4</div>
+  <table class="tbl">
+    <tr><th>선택</th><th>이유</th></tr>
+    <tr><td>빌드 도구 없는 정적 사이트</td><td>작품 파일 하나를 브라우저로 열면 바로 도는 즉시성, 전시는 가벼워야 한다</td></tr>
+    <tr><td>선 구체, 후 추상</td><td>중복을 눈으로 보기 전의 추상은 추측이다, 두 벌을 만들고 나서 계약을 뽑는다</td></tr>
+    <tr><td>데이터 주도 카탈로그</td><td>구조(코드)와 내용(데이터)의 분리, 전시 확장이 편집이 된다</td></tr>
+    <tr><td>verify.mjs 게이트</td><td>렌더 루프의 단위 테스트 대신, 계약과 카탈로그의 무결을 기계가 지킨다</td></tr>
+  </table>
+</section>
+
+
+<!-- ============================ M0 ============================ -->
+<section class="task" id="m0">
+  <div class="task-head"><span class="task-num">MISSION 00</span><h2>사전 준비</h2><span class="time-badge">10분</span></div>
+  <p class="task-goal">프로젝트 폴더, 배포용 CDK 뼈대, 그리고 <strong>브라우저로 보는 통로</strong>를 준비합니다. Bedrock 키는 필요 없습니다.</p>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>aws sts get-caller-identity --query Account --output text
+node -v &amp;&amp; npx cdk --version
+
+mkdir -p ~/capstone/media-art &amp;&amp; cd ~/capstone/media-art
+[ -f cdk.json ] || npx cdk init app --language typescript
+(npx cdk bootstrap &gt; /tmp/bootstrap.log 2&gt;&amp;1 &amp;)
+git config user.name "capstone" &amp;&amp; git config user.email "capstone@lab.local"
+mkdir -p site/js/pieces site/css
+git add -A &amp;&amp; git commit -m "chore: scaffold" 2&gt;/dev/null || true</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">1</span>미리보기 통로 확인</div>
+  <p class="body">이 랩은 Phase마다 브라우저로 확인합니다. 정적 서버를 띄우고 <strong>프록시 경로</strong>로 접근하는 방식이 가장 간단합니다.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 미리보기 서버 (별도 탭에서 계속 띄워둡니다)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/capstone/media-art &amp;&amp; python3 -m http.server 8000 --directory site</code></pre>
+  </div>
+  <p class="body">브라우저 주소창의 code-server URL 끝에 <code class="inline">/proxy/8000/</code>을 붙여 접속합니다.
+  아직 <code class="inline">site/</code>가 비어 있으니 빈 목록만 보이면 성공입니다.</p>
+
+  <div class="callout warn">
+    <span class="co-title">프록시가 안 열린다면</span>
+    끝의 슬래시(<code class="inline">/proxy/8000/</code>)를 빠뜨리지 않았는지, 서버가 <code class="inline">--directory site</code>로 떠 있는지 확인하세요.
+    그래도 막히면 미리보기 없이 진행하고 M5 배포 후 CloudFront URL로 한 번에 확인해도 됩니다.
+    단 그 경우 M2와 M3의 체크포인트를 눈으로 못 보므로, 되도록 통로를 확보하세요.
+  </div>
+
+  <div class="step-title"><span class="step-no">2</span>claude-hud 설치, 상태줄 HUD</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/plugin marketplace add jarrodwatts/claude-hud
+/plugin install claude-hud@claude-hud
+/reload-plugins
+/claude-hud:setup</code></pre>
+  </div>
+  <p class="body">설치가 끝나면 세션 하단 상태줄에 모델, 컨텍스트 사용량, 세션 상태가 표시됩니다.
+  긴 캡스톤에서 컨텍스트가 얼마나 남았는지 한눈에 보이므로, Phase 사이에 정리 시점을 잡기 좋습니다.</p>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m0"><span>스캐폴드가 완료되었고, 미리보기 통로(또는 대안)를 확보했습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m0hud"><span>claude-hud 상태줄이 세션에 표시됩니다</span></label>
+  </div>
+</section>
+
+<!-- ============================ M1 ============================ -->
+<section class="task" id="m1">
+  <div class="task-head"><span class="task-num">MISSION 01</span><h2>설계, 브레인스토밍</h2><span class="time-badge">15분</span></div>
+  <p class="task-goal">요구사항 7개 조항을 superpowers에 넘겨 <strong>설계와 Phase 계획</strong>을 뽑습니다. 두 작품의 알고리즘 상수가 프롬프트에 들어 있습니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 세션 운용과 Capstone Setup의 superpowers 워크플로.</p>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal (~/capstone/media-art)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/capstone/media-art &amp;&amp; claude</code></pre>
+  </div>
+
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:brainstorming 다음 요구사항으로 "Generative Hours" 제너러티브 아트 전시 사이트를 설계하자.
+1) 빌드 도구 없는 정적 사이트: site/index.html, site/css/style.css, site/js/*.js.
+   ES 모듈만 쓰고 외부 런타임 라이브러리는 금지(구글 폰트 CSS만 허용).
+   python3 -m http.server로 열리고 같은 파일이 그대로 S3에 올라간다
+2) 작품 2점, 일부러 코드 모양이 정반대인 짝으로 만든다:
+   01 "Whispering Currents" - 2옥타브 Perlin 노이즈를 각도로 읽은 벡터장 위를 입자가 흐른다.
+      입자 수는 화면 면적에 비례해 6000~34000 사이로 묶는다.
+      잔상은 캔버스를 지우지 않고 매 프레임 rgba(5,5,7,0.066)으로 덮어 만든다. 합성은 lighter.
+      마우스 이동은 반경 150px의 바람. 길게 누르면 소용돌이가 1.4초에 걸쳐 충전되고(반경 90px에서
+      min(w,h)*0.42까지, 강도 1.4에서 5.2까지) 놓으면 방출되어 서서히 풀린다
+   02 "Morphogenesis" - Gray-Scott 반응-확산. Du=0.16, Dv=0.08, dt는 상수에 접어넣어 1로 둔다.
+      Float32Array 격자와 이중 버퍼, 3x3 라플라시안(중심 -1, 직교 0.2, 대각 0.05), 경계는 wrap.
+      프레임당 8스텝. 격자는 화면보다 거칠게 잡고(약 8만 칸) ImageData로 그려 부드럽게 확대한다.
+      F/k 프리셋 4개: 세포분열 .0367/.0649, 산호 .0545/.062, 표범 .035/.065, 미로 .029/.057.
+      드래그하면 V를 붓처럼 심는다
+3) 전시 구조는 3단: 아트리움(랜딩) -&gt; 갤러리(작품 카드 그리드) -&gt; 전시실(작품 하나 전체화면 + 플래카드).
+   body[data-view]로 전환한다. 전시실의 캔버스는 단 하나이고 작품이 그 위에 마운트/언마운트된다
+4) 카탈로그는 site/js/data.js에 순수 데이터로 분리한다. 작품을 더하는 일이 "data.js 한 항목 + 파일 하나"여야
+   한다. module이 null인 작품은 갤러리에 "Soon" 카드로 남는다
+5) 작품 파일은 공통 Piece 기반 클래스를 상속한다. 엔진이 캔버스 리사이즈와 DPR, RAF 루프, dt/t 시계,
+   포인터 정규화, mount/destroy를 소유하고 작품은 setup()과 frame(dt,t)만 구현한다.
+   engine.js는 모듈 스코프에서 DOM을 만지지 않는다(브라우저 없이 계약을 검사하기 위해)
+6) 구현 순서: Phase 1(작품 01을 추상 없이 한 파일로 끝까지) -&gt; Phase 2(작품 02를 통째로 베껴 쓴 뒤
+   Piece 계약을 추출) -&gt; Phase 3(3단 전시 구조와 카탈로그) -&gt; Phase 4(CDK로 S3 + CloudFront 배포)
+7) 시간 제약 2시간: 렌더 루프의 단위 테스트는 만들지 않는다. 대신 verify.mjs로 카탈로그와 Piece 계약을
+   정적 검사하고 나머지는 브라우저 육안 확인으로 갈음한다. 이 사이트는 Bedrock을 쓰지 않는다
+결정이 필요하면 이 범위 안에서 최소한으로만 물어봐.</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">자동화 옵션, auto mode</span>
+    세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
+    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    시간이 빠듯할 때 유용합니다. 되돌리려면 <code class="inline">auto mode off</code>입니다.
+  </div>
+
+  <p class="body">브레인스토밍 후 <code class="inline">/superpowers:writing-plans</code>으로 계획을 만들고,
+  Phase 4개 구성을 확인해 승인하세요.</p>
+
+  <div class="callout warn">
+    <span class="co-title">계획을 승인하기 전에 확인할 것</span>
+    Phase 1의 산출물에 <strong>engine.js나 Piece가 등장하면 계획이 틀렸습니다.</strong>
+    Phase 1은 한 파일이어야 하고, 추상은 Phase 2에서만 나옵니다. Claude가 친절하게 미리 추상을 만들어
+    두려 하면 되돌리세요 - 이 랩에서 그 순서는 교육 내용 자체입니다.
+  </div>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m1"><span>Phase 4개 계획이 승인되었고, Phase 1에 추상이 없습니다</span></label>
+  </div>
+</section>
+
+<!-- ============================ M2 ============================ -->
+<section class="task" id="m2">
+  <div class="task-head"><span class="task-num">MISSION 02</span><h2>Phase 1, 첫 픽셀</h2><span class="time-badge">25분</span></div>
+  <p class="task-goal">추상 없이 <strong>한 파일</strong>로 작품 01을 완주합니다. 20분 안에 화면이 살아 있어야 합니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프. "추상 금지"는 게으름이 아니라 M3를 위한 포석입니다.</p>
+
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:executing-plans Phase 1(첫 픽셀)만 구현하고 멈춰줘.
+지금은 추상을 만들지 마. site/index.html에 전체화면 캔버스 하나, site/js/currents.js 한 파일만 두고
+그 안에서 캔버스 리사이즈와 DPR 스케일, requestAnimationFrame 루프, dt/t 시계, 포인터 좌표를 직접 처리해라.
+그 위에 2옥타브 Perlin 노이즈 벡터장, 입자 흐름, 잔상, 길게 누르는 소용돌이까지 완성해.
+dt에는 1/20초 상한을 둬라(탭을 나갔다 돌아왔을 때 물리가 터지지 않게).
+setup 마지막에 캔버스를 한 번 검정으로 칠해라(첫 프레임이 하얗게 번쩍이지 않게).
+끝나면 로컬에서 보는 방법을 알려줘.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">1</span>잔상의 정체를 확인한다</div>
+  <p class="body">완성되면 코드에서 캔버스를 덮는 한 줄을 찾아 알파값을 바꿔 보세요. 이 한 줄이 점과 혜성의 차이입니다.</p>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">site/js/currents.js - 이 한 줄이 잔상이다</span></div>
+    <pre><code>// 0.066 -&gt; 0.4 로 올리면 잔상이 짧아지고, 0.01 로 내리면 화면이 하얗게 눌어붙는다.
+// clearRect를 쓰면 잔상은 완전히 사라진다.
+ctx.fillStyle = "rgba(5,5,7,0.066)";
+ctx.fillRect(0, 0, w, h);</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">왜 입자 수를 화면 면적에 묶는가</span>
+    <code class="inline">clamp(width * height / 38, 6000, 34000)</code>. 상수 하나를 박아두면 노트북에서는 느리고
+    4K 모니터에서는 텅 빕니다. 비용을 <strong>픽셀에 비례</strong>시키는 습관은 이 랩을 나가서도 씁니다.
+  </div>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m2a"><span>브라우저에 흐름이 보이고, 마우스를 끌면 결이 휘어집니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m2b"><span>한곳을 길게 누르면 소용돌이가 자라고, 놓으면 방출되어 서서히 풀립니다</span></label>
+  </div>
+</section>
+
+<!-- ============================ M3 ============================ -->
+<section class="task" id="m3">
+  <div class="task-head"><span class="task-num">MISSION 03</span><h2>Phase 2, 두 번째 작품과 계약의 탄생</h2><span class="time-badge">30분</span></div>
+  <p class="task-goal">이 랩의 정점입니다. 두 번째 작품을 <strong>일부러 통째로 베껴 쓴 다음</strong>, 그 중복을 보고 나서 계약을 뽑아냅니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 code-reviewer 서브에이전트, 계약 추출 리팩터의 diff 리뷰를 맡기기 딱 좋은 순간입니다.</p>
+
+  <div class="step-title"><span class="step-no">1</span>중복을 만든다</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:executing-plans Phase 2의 앞쪽만 해줘. site/js/morphogenesis.js를 새로 만들어
+Gray-Scott 반응-확산 작품을 구현해라. Du=0.16, Dv=0.08, 3x3 라플라시안(중심 -1, 직교 0.2, 대각 0.05),
+경계는 wrap, 프레임당 8스텝, F/k 프리셋 4개, 드래그로 V 심기까지.
+중요: 지금은 currents.js와 공통 코드를 공유하지 마라. 캔버스 셋업, DPR, RAF 루프, dt/t 시계, 포인터 처리를
+일부러 그대로 다시 써라. 두 파일을 나란히 놓고 무엇이 중복인지 내 눈으로 보고 싶다.
+다 되면 두 파일에서 거의 똑같은 부분의 줄 번호를 짚어서 알려줘.</code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="co-title">이중 버퍼, 이 작품에서만 나오는 함정</span>
+    한 스텝은 반드시 <strong>옛 격자를 읽어 새 격자에 써야</strong> 합니다. 제자리에서 고치면 어떤 이웃은
+    이미 갱신된 값이라 의도한 방정식이 아닌 다른 것을 풀게 됩니다. 증상은 미묘합니다 - 터지지 않고,
+    그저 무늬가 한쪽으로 비스듬히 번지거나 영원히 자라지 않습니다.
+    버퍼 두 장을 만들고 스텝 끝에서 <strong>복사하지 말고 교체</strong>하세요.
+  </div>
+
+  <div class="step-title"><span class="step-no">2</span>계약을 추출한다</div>
+  <p class="body">이제 중복이 눈앞에 있습니다. 무엇이 공통인지 <strong>추측하지 않고 알게</strong> 된 상태에서 뽑아냅니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>이제 currents.js와 morphogenesis.js의 중복을 site/js/engine.js의 Piece 기반 클래스로 추출해라.
+Piece가 소유할 것: 캔버스 리사이즈와 DPR 스케일(DPR은 2로 상한), RAF 루프, dt/t 시계(dt는 1/20초 상한),
+포인터 정규화({x, y, vx, vy, active, down}), mount()과 destroy().
+작품이 구현할 것: setup()과 frame(dt, t)는 필수, onResize/onPointerDown/onPointerUp/controls(host)는 선택.
+슬라이더와 버튼을 만드는 헬퍼도 engine.js에 두고, 작품 파일은 document를 직접 만지지 않게 해라.
+두 작품을 site/js/pieces/01-currents.js와 site/js/pieces/02-morphogenesis.js로 옮겨 Piece를 상속시켜라.
+제약 하나: engine.js는 모듈 스코프에서 document나 window를 만지면 안 된다. 클래스와 함수 정의만 둬라.
+리팩터 후 두 작품이 이전과 똑같이 동작하는지 내가 확인할 수 있게 실행 방법을 알려줘.</code></pre>
+  </div>
+
+  <details class="solution">
+    <summary>막힐 때 열어보기 - Piece 계약의 최소 시그니처</summary>
+    <div class="sol-body">
+      <p class="body">엔진이 부르는 쪽과 작품이 채우는 쪽이 이렇게 갈립니다. 이름만 맞으면 나머지는 자유입니다.</p>
+      <div class="code-wrap">
+        <div class="code-head"><span class="code-label">site/js/engine.js</span><button class="copy-btn" type="button">복사</button></div>
+        <pre><code>export class Piece {
+  constructor(canvas) { /* canvas, dpr, w, h, pointer 초기화 */ }
+
+  mount() {
+    this._measure();      // canvas.width = clientWidth * dpr
+    this.setup();         // 작품이 채운다
+    this._bindPointer();  // pointerdown/move/up -&gt; this.pointer
+    this._observeResize();
+    // RAF 루프 시작. dt = min((now - last) / 1000, 1/20)
+  }
+
+  destroy() {
+    // mount에서 얻은 모든 것을 여기서 놓는다:
+    // cancelAnimationFrame, removeEventListener, ResizeObserver.disconnect
+  }
+
+  // --- 작품이 구현하는 것 ---
+  setup() {}            // 필수
+  frame(dt, t) {}       // 필수
+  onResize() {}         // 선택
+  onPointerDown() {}    // 선택
+  onPointerUp() {}      // 선택
+  controls(host) {}     // 선택, 플래카드에 슬라이더/버튼을 붙인다
+}</code></pre>
+      </div>
+      <p class="body"><code class="inline">engine.js</code>가 모듈 스코프에서 DOM을 안 만지게 하라는 제약이 붙은 이유는
+      M5에서 드러납니다. 지금은 그냥 지키세요.</p>
+    </div>
+  </details>
+
+  
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 선 구체 후 추상</span>
+    중복을 눈으로 보기 전에 만든 추상은 추측이고, 추측으로 만든 계약은 대개 틀립니다.
+    작품 02를 <strong>일부러 통째로 베껴 쓰는</strong> 이유가 그것입니다: 두 벌이 나란히 있어야
+    "무엇이 같고 무엇이 다른가"가 사실이 되고, 그 사실에서 뽑은 Piece 계약만이 세 번째 작품도 받아냅니다.
+    리팩터의 합격 기준은 단순합니다, 화면이 전과 똑같을 것.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m3a"><span>두 작품이 같은 Piece 계약 위에서 돌고, 리팩터 전과 똑같이 보입니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m3b"><span>작품 01 → 02 → 01 로 세 번 오간 뒤에도 움직임의 속도가 처음과 같습니다</span></label>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">두 번째 체크포인트가 통과되지 않는다면</span>
+    작품을 오갈수록 화면이 <strong>점점 빨라지는</strong> 증상이라면 축하합니다, 가장 흔한 버그를 스스로 밟았습니다.
+    루프를 하나 더 만들었는데 이전 것을 세우지 않은 것입니다. 어디를 봐야 할지는 이미 알고 있습니다 -
+    <code class="inline">destroy()</code>가 정말로 <code class="inline">mount()</code>의 대칭인지 확인하세요.
+  </div>
+</section>
+
+<!-- ============================ M4 ============================ -->
+<section class="task" id="m4">
+  <div class="task-head"><span class="task-num">MISSION 04</span><h2>Phase 3, 전시관 개장</h2><span class="time-badge">20분</span></div>
+  <p class="task-goal">작품 두 점을 <strong>전시</strong>로 만듭니다. 아트리움, 갤러리, 전시실 3단과 카탈로그를 세웁니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 전시 구조를 세우는 동안 작품 플래카드 문구를 서브에이전트로 병행할 수 있습니다.</p>
+
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:executing-plans Phase 3(전시관 개장)을 구현해줘.
+1) site/js/data.js - 순수 데이터, 로직 0.
+   WINGS 2개: flow "Forces &amp; Flow / 힘과 흐름" accent #7cc6ff, life "Living Systems / 살아있는 계" accent #8fe39a
+   WORKS - 각 항목은 no, wing, title, ko, medium, year, note, hint, module.
+   작품 01과 02 외에 module이 null인 항목 2개도 넣어라(갤러리에 "Soon" 카드로 남는지 확인용)
+2) site/index.html - 한 문서 안에 세 뷰. body[data-view]가 atrium/gallery/room을 전환한다.
+   전시실에는 캔버스 #stage 하나, 작품 설명을 담는 플래카드, 이전/다음 액션바, 나가기 버튼
+3) site/js/main.js - 뷰 컨트롤러.
+   갤러리 그리드는 한 번만 빌드한다. 카드를 누르면 await import(work.module)로 마운트하고
+   플래카드에 no/title/ko/medium/note를 주입하고 piece.controls()로 컨트롤을 붙인다.
+   이전/다음, Esc로 나가기, #work-01 딥링크를 지원한다
+4) 규율 두 가지를 지켜라:
+   - 작품을 바꿀 때 반드시 이전 piece.destroy()를 먼저 부른다. 캔버스는 끝까지 하나다
+   - import가 실패하면 검은 화면으로 두지 말고 플래카드에 실패 사유를 적는다
+5) CSS는 어두운 미술관 톤. 전시관의 accent를 CSS 변수로 주입해 카드와 플래카드가 물려받게 해라
+   (전시관을 더해도 CSS를 고치지 않아도 되게)</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">module: null 이 하는 일</span>
+    비어 있는 카드는 낭비가 아니라 <strong>계약의 증거</strong>입니다. 갤러리에 "Soon"으로 걸리는 작품이
+    보인다면, 그 자리에 파일 하나를 놓고 경로 한 줄만 채우면 전시가 열린다는 뜻입니다.
+    이 랩이 두 점으로 끝나도 구조는 예순 점을 견딥니다.
+  </div>
+
+  
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 데이터 주도 전시와 해시 딥링크</span>
+    갤러리가 data.js를 읽어 카드를 그리는 순간, 전시 확장은 코딩이 아니라 <strong>편집</strong>이 됩니다.
+    그리고 <code class="inline">#work-02</code> 해시 라우팅은 "지금 어느 전시실인가"라는 상태를 URL에 싣는 것,
+    새로고침에도 살아남고 링크로 공유되는 가장 가벼운 라우터입니다. 전환 시 이전 작품의 dispose를
+    부르는 규율이 있어야 세 번 오가도 처음 속도가 유지됩니다(누수 없음).
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m4a"><span>갤러리에 전시관 2개, Open 카드 2장과 Soon 카드 2장이 보입니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m4b"><span>주소 끝에 #work-02를 붙여 새로고침하면 그 작품의 전시실로 바로 들어갑니다</span></label>
+  </div>
+</section>
+
+<!-- ============================ M5 ============================ -->
+<section class="task" id="m5">
+  <div class="task-head"><span class="task-num">MISSION 05</span><h2>Phase 4, 배포와 개장</h2><span class="time-badge">20분</span></div>
+  <p class="task-goal">계약을 <strong>기계가 검사</strong>하게 만든 다음, S3 + CloudFront로 전시를 엽니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 검증 루프가 기계 게이트로 승격됩니다. 자동화가 궁금하면 <a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5</a>의 헤드리스 패턴이 다음입니다.</p>
+
+  <div class="step-title"><span class="step-no">1</span>계약 검사기를 만든다</div>
+  <p class="body">렌더 루프에 단위 테스트를 붙이는 건 값이 없습니다. 하지만 카탈로그 계약이 깨지면
+  <strong>조용히</strong> 깨집니다 - 카드를 눌러도 아무 일이 없고, 아무도 모릅니다. 그것만 기계에게 맡깁니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>verify.mjs를 만들어줘. 브라우저 없이 `node verify.mjs`로 돌아가야 한다.
+site/js/data.js, details.js(있다면), engine.js를 import해서 확인한다:
+1) 모든 WORKS[].module 파일이 실제로 존재하는가 (경로는 site/js/ 기준 상대 경로다)
+2) 각 piece가 default export이고, Piece를 상속하며, prototype에 setup과 frame이 있는가
+3) 모든 WORKS[].wing이 WINGS에 존재하는가
+4) WORKS[].no가 중복되지 않는가
+5) 모든 WINGS가 6자리 hex accent를 가지는가
+PASS/FAIL을 한 줄씩 찍고, 실패가 하나라도 있으면 exit code 1로 끝나라.
+이게 브라우저 없이 돌아가는 이유를 주석으로 한 줄 남겨줘.</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">기대 출력</span></div>
+    <pre><code>Piece contract
+  PASS  2 work(s) claim an engine (2 marked Soon)
+  PASS  01 Whispering Currents: extends Piece, implements setup + frame
+  PASS  02 Morphogenesis: extends Piece, implements setup + frame
+...
+20 checks passed. The exhibition can open.</code></pre>
+  </div>
+  <div class="callout tip">
+    <span class="co-title">M3의 그 제약이 여기서 값을 냅니다</span>
+    <code class="inline">engine.js</code>가 모듈 스코프에서 DOM을 만지지 않기 때문에 Node가 이 파일들을
+    import할 수 있습니다. <strong>테스트 가능성을 따로 만들지 않았습니다</strong> - 경계를 깨끗하게 그은 대가로
+    공짜로 얻었습니다. 이것이 좋은 설계가 실제로 값을 내는 방식입니다.
+  </div>
+
+  <div class="step-title"><span class="step-no">2</span>배포한다</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>이제 CDK 스택을 써서 site/를 S3 + CloudFront로 배포해줘.
+- 버킷은 퍼블릭 접근 전면 차단, OAC로 CloudFront만 읽게 한다. removalPolicy는 DESTROY + autoDeleteObjects
+- Distribution은 defaultRootObject "index.html", HTTPS 리다이렉트, 압축 켜기
+- BucketDeployment로 site/ 전체를 올리고 distributionPaths ["/*"]로 배포마다 무효화한다
+- errorResponses로 404를 index.html로 돌리지 마라. 이건 SPA가 아니다.
+  모듈 경로가 틀렸을 때 조용한 검은 화면이 되는 대신 요청이 실패한 게 보여야 한다
+- CfnOutput으로 전시 URL을 뱉어라
+끝나면 배포 명령을 알려줘.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 배포와 스모크 테스트</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>node verify.mjs || echo "계약 검사 실패, 배포하지 말 것"
+npx cdk deploy --require-approval never
+
+URL=$(aws cloudformation describe-stacks --stack-name MediaArtStack \
+  --query "Stacks[0].Outputs[?OutputKey=='ExhibitionUrl'].OutputValue" --output text)
+echo "$URL"
+
+curl -sI "$URL"                          | head -1
+curl -sI "${URL}js/main.js"              | grep -i '^content-type'
+curl -sI "${URL}js/pieces/01-currents.js" | head -1</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">기대 출력</span></div>
+    <pre><code>HTTP/2 200
+content-type: text/javascript
+HTTP/2 200</code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="co-title">여기서 사람들이 20분을 잃습니다 - Content-Type</span>
+    ES 모듈은 <code class="inline">Content-Type</code>이 틀리면 브라우저가 <strong>실행을 거부</strong>합니다.
+    화면은 검고 콘솔에만 에러가 뜨므로, 콘솔을 열지 않으면 원인을 짐작조차 못 합니다.
+    <code class="inline">BucketDeployment</code>는 확장자마다 MIME을 알아서 붙여주니 이 경로로 올리면 안전합니다.
+    급하다고 <code class="inline">aws s3 cp</code>로 손수 올리면 <code class="inline">.js</code>가
+    <code class="inline">binary/octet-stream</code>이 되어 정확히 이 함정에 빠집니다.
+    위 스모크 테스트의 두 번째 줄이 그것만을 확인합니다.
+  </div>
+
+  
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 검증이 게이트다</span>
+    렌더 루프의 단위 테스트는 비용 대비 효용이 낮습니다. 대신 verify.mjs가 <strong>계약과 카탈로그의 무결</strong>
+    (모든 작품이 Piece를 상속하는가, data.js 항목과 파일이 일치하는가)을 검사하고, 전부 PASS일 때만 배포합니다.
+    사람 눈 대신 기계가 지키는 게이트, 이것이 CI의 가장 작은 형태입니다. 다음 단계는 이 스크립트를
+    파이프라인에 앉히는 것뿐입니다.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m5a"><span>node verify.mjs가 전부 PASS로 끝납니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m5b"><span>CloudFront URL에서 두 작품이 열리고 인터랙션이 동작합니다. 링크를 공유했습니다</span></label>
+  </div>
+</section>
+
+<!-- ============================ OPTION: HARNESS ============================ -->
+
+<section class="task" id="gq">
+  <div class="task-head"><span class="task-num">BONUS</span><h2>전시 퀄리티 강화 라운드, 몰입을 올려라</h2><span class="time-badge">+α 자유</span></div>
+  <p class="task-goal">
+    전시가 열렸다면 이제 <strong>전시를 내 것으로 만드는 시간</strong>입니다. 강화 카드 중 끌리는 것을 골라
+    하나씩 주문하세요. 요령은 같습니다: 한 번에 하나, 작품으로 확인하고, 마음에 들면 커밋.
+  </p>
+
+  <div class="step-title"><span class="step-no">A</span>강화 카드 1, 세 번째 작품</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>작품 03을 추가하자. 공통 Piece 계약을 그대로 구현하는 세 번째 알고리즘:
+수백 개의 파티클이 보이지 않는 인력점 몇 개를 공전하다, 마우스가 다가가면 흩어지고
+멀어지면 서서히 궤도로 복귀하는 "중력 정원". 색은 궤도 반지름에 따라 그라디언트,
+갤러리의 Soon 카드 하나를 Open으로 승격하고 #work-03 딥링크까지.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">B</span>강화 카드 2, 도슨트 캡션</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>각 전시실에 도슨트 캡션을 달자. 작품 하단에 얇은 캡션 바: 작품 번호, 제목,
+"이 작품이 쓰는 규칙" 한 문장(예: 벡터장의 각도는 노이즈에서 온다), 그리고 조작 힌트.
+캡션은 입장 3초 후 스르륵 나타나고 마우스가 움직이면 잠시 숨어 작품을 방해하지 않는다.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">C</span>강화 카드 3, 관람 모드</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>자동 관람 모드를 추가하자. 갤러리에서 P 키(또는 Play 버튼) → 열린 작품들을
+30초씩 자동 순회, 작품 전환은 부드러운 페이드, 어떤 입력이든 들어오면 관람 모드 해제.
+전시장 키오스크처럼 손을 대지 않아도 살아 있는 전시가 되게.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">D</span>강화 카드 4, 개장 연출</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>갤러리 입장 연출을 다듬자. 첫 로드에 타이틀이 어둠 속에서 떠오르고,
+Open 카드들이 시차를 두고 하나씩 켜진다(stagger). 카드 호버 시 해당 작품의
+미니 프리뷰가 은은하게 움직이면 최고. 연출은 2초 안에 끝나고 재방문(세션 내)에는 생략.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">E</span>강화 카드 5, 나만의 작품으로</div>
+  <p class="body">여기부터는 정해진 카드가 없습니다. <strong>당신이 작가입니다</strong>. 좋아하는 시각적 현상 하나를 골라,
+  위 카드들처럼 직접 요구사항을 써서 주문하세요. 아이디어가 필요하면: 리사주 곡선, 반응 확산 무늬,
+  별이 흐르는 은하, 잉크 번짐, 만화경 대칭, 픽셀 비.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 빈칸을 내 아이디어로</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>내 전시에 [내가 원하는 작품/연출]을 추가하자. 규칙:
+1) 규칙: [무엇이 무엇을 따라 움직이는지, 알고리즘을 한두 문장으로]
+2) 인터랙션: [마우스/키보드에 어떻게 반응하는지]
+3) 분위기: [색, 속도, 밀도처럼 느낌을 좌우하는 요소]
+4) 공통 Piece 계약과 기존 작품의 성능은 깨지 않는다
+구현 전에 이 규칙을 네 계획으로 다시 말해주고, 승인하면 진행해.</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">강화 라운드의 요령</span>
+    ① 카드 하나 = 커밋 하나, 되돌아갈 지점을 만들며 갑니다. ② 작품은 <strong>느낌을 말로</strong> 다듬으세요,
+    "소용돌이가 너무 빨리 풀린다"처럼. ③ 마지막엔 재배포로 전시 URL을 최신으로.
+  </div>
+  <div class="checkpoint dod">
+    <div class="cp-title">BONUS DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="gq1"><span>강화 카드 하나 이상을 적용해 전시에서 확인하고 커밋했습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="opt-h">
+  <div class="task-head">
+    <span class="task-num">OPTION</span>
+    <h2>하네스 엔지니어링, 작품을 성숙시키고 등급을 받다</h2>
+    <span class="time-badge">+15분 옵션</span>
+  </div>
+  <p class="task-goal">
+    지금까지 만든 것은 <strong>결과물</strong>입니다. 이 옵션은 그 결과물을 만든 <strong>작업 환경, 즉 하네스</strong>
+    (CLAUDE.md, hooks, skills, commands, agents)를 표준 구조로 성숙시키고(project-init),
+    그 품질을 6개 차원(정확성, 안전성, 완전성, 실행 가능성, 일관성, 검증 가능성)에서
+    채점받는(harness-eval) 단계입니다. superpowers의 3단(brainstorm, write-plan, execute-plan) 뒤에
+    <strong>4단 성숙화와 5단 평가</strong>를 붙이는 셈입니다. 캡스톤 공통의 마무리 의식입니다.
+  </p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4</a>의 훅과 스킬을 팀 자산으로 승격하는 감각, 그리고 <a href="ClaudeCode_Reference3_Plugins.html" style="color:#c9a2ff">Reference 3</a>의 플러그인 생태계.</p>
+
+  <div class="step-title"><span class="step-no">1</span>플러그인 2종 설치</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>claude plugin marketplace add https://github.com/whchoi98/project-init
+claude plugin install project-init@project-init
+claude plugin marketplace add https://github.com/whchoi98/harness-eval
+claude plugin install harness-eval@harness-eval
+claude plugin list</code></pre>
+  </div>
+  <p class="body">설치 후 새 Claude 세션을 시작하세요, superpowers 때와 같은 규칙입니다.</p>
+
+  <div class="step-title"><span class="step-no">2</span>성숙화, /project-init:init-project와 /project-init:sync-docs</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/project-init:init-project 이 저장소는 빌드 도구 없는 정적 제너러티브 아트 전시(site/)와
+CDK 배포 스택(bin/, lib/)으로 이루어져 있다. 다음을 하네스에 반영해줘.
+- CLAUDE.md에 Piece 계약을 규범으로 적어라: 작품 파일은 engine.js만 import하고 서로를 모른다,
+  engine.js는 모듈 스코프에서 DOM을 만지지 않는다, 작품 추가는 data.js 한 항목 + 파일 하나다
+- site/js/**를 편집한 뒤에는 node verify.mjs가 자동으로 돌게 훅을 걸어라
+- 새 작품을 뼈대부터 만들어 주는 skill을 하나 추가해라(카탈로그 항목과 Piece 하위 클래스 스켈레톤)</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/harness-eval:standard</code></pre>
+  </div>
+  <p class="body">점수와 등급, 그리고 개선 로드맵이 나옵니다. 상위 항목 하나만 고쳐 다시 돌려 보세요 -
+  점수가 오르는 것을 확인하는 데까지가 이 옵션의 목적입니다.</p>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="opth"><span>하네스를 성숙화하고 등급을 받았습니다 (옵션)</span></label>
+  </div>
+</section>
+
+<!-- ============================ CUTLINE ============================ -->
+<section class="task" id="cut">
+  <div class="task-head"><span class="task-num">SURVIVAL</span><h2>컷라인과 트러블슈팅</h2><span class="time-badge">참고</span></div>
+  <p class="task-goal">시간이 부족할 때 <strong>무엇을 버리고 무엇을 지키는가</strong>. 미리 정해두면 당황하지 않습니다.</p>
+
+  <div class="step-title"><span class="step-no">1</span>버리는 순서</div>
+  <table class="tbl">
+    <tbody><tr><th>순서</th><th>버릴 것</th><th>대가</th></tr>
+    <tr><td>1</td><td>그레인, 비네트 오버레이, 사운드</td><td>분위기만 줄어듭니다. 기능 손실 0</td></tr>
+    <tr><td>2</td><td>카드 썸네일 페인트</td><td>갤러리가 단조로워집니다. 카드는 그대로 동작</td></tr>
+    <tr><td>3</td><td>아트리움 히어로 (갤러리로 바로 시작)</td><td>3단이 2단이 됩니다. body[data-view]는 그대로 두세요</td></tr>
+    <tr><td>4</td><td>작품 02의 프리셋 3개 (세포분열만 남김)</td><td>F/k 탐험의 재미가 줄지만 알고리즘은 온전합니다</td></tr>
+    <tr><td>5</td><td>details.js 기술 노트 패널</td><td>플래카드가 짧아집니다</td></tr>
+  </tbody></table>
+  <div class="callout warn">
+    <span class="co-title">절대 버리지 않는 것</span>
+    <code class="inline">destroy()</code>, <code class="inline">Piece</code> 계약, 그리고 <strong>배포</strong>.
+    이 셋이 이 캡스톤의 내용 전부입니다. 작품이 한 점만 완성됐어도 배포까지는 가세요 -
+    링크가 없으면 아무것도 보여줄 수 없습니다.
+  </div>
+  <div class="callout tip">
+    <span class="co-title">정말 시간이 없다면</span>
+    M3의 리팩터까지 마친 상태라면 M4를 <strong>최소 갤러리</strong>로 축약해도 됩니다.
+    카드 두 장과 <code class="inline">openRoom()</code>만 있으면 전시입니다. 아트리움과 딥링크는 나중에 붙습니다.
+  </div>
+
+  <div class="step-title"><span class="step-no">2</span>증상별 원인</div>
+  <table class="tbl">
+    <tbody><tr><th>증상</th><th>먼저 볼 곳</th></tr>
+    <tr><td>화면이 검고 콘솔에 MIME 관련 거부 메시지</td><td><code class="inline">aws s3 cp</code>로 손수 올렸는지. <code class="inline">BucketDeployment</code>를 쓰면 Content-Type이 맞습니다</td></tr>
+    <tr><td>화면이 검고 콘솔에 404 또는 403</td><td><code class="inline">data.js</code>의 <code class="inline">module</code> 경로. <code class="inline">site/js/</code> 기준 상대 경로입니다. <code class="inline">node verify.mjs</code>가 배포 전에 잡습니다</td></tr>
+    <tr><td>작품을 오갈수록 점점 빨라진다</td><td><code class="inline">destroy()</code>에서 <code class="inline">cancelAnimationFrame</code>을 부르는지. 리스너와 ResizeObserver도 함께</td></tr>
+    <tr><td>탭에 다시 돌아오면 화면이 터진다</td><td><code class="inline">dt</code>에 상한이 없는 것. <code class="inline">min(dt, 1/20)</code></td></tr>
+    <tr><td>무늬가 전혀 자라지 않는다 (작품 02)</td><td>씨를 안 뿌렸을 가능성. 아무것도 없는 판은 평형이라 영원히 아무 일도 없습니다. 또는 F/k가 죽는 영역</td></tr>
+    <tr><td>무늬가 한쪽으로 비스듬히 번진다</td><td>이중 버퍼를 안 쓴 것. 제자리에서 갱신하고 있습니다</td></tr>
+    <tr><td>작품 02가 무겁다</td><td>격자 칸 수 × 프레임당 스텝 수. 격자를 거칠게 잡고 확대하세요</td></tr>
+    <tr><td>입자가 화면 중앙만 텅 빈다 (작품 01)</td><td>리스폰을 화면 전체 균등으로 한 것. 가장자리 쪽으로 편향시키면 흐름이 계속 들어옵니다</td></tr>
+    <tr><td>첫 프레임이 하얗게 번쩍인다</td><td><code class="inline">setup()</code> 끝에서 캔버스를 한 번 검정으로 칠하지 않은 것</td></tr>
+    <tr><td>고해상도 화면에서만 느리다</td><td>DPR 상한이 없는 것. <code class="inline">min(devicePixelRatio, 2)</code></td></tr>
+    <tr><td><code class="inline">cdk deploy</code>가 bootstrap 오류</td><td>M0에서 백그라운드로 돌린 <code class="inline">npx cdk bootstrap</code>이 끝났는지. <code class="inline">cat /tmp/bootstrap.log</code></td></tr>
+  </tbody></table>
+</section>
+
+<!-- ============================ WRAPUP ============================ -->
+<section class="task" id="wrapup">
+  <div class="task-head"><span class="task-num">WRAP UP</span><h2>미션 종료</h2><span class="time-badge">마무리</span></div>
+  <p class="task-goal">전시가 열렸습니다. 이 랩에서 실제로 배운 것은 미디어 아트가 아닙니다.</p>
+
+  <table class="tbl">
+    <tbody><tr><th>남는 것</th><th>어디서 다시 쓰는가</th></tr>
+    <tr><td>두 번째 사례가 오기 전에는 추상하지 않는다</td><td>모든 리팩터. Phase 1과 2의 순서가 이 랩의 본론이었습니다</td></tr>
+    <tr><td><code class="inline">mount()</code>와 <code class="inline">destroy()</code>의 대칭</td><td>구독, 타이머, 워커, 연결 - 얻은 곳에서 놓습니다</td></tr>
+    <tr><td>경계를 깨끗이 그으면 테스트 가능성이 따라온다</td><td><code class="inline">engine.js</code>가 DOM을 안 만졌기에 <code class="inline">verify.mjs</code>가 가능했습니다</td></tr>
+    <tr><td>비용을 상수가 아니라 규모에 비례시킨다</td><td>입자 수, 격자 칸 수, 배치 크기, 페이지 크기</td></tr>
+    <tr><td>조용히 깨지는 것만 기계에게 검사시킨다</td><td>렌더 루프는 눈으로, 카탈로그 계약은 CI로</td></tr>
+    <tr><td>Ch2 서브에이전트</td><td>Phase 2의 리팩터에서 두 작품을 병렬로 옮길 때</td></tr>
+    <tr><td>Ch4 settings와 hooks</td><td><code class="inline">site/js/**</code> 저장 시 <code class="inline">verify.mjs</code>를 자동 실행</td></tr>
+    <tr><td>같은 배포 패턴</td><td>S3 + CloudFront + BucketDeployment는 정적 배포의 표준 패턴. 이제 눈 감고도</td></tr>
+  </tbody></table>
+
+  <div class="callout tip">
+    <span class="co-title">전시를 계속 키우려면</span>
+    작품을 더하는 일은 <strong><code class="inline">data.js</code>에 항목 하나, <code class="inline">pieces/</code>에 파일 하나</strong>입니다.
+    그 외 어떤 파일도 고치지 않습니다. 갤러리에 남겨둔 "Soon" 카드가 그 증거입니다.
+    다음 후보를 하나 골라 붙여 보세요 - 군무(Boids), 점균(Physarum), 메타볼, 시간을 세는 법.
+    각각 30분 안에 들어갑니다.
+  </div>
+
+  <div class="callout warn">
+    <span class="co-title">끝났으면 치우세요</span>
+    CloudFront 배포는 켜져 있는 동안 비용이 발생합니다. 공유가 끝났다면
+    <code class="inline">npx cdk destroy</code>로 스택을 내리세요.
+    <code class="inline">autoDeleteObjects</code>를 걸어 두었으니 버킷도 함께 비워집니다.
+  </div>
+
+  <div class="next-box">
+    <div>
+      <div class="nx-label">NEXT</div>
+      <h3>포털로</h3>
+      <p>다른 캡스톤(1 Press Start, 2 Market Desk on Web)도 같은 리듬입니다. <a href="index.html" style="color:#c9a2ff">워크샵 포털</a>에서 다음 미션을 고르세요.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<footer>
+  <div class="who">Claude Code Deep Dive Workshop, Capstone 3</div>
+  <div>기준: Claude Code 2.1.x + CDK v2, Opus 5, 2026.07</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".code-wrap").querySelector("pre");
+      var text = pre.textContent.replace(/\n{3,}/g, "\n\n").trim();
+      function done() {
+        var old = btn.textContent;
+        btn.textContent = "복사됨 ✓";
+        btn.classList.add("copied");
+        setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () { fallback(); });
+      } else { fallback(); }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+  var taskGroups = {
+    m0: ["m0"], m1: ["m1"], m2: ["m2a", "m2b"],
+    m3: ["m3a", "m3b"], m4: ["m4a", "m4b"], m5: ["m5a", "m5b"]
+  };
+  /* opt-h is optional and deliberately excluded from the progress count. */
+  var state = {};
+  function refresh() {
+    var doneCount = 0;
+    Object.keys(taskGroups).forEach(function (task) {
+      var allDone = taskGroups[task].every(function (cp) { return state[cp]; });
+      if (allDone) doneCount++;
+      var seg = document.querySelector('.seg[data-task="' + task + '"]');
+      if (seg) seg.classList.toggle("done", allDone);
+      var nav = document.querySelector('.sidenav a[data-nav="' + task + '"]');
+      if (nav) nav.classList.toggle("done", allDone);
+    });
+    var pc = document.getElementById("progress-count");
+    if (pc) pc.textContent = doneCount + "/" + Object.keys(taskGroups).length;
+  }
+  document.querySelectorAll('.cp-item input[type="checkbox"]').forEach(function (cb) {
+    cb.addEventListener("change", function () { state[cb.dataset.cp] = cb.checked; refresh(); });
+  });
+  document.querySelectorAll(".seg").forEach(function (seg) {
+    seg.addEventListener("click", function () {
+      var el = document.getElementById(seg.dataset.task);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidenav a[data-nav]");
+  var segs = document.querySelectorAll(".seg[data-task]");
+  if ("IntersectionObserver" in window) {
+    var current = null;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) current = entry.target.id; });
+      if (!current) return;
+      navLinks.forEach(function (a) { a.classList.toggle("active", a.dataset.nav === current); });
+      segs.forEach(function (s) { s.classList.toggle("active", s.dataset.task === current); });
+    }, { rootMargin: "-20% 0px -65% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+
+
+<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
+<script>
+(function(){
+  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
+  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
+  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
+  if(saved==='light'){ root.setAttribute('data-theme','light'); }
+  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
+  label();
+  btn.addEventListener('click',function(){
+    var light = root.getAttribute('data-theme')==='light';
+    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
+    label();
+  });
+})();
+</script>
+</body></html>

@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+<title>Chapter 2 Hands-on Lab - Claude Code Deep Dive Workshop</title>
+<style>
+:root {
+  --bg: #12181F;
+  --bg-card: #1B242E;
+  --bg-code: #0C1117;
+  --bg-inline: #232E3A;
+  --line: #2A3542;
+  --orange: #FF9900;
+  --orange-dim: rgba(255, 153, 0, 0.14);
+  --crimson: #B6002E;
+  --green: #3FB950;
+  --green-dim: rgba(63, 185, 80, 0.12);
+  --text: #E2E4EC;
+  --muted: #A6ABBE;
+  --dim: #7B8198;
+  --font-body: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-code: "D2Coding", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(255, 153, 0, 0.3); }
+a { color: var(--orange); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+/* ============ Hero ============ */
+.hero {
+  position: relative;
+  padding: 64px 32px 44px;
+  max-width: 1160px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -140px; right: -180px;
+  width: 460px; height: 460px;
+  background: radial-gradient(closest-side, rgba(182, 0, 46, 0.28), rgba(255, 153, 0, 0.10) 55%, transparent 75%);
+  pointer-events: none;
+}
+.eyebrow {
+  display: inline-block;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.hero h1 {
+  font-size: clamp(28px, 4.4vw, 42px);
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  max-width: 780px;
+}
+.hero .subtitle {
+  margin-top: 14px;
+  color: var(--orange);
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 700;
+}
+.hero .lede {
+  margin-top: 18px;
+  color: var(--muted);
+  max-width: 720px;
+  font-size: 15.5px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin-top: 26px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.hero-meta strong { color: var(--text); font-weight: 700; }
+
+/* ============ Sticky timeline ============ */
+.timeline {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(12, 17, 23, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.timeline-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.timeline-label {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.timeline-label strong { color: var(--orange); font-size: 13px; }
+.segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  height: 26px;
+}
+.seg {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg-card);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  padding: 0;
+  font-family: var(--font-body);
+}
+.seg:hover { border-color: var(--orange); }
+.seg .fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 153, 0, 0.85), rgba(255, 153, 0, 0.65));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.seg.done .fill { transform: scaleX(1); }
+.seg .seg-txt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.seg.done .seg-txt { color: #12181F; }
+.seg.active { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
+
+/* ============ Layout ============ */
+.layout {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 44px 32px 80px;
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 52px;
+  align-items: start;
+}
+.sidenav {
+  position: sticky;
+  top: 66px;
+  font-size: 13.5px;
+}
+.sidenav .nav-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  margin-bottom: 14px;
+}
+.sidenav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 7px 10px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+.sidenav a:hover { color: var(--text); background: var(--bg-card); text-decoration: none; }
+.sidenav a.active { color: var(--orange); border-left-color: var(--orange); background: var(--bg-card); }
+.sidenav .dot {
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dim);
+}
+.sidenav a.done .dot { background: var(--green); border-color: var(--green); }
+.sidenav .nav-time { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+/* ============ Task sections ============ */
+.task { margin-bottom: 72px; }
+.task-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.task-num {
+  font-family: var(--font-code);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 0.1em;
+}
+.task-head h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.time-badge {
+  margin-left: auto;
+  flex: none;
+  background: var(--orange-dim);
+  color: var(--orange);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.task-goal {
+  color: var(--muted);
+  margin-bottom: 24px;
+  max-width: 760px;
+}
+.task-goal strong { color: var(--text); }
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16.5px;
+  font-weight: 800;
+  margin: 34px 0 12px;
+}
+.step-title .step-no {
+  flex: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #12181F;
+  font-size: 12.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+p.body { color: var(--muted); margin: 10px 0 14px; max-width: 760px; }
+p.body strong, li strong { color: var(--text); }
+code.inline {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  background: var(--bg-inline);
+  color: #FFC466;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+kbd {
+  font-family: var(--font-code);
+  font-size: 0.82em;
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: var(--text);
+}
+
+/* ============ Code blocks ============ */
+.code-wrap {
+  background: var(--bg-code);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 14px 0 20px;
+  overflow: hidden;
+}
+.code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+.code-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.copy-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.code-wrap pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.code-wrap code { font-family: inherit; color: #D8DEE9; }
+.code-wrap.output pre { color: var(--dim); }
+.code-wrap .cmt { color: #5E6B7E; }
+.code-wrap .hl { color: #FFC466; }
+.code-wrap .ok { color: var(--green); }
+
+/* ============ Callouts ============ */
+.callout {
+  border-radius: 8px;
+  background: var(--bg-card);
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14.5px;
+  color: var(--muted);
+  max-width: 760px;
+}
+.callout strong { color: var(--text); }
+.callout.tip .co-title { color: var(--orange); }
+
+.callout .co-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 5px;
+}
+
+.callout.warn .co-title { color: #FF5C85; }
+
+/* ============ Checkpoint ============ */
+.checkpoint {
+  background: var(--green-dim);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 28px;
+}
+.checkpoint .cp-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+.cp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+.cp-item input {
+  flex: none;
+  margin-top: 5px;
+  width: 15px; height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+.cp-item input:checked + span { color: var(--text); }
+
+/* ============ Tabs ============ */
+.tabs { margin: 18px 0 6px; }
+.tab-btns {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dim);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 9px 16px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+.tab-pane { display: none; padding-top: 16px; }
+.tab-pane.active { display: block; }
+
+/* ============ Tables ============ */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 14px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tbl th, .tbl td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid #FFFFFF14;
+}
+.tbl th {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+  background: rgba(255, 255, 255, 0.03);
+}
+.tbl td { color: var(--muted); vertical-align: middle; }
+.tbl td:first-child { color: var(--text); font-weight: 700; white-space: nowrap; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl code { font-family: var(--font-code); font-size: 0.9em; color: #FFC466; }
+
+/* ============ Wrap-up ============ */
+.wrapup {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 32px 34px;
+  margin-bottom: 56px;
+}
+.wrapup h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.wrapup .sub { color: var(--muted); font-size: 14.5px; margin-bottom: 18px; }
+.next-box {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(182, 0, 46, 0.16), rgba(255, 153, 0, 0.08));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 26px;
+}
+.next-box .nx-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--orange);
+}
+.next-box h3 { font-size: 19px; font-weight: 800; }
+.next-box p { color: var(--muted); font-size: 14px; }
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 30px 32px 46px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.9;
+}
+footer .who { color: var(--muted); font-weight: 700; }
+footer .mail { color: var(--orange); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 20px 64px; }
+  .sidenav { display: none; }
+  .hero { padding: 44px 20px 32px; }
+  .timeline-inner { padding: 10px 20px; }
+  .seg .seg-txt { font-size: 9px; }
+  .task-head h2 { font-size: 20px; }
+}
+
+/* ── Korean typography fix: 단어 단위 줄바꿈, 히어로 정돈 ── */
+body { word-break: keep-all; overflow-wrap: break-word; }
+.hero h1 { max-width: 980px; font-size: clamp(26px, 4vw, 38px); text-wrap: balance; }
+.hero .subtitle, .hero .lede, .task-goal, .wrapup .sub { text-wrap: pretty; }
+
+/* ── 잘림 방지 v2: 히어로 압축 + 좁은 화면 대응 ── */
+.hero { padding: 44px 28px 34px; }
+.eyebrow { margin-bottom: 14px; }
+.hero h1 { line-height: 1.3; }
+.hero .subtitle { margin-top: 10px; }
+.hero .lede { margin-top: 12px; }
+.seg-txt { text-overflow: ellipsis; }
+@media (max-width: 620px) {
+  .hero { padding: 26px 16px 24px; }
+  .hero h1 { font-size: 23px; }
+  .hero .subtitle { font-size: 15px; }
+  .hero .lede { font-size: 14px; }
+  .hero-meta { gap: 6px 14px; font-size: 12px; }
+  .seg .seg-txt { display: none; }
+  .timeline-inner { padding: 0 10px; }
+}
+
+/* ── 잘림 방지 v3: 좁은 화면 가로 넘침 제거 ── */
+.tbl { display: block; overflow-x: auto; max-width: 100%; }
+.hero, .layout, .timeline-inner, main, section { min-width: 0; }
+@media (max-width: 620px) {
+  .timeline-label:last-child { display: none; }
+}
+
+/* ── 잘림 방지 v4: 인라인 코드 칩의 최소폭 강제 해제 ── */
+code.inline { white-space: normal; overflow-wrap: anywhere; }
+
+/* ── v5: 소개문/본문 전체 폭 사용 (가독성 캡 해제) ── */
+.hero .lede, .task-goal, p.body, .callout, .part-divider p, .wrapup .sub { max-width: none; }
+.hero .lede { text-wrap: wrap; }
+
+/* ── macOS 터미널 스타일: 신호등 3버튼 ── */
+.code-head { position: relative; padding-left: 76px; }
+.code-head::before {
+  content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 11px; height: 11px; border-radius: 50%; background: #FF5F57;
+  box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
+}
+</style>
+<style id="hol-theme">
+html[data-theme="light"]{
+  --bg:#F3F4F7; --bg-card:#FFFFFF; --bg-code:#EEF1F5; --bg-inline:#E4E9EF; --line:#D7DDE5;
+  --orange:#B45309; --orange-dim:rgba(180,83,9,.12);
+  --green:#1F883D; --green-dim:rgba(31,136,61,.12);
+  --text:#1B2430; --muted:#5B6472; --dim:#75808F;
+  background:#F3F4F7;
+}
+html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
+html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
+#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
+background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
+border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
+font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#themeToggle:hover{border-color:var(--orange,#FF9900)}
+html[data-theme="light"] .code-wrap code{color:#2A3542}
+html[data-theme="light"] .code-wrap.output code{color:#57606E}
+html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
+html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
+html[data-theme="light"] .k.s{background:#DCEEDC}
+html[data-theme="light"] .k.w{background:#E9E2F7}
+html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
+html[data-theme="light"] .code-wrap .hl{color:#B45309}
+html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
+html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
+html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
+html[data-theme="light"] .head .when{color:#FF9900}
+html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
+html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
+html[data-theme="light"] .part-divider{background:linear-gradient(135deg,#EDE6FA 0%,#FFFFFF 65%);border-color:#B79CEF}
+html[data-theme="light"] .part-divider h2{color:#1B2430}
+html[data-theme="light"] .part-divider .rules span{background:#EDE6FA;border-color:#B79CEF;color:#5B21C7}
+html[data-theme="light"] .tbl code{color:#B45309}
+@media print{#themeToggle{display:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Hands-on Lab / Chapter 2</span>
+  <h1>Subagents, 전문 에이전트를 만들고 지휘하기</h1>
+  <div class="subtitle">Claude Code Deep Dive Workshop, Chapter 2 - Agents (Subagents) 실습</div>
+  <p class="lede">
+    이 랩에서는 <strong>code-reviewer, test-writer, docs-writer</strong> 3종의 서브에이전트를 직접 정의하고,
+    도구 권한 격리를 체험한 뒤 자동 / 명시 / 병렬 디스패치 3가지 패턴과 Headless CI 통합까지 실습합니다.
+    Chapter 1에서 만든 <code class="inline">~/claude-lab/ch1</code> 프로젝트를 이어서 사용합니다.
+  </p>
+  <div class="hero-meta">
+    <span>소요 시간 <strong>40분 내외</strong></span>
+    <span>Task <strong>준비 + 5개</strong></span>
+    <span>기준 버전 <strong>Claude Code 2.1.x</strong></span>
+    <span>Update <strong>2026.07</strong></span>
+  </div>
+</header>
+
+<nav class="timeline" aria-label="랩 진행 타임라인">
+  <div class="timeline-inner">
+    <span class="timeline-label">진행 <strong id="progress-count">0/6</strong></span>
+    <div class="segments" id="segments">
+      <button class="seg" data-task="t0" style="flex:2" title="준비, 2분"><span class="fill"></span><span class="seg-txt">준비</span></button>
+      <button class="seg" data-task="t1" style="flex:8" title="Task 1 첫 Subagent, 8분"><span class="fill"></span><span class="seg-txt">1 첫 Subagent</span></button>
+      <button class="seg" data-task="t2" style="flex:6" title="Task 2 권한 격리, 6분"><span class="fill"></span><span class="seg-txt">2 권한 격리</span></button>
+      <button class="seg" data-task="t3" style="flex:7" title="Task 3 에이전트 3종, 7분"><span class="fill"></span><span class="seg-txt">3 에이전트 3종</span></button>
+      <button class="seg" data-task="t4" style="flex:10" title="Task 4 디스패치 3패턴, 10분"><span class="fill"></span><span class="seg-txt">4 디스패치 3패턴</span></button>
+      <button class="seg" data-task="t5" style="flex:7" title="Task 5 Headless와 CI, 7분"><span class="fill"></span><span class="seg-txt">5 Headless/CI</span></button>
+    </div>
+    <span class="timeline-label">40 min</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+<aside class="sidenav" aria-label="랩 목차">
+  <div class="nav-title">LAB CONTENTS</div>
+  <a href="#t0" data-nav="t0"><span class="dot"></span>사전 준비 확인<span class="nav-time">2분</span></a>
+  <a href="#t1" data-nav="t1"><span class="dot"></span>Task 1 첫 Subagent<span class="nav-time">8분</span></a>
+  <a href="#t2" data-nav="t2"><span class="dot"></span>Task 2 도구 권한 격리<span class="nav-time">6분</span></a>
+  <a href="#t3" data-nav="t3"><span class="dot"></span>Task 3 에이전트 3종 완성<span class="nav-time">7분</span></a>
+  <a href="#t4" data-nav="t4"><span class="dot"></span>Task 4 디스패치 3패턴<span class="nav-time">10분</span></a>
+  <a href="#t5" data-nav="t5"><span class="dot"></span>Task 5 Headless와 CI<span class="nav-time">7분</span></a>
+  <a href="#wrapup" data-nav="wrapup"><span class="dot"></span>마무리 체크리스트<span class="nav-time"></span></a>
+</aside>
+
+<main>
+
+<!-- ================= Task 0 ================= -->
+<section class="task" id="t0">
+  <div class="task-head">
+    <span class="task-num">TASK 00</span>
+    <h2>사전 준비 확인</h2>
+    <span class="time-badge">2분</span>
+  </div>
+  <p class="task-goal">
+    Chapter 1 실습 프로젝트가 <strong>커밋 2개 이상</strong>(초기 + 버그 수정) 상태인지 확인합니다.
+    Task 1의 첫 리뷰 대상이 이 수정 커밋의 diff입니다.
+  </p>
+
+  <div class="callout tip">
+    <span class="co-title">터미널 위치</span>
+    이 랩은 Chapter 1에서 만든 <code class="inline">~/claude-lab/ch1</code>에서 그대로 이어집니다.
+    아래에 나오는 <code class="inline">.claude/agents/</code> 같은 상대 경로도 전부 이 폴더 기준입니다.
+    시작 전에 <code class="inline">cd ~/claude-lab/ch1</code>로 위치를 맞추세요.
+  </div>
+
+  <div class="step-title"><span class="step-no">1</span>프로젝트 상태 확인</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/claude-lab/ch1
+npm test          <span class="cmt"># 3개 모두 PASS 여야 합니다</span>
+git log --oneline <span class="cmt"># 커밋 2개 이상이어야 합니다</span></code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="co-title">Chapter 1을 건너뛰었거나 프로젝트가 없는 경우에만</span>
+    아래 블록을 통째로 실행하면 Chapter 1 완료 상태(버그 수정 커밋 포함)로 프로젝트가 재생성됩니다.
+    이미 프로젝트가 있다면 실행하지 마세요.
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 복구용 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>mkdir -p ~/claude-lab/ch1/src &amp;&amp; cd ~/claude-lab/ch1
+
+cat &gt; package.json &lt;&lt; 'EOF'
+{
+  "name": "user-service-lab",
+  "version": "1.0.0",
+  "description": "Claude Code Workshop sample project",
+  "type": "module",
+  "scripts": { "test": "node test.js" }
+}
+EOF
+
+cat &gt; src/users.js &lt;&lt; 'EOF'
+// 사용자 데이터 저장소
+// 주의: 일부 사용자는 profile 필드가 없음 (마이그레이션 미수행 상황)
+export const users = [
+  { id: 1, name: "Kim", profile: { email: "kim@example.com", plan: "pro" } },
+  { id: 2, name: "Lee", profile: { email: "lee@example.com", plan: "free" } },
+  { id: 3, name: "Park" }
+];
+EOF
+
+cat &gt; src/userService.js &lt;&lt; 'EOF'
+import { users } from "./users.js";
+
+export function getUser(id) {
+  return users.find((u) =&gt; u.id === id);
+}
+
+export function getUserPlan(id) {
+  const user = getUser(id);
+  return user.profile.plan;
+}
+EOF
+
+cat &gt; test.js &lt;&lt; 'EOF'
+import { getUserPlan } from "./src/userService.js";
+
+function check(name, fn, expected) {
+  const actual = fn();
+  console.log(`${name}: ${actual === expected ? "PASS" : `FAIL (got ${actual})`}`);
+}
+
+check("Test 1 - pro 플랜 사용자", () =&gt; getUserPlan(1), "pro");
+check("Test 2 - free 플랜 사용자", () =&gt; getUserPlan(2), "free");
+check("Test 3 - profile 없는 사용자", () =&gt; getUserPlan(3), "unknown");
+EOF
+
+git init -q
+git config user.name  &gt;/dev/null 2&gt;&amp;1 || git config user.name "lab"
+git config user.email &gt;/dev/null 2&gt;&amp;1 || git config user.email "lab@example.com"
+git add -A &amp;&amp; git commit -q -m "chore: initial lab project (with bug)"
+
+cat &gt; src/userService.js &lt;&lt; 'EOF'
+import { users } from "./users.js";
+
+export function getUser(id) {
+  return users.find((u) =&gt; u.id === id);
+}
+
+export function getUserPlan(id) {
+  const user = getUser(id);
+  return user?.profile?.plan ?? "unknown";
+}
+EOF
+
+git add -A &amp;&amp; git commit -q -m "fix: handle users without profile"
+npm test &amp;&amp; git log --oneline</code></pre>
+  </div>
+
+    <div class="step-title"><span class="step-no">2</span>jq 설치 확인</div>
+  <p class="body">Task 5의 헤드리스 통합에서 <strong>JSON 출력 파싱</strong>에 <code class="inline">jq</code>를 사용합니다.
+  없으면 한 줄로 설치하세요.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>jq --version || sudo dnf install -y jq</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">출력 예시</span></div>
+    <pre><code>jq-1.7.1</code></pre>
+  </div>
+
+<div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="t0"><span>npm test 3개 PASS, git log에 커밋 2개 이상이 보입니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="t0jq"><span>jq --version이 버전을 출력합니다</span></label>
+  </div>
+</section>
+
+<!-- ================= Task 1 ================= -->
+<section class="task" id="t1">
+  <div class="task-head">
+    <span class="task-num">TASK 01</span>
+    <h2>첫 Subagent, code-reviewer 만들기</h2>
+    <span class="time-badge">8분</span>
+  </div>
+  <p class="task-goal">
+    <code class="inline">.claude/agents/</code>에 code-reviewer를 정의하고 등록을 확인한 뒤,
+    Chapter 1의 <strong>버그 수정 커밋</strong>을 첫 리뷰 대상으로 호출합니다.
+  </p>
+
+  <div class="callout tip">
+    <span class="co-title">Subagent가 왜 필요한가, Context Isolation</span>
+    서브에이전트는 <strong>자신만의 200K 컨텍스트, 시스템 프롬프트, 도구 권한, 모델</strong>을 갖는 독립 에이전트입니다.
+    파일 수십 개를 읽는 무거운 분석을 위임하면 서브에이전트 컨텍스트에서 소비되고,
+    메인에는 <strong>요약만 반환</strong>되어 메인 컨텍스트가 보호됩니다.
+  </div>
+
+  <div class="step-title"><span class="step-no">1</span>에이전트 정의 파일 작성</div>
+  <p class="body">
+    정의 파일은 <strong>YAML frontmatter 핵심 4필드</strong>(name / description / tools / model, 필수는 name과 description)와
+    시스템 프롬프트 본문으로 구성됩니다. 프로젝트 루트에서 아래 블록을 실행하세요.
+  </p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/claude-lab/ch1
+mkdir -p .claude/agents
+
+cat &gt; .claude/agents/code-reviewer.md &lt;&lt; 'EOF'
+---
+name: code-reviewer
+description: |
+  PR diff를 검토하여 가독성, 안전성, 성능, 테스트 커버리지 관점에서
+  개선 사항을 제안하는 시니어 코드 리뷰어. 사용 시점: 코드 리뷰가
+  필요하다고 사용자가 요청하거나 git diff 검토가 필요한 경우.
+tools: Read, Grep, Glob, Bash(git diff:*), Bash(git log:*)
+model: sonnet
+---
+당신은 10년 경력의 시니어 소프트웨어 엔지니어입니다.
+
+# 검토 우선순위
+1. 안전성: null 참조, race condition, 입력 검증 누락
+2. 가독성: 명명, 함수 크기, 주석 필요성
+3. 성능: 알고리즘 복잡도, 불필요한 I/O
+4. 테스트: 새 코드의 테스트 커버리지
+
+# 출력 형식
+- Severity: high | medium | low
+- 파일:라인, 문제 설명, 권장 수정안
+EOF</code></pre>
+  </div>
+
+  <table class="tbl">
+    <tr><th>필드</th><th>역할</th><th>이 예시의 선택</th></tr>
+    <tr><td><code>name</code></td><td>고유 식별자, kebab-case 영문 소문자</td><td>code-reviewer</td></tr>
+    <tr><td><code>description</code></td><td>자동 디스패치의 판단 기준, 사용 시점까지 명시</td><td>리뷰 요청 / git diff 검토 시</td></tr>
+    <tr><td><code>tools</code></td><td>도구 화이트리스트, Bash는 명령 패턴으로 제한</td><td>읽기 전용 + git diff / log만</td></tr>
+    <tr><td><code>model</code></td><td>별칭 sonnet / opus / haiku, 전체 모델 ID, 또는 inherit. 생략 시 inherit(메인 모델 상속)</td><td>sonnet, 일상 리뷰의 표준</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">2</span>등록 확인</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>claude</code></pre>
+  </div>
+  <div class="callout warn">
+    <span class="co-title">변경 안내, /agents 위저드 제거 (v2.1.198+)</span>
+    구버전에서 쓰던 <code class="inline">/agents</code>는 이제 안내 문구만 출력합니다.
+    에이전트 관리 자체가 파일 기반으로 바뀐 것은 아니며(파일 위치와 frontmatter는 동일),
+    <strong>확인은 @ 멘션 typeahead 또는 Claude에게 질문</strong>으로, 생성/수정은 파일 편집 또는 Claude에게 요청으로 합니다.
+  </div>
+  <p class="body">
+    입력창에 <code class="inline">@</code>를 입력하면 파일 멘션과 함께 <strong>code-reviewer (agent)</strong>가
+    typeahead 목록에 나타납니다(<kbd>Esc</kbd>로 닫기). 또는 아래처럼 직접 물어봐도 됩니다.
+  </p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>현재 이 세션에서 사용할 수 있는 서브에이전트 목록을 알려주세요</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">출력 예시</span></div>
+    <pre><code>사용 가능한 서브에이전트:
+  - code-reviewer : PR diff 검토 (프로젝트, .claude/agents/)
+  - Explore, Plan, general-purpose : 내장 에이전트</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">3</span>첫 호출, 버그 수정 커밋 리뷰</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>code-reviewer 에이전트를 사용해서 최근 커밋의 변경분(git diff HEAD~1)을 검토해 주세요</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">관찰 포인트</span></div>
+    <pre><code>[메인] code-reviewer 에이전트를 호출합니다.
+  → Agent(code-reviewer, "Review git diff HEAD~1")
+[reviewer] Bash  git diff HEAD~1
+[reviewer] Read  src/userService.js
+[메인] 결과 요약:
+  - low  src/userService.js:9, 옵셔널 체이닝 적용 적절
+  - medium test.js, 존재하지 않는 id 케이스 테스트 부재 ...</code></pre>
+  </div>
+  <p class="body">
+    결과를 받으면 <strong>출력 형식이 시스템 프롬프트에서 지정한 Severity 구조를 따르는지</strong>,
+    우선순위 4개 관점이 반영되었는지 확인하세요.
+  </p>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="t1a"><span>@ typeahead 또는 Claude 응답에서 code-reviewer 등록을 확인했습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="t1b"><span>Severity 형식을 따르는 리뷰 결과를 받았습니다</span></label>
+  </div>
+</section>
+
+<!-- ================= Task 2 ================= -->
+<section class="task" id="t2">
+  <div class="task-head">
+    <span class="task-num">TASK 02</span>
+    <h2>도구 권한 격리 체험</h2>
+    <span class="time-badge">6분</span>
+  </div>
+  <p class="task-goal">
+    읽기 전용 에이전트에 <strong>일부러 권한 밖 요청</strong>을 보내 거부 동작을 관찰하고,
+    tools 필드에 권한을 명시적으로 추가한 뒤 <strong>새 위임</strong>으로 차이를 체험합니다. 최소 권한 원칙과 정의 갱신 타이밍의 실습입니다.
+  </p>
+
+  <div class="callout tip">
+    <span class="co-title">Tools란 무엇인가</span>
+    서브에이전트 정의의 <code class="inline">tools</code> 필드는 그 에이전트가 쓸 수 있는 <strong>손발의 목록</strong>입니다.
+    <code class="inline">Read</code>(파일 읽기), <code class="inline">Grep</code>/<code class="inline">Glob</code>(검색),
+    <code class="inline">Edit</code>/<code class="inline">Write</code>(수정과 생성), <code class="inline">Bash</code>(명령 실행)처럼
+    하나하나가 구체적 능력이고, <strong>목록에 없는 도구는 시도 자체가 차단</strong>됩니다.
+    이 Task는 그 울타리를 일부러 밟아 보며 최소 권한이 실제로 동작하는지 확인하는 실험입니다.
+  </div>
+
+  <div class="step-title"><span class="step-no">1</span>읽기 전용 테스트 에이전트 작성</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cat &gt; .claude/agents/dangerous-test.md &lt;&lt; 'EOF'
+---
+name: dangerous-test
+description: 의도적 권한 테스트용 에이전트. 사용 시점: 사용자가 이름으로 직접 지정할 때만.
+tools: Read, Grep
+model: haiku
+---
+당신은 테스트 에이전트입니다.
+파일을 분석하고 결과를 보고하세요.
+EOF</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">2</span>일부러 권한을 벗어난 요청</div>
+  <p class="body">tools에 <strong>Edit이 없는 상태</strong>에서 파일 수정을 요청합니다. Claude Code가 <code class="inline">.claude/agents/</code>를 감시하므로 파일 저장 후 몇 초 안에 자동 인식됩니다(Task 1에서 디렉토리를 만든 뒤 세션을 시작했기 때문에 재시작 불필요).</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>dangerous-test 에이전트를 사용해서 src/users.js의 Park 사용자에게 profile 필드를 추가해 주세요</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">관찰 포인트</span></div>
+    <pre><code>[dangerous-test] Read src/users.js
+[dangerous-test] 파일 수정이 필요하지만 Edit 도구 권한이 없습니다.
+  분석 결과만 보고합니다: Park(id 3)에 profile 필드가 없습니다.
+  → 수정은 Edit 권한이 있는 에이전트 또는 메인에서 수행해야 합니다.</code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="co-title">tools 필드 생략의 위험</span>
+    tools 필드를 <strong>아예 생략하면 메인의 모든 도구를 상속</strong>합니다(지양).
+    화이트리스트를 명시하는 습관이 안전의 기본입니다. 반대로 대부분을 상속하되 일부만 빼려면 <code class="inline">disallowedTools: Write, Edit</code>처럼 거부 목록을 쓸 수 있습니다.
+  </div>
+
+  <div class="step-title"><span class="step-no">3</span>권한을 명시적으로 부여</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, tools에 Edit 추가</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>sed -i.bak 's/^tools: Read, Grep$/tools: Read, Grep, Edit/' .claude/agents/dangerous-test.md
+grep '^tools:' .claude/agents/dangerous-test.md   <span class="cmt"># tools: Read, Grep, Edit 확인</span></code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">4</span>/exit로 나갔다 들어와 새 위임으로 재시도</div>
+  <div class="callout warn">
+    <span class="co-title">중요, 같은 요청을 그냥 반복하면 여전히 거부됩니다</span>
+    정의 파일 변경은 <strong>다음 새 위임부터</strong> 적용됩니다. 그런데 메인은 직전 턴에서
+    "이 에이전트는 수정 불가"를 이미 학습했기 때문에, 같은 요청을 반복하면 재위임 없이 기존 맥락으로
+    답하거나 이전 인스턴스를 재개(resume)할 수 있습니다. 재개된 서브에이전트는 <strong>스폰 시점의 도구 권한을 그대로 유지</strong>합니다.
+    <code class="inline">/exit</code>로 세션을 완전히 나갔다가 <code class="inline">claude</code>로 다시 들어오세요. 갱신된 정의로 새 인스턴스가 뜹니다(같은 세션에서 <code class="inline">/clear</code>로 맥락만 비워도 동일 효과).
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 세션 종료</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/exit</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal (~/claude-lab/ch1), 재진입</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>claude</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 재시도</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>dangerous-test 에이전트를 사용해서 src/users.js의 Park 사용자에게 profile 필드를 추가해 주세요</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">관찰 포인트</span></div>
+    <pre><code>[dangerous-test] Read src/users.js
+[dangerous-test] Edit src/users.js   <span class="cmt"># 이번에는 Edit 도구 사용 (승인 요청 표시)</span>
+  Park(id 3)에 profile 필드를 추가했습니다.</code></pre>
+  </div>
+  <p class="body">
+    이것이 <strong>의도적 권한 부여와 무분별한 전체 권한의 차이</strong>입니다.
+    동시에, 서브에이전트의 도구 권한이 <strong>인스턴스 스폰 시점에 고정</strong>된다는 점과
+    메인의 대화 맥락이 재위임을 가로막을 수 있다는 점, 그리고 <code class="inline">/exit</code> 재진입(또는 <code class="inline">/clear</code>)이
+    이런 상황의 실전 해결책이라는 점까지 함께 체득한 것입니다.
+  </p>
+
+  <div class="step-title"><span class="step-no">5</span>실습 프로젝트 원상 복구</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 데이터 원복</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>git checkout -- src/users.js
+rm -f .claude/agents/dangerous-test.md .claude/agents/dangerous-test.md.bak</code></pre>
+  </div>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="t2a"><span>Edit 권한이 없을 때 수정이 거부되는 것을 관찰했습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="t2b"><span>tools에 Edit 추가 + /exit 재진입 후 재시도에서 수정이 진행되는 차이를 확인했습니다</span></label>
+  </div>
+</section>
+<!-- ================= Task 3 ================= -->
+<section class="task" id="t3">
+  <div class="task-head">
+    <span class="task-num">TASK 03</span>
+    <h2>에이전트 3종 완성, test-writer와 docs-writer 추가</h2>
+    <span class="time-badge">7분</span>
+  </div>
+  <p class="task-goal">
+    Task 4의 디스패치 실습을 위해 <strong>test-writer</strong>(테스트 작성)와 <strong>docs-writer</strong>(문서 작성)를
+    추가합니다. 두 에이전트의 description이 서로 <strong>영역이 겹치지 않게</strong> 작성된 점에 주목하세요.
+  </p>
+
+  <div class="step-title"><span class="step-no">1</span>두 에이전트 한 번에 생성</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cat &gt; .claude/agents/test-writer.md &lt;&lt; 'EOF'
+---
+name: test-writer
+description: |
+  기존 코드의 테스트 커버리지를 분석하고 누락된 엣지 케이스, 분기,
+  예외 경로에 대한 테스트를 작성. 사용 시점: 커버리지 부족이 확인되거나
+  새 함수에 테스트가 필요한 경우.
+tools: Read, Grep, Glob, Edit, Write, Bash(npm test:*)
+model: sonnet
+---
+당신은 테스트 자동화 전문가입니다.
+
+# 작업 절차
+1. 대상 함수의 시그니처와 분기 구조 분석
+2. 기존 테스트 파일이 있다면 스타일 일치
+3. 정상 케이스, 엣지 케이스, 예외 케이스 모두 커버
+4. 테스트 작성 후 실제로 실행하여 통과 확인
+
+# 작성 원칙
+- 테스트 하나가 한 가지만 검증
+- 의미 있는 테스트 이름
+- AAA 패턴 (Arrange Act Assert)
+EOF
+
+cat &gt; .claude/agents/docs-writer.md &lt;&lt; 'EOF'
+---
+name: docs-writer
+description: |
+  README, API 문서, 아키텍처 결정 문서(ADR)를 코드와 일치하도록 작성하거나
+  업데이트. 사용 시점: 신규 기능 추가 후 문서 작성이 필요하거나 기존 문서가
+  코드와 불일치할 때.
+tools: Read, Grep, Glob, Edit, Write, Bash(git log:*)
+model: sonnet
+---
+당신은 기술 문서 작성가입니다.
+
+# 문서 종류별 가이드
+- README: 프로젝트 개요, 설치, 사용법, 예시
+- API 문서: 함수 시그니처, 파라미터, 반환값, 예시
+- ADR: Context, Decision, Consequences 형식
+
+# 작성 원칙
+- 코드와 실제 동작이 일치해야 함
+- 예시는 실제로 실행 가능한 것
+- 한국어와 영어 혼용 가능, 일관성 유지
+EOF
+
+ls .claude/agents/</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">2</span>3종 등록 확인</div>
+  <p class="body">
+    세션 입력창에 <code class="inline">@</code>를 입력해 typeahead에 <strong>3종 모두 (agent)로 표시</strong>되는지 확인하세요.
+    직접 <code class="inline">@agent-test-writer</code>처럼 입력해도 멘션이 인식됩니다. 또는 아래처럼 물어봐도 됩니다.
+  </p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>사용 가능한 서브에이전트를 모두 알려주세요</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">출력 예시</span></div>
+    <pre><code>프로젝트 서브에이전트 (.claude/agents/):
+  - code-reviewer : PR diff 검토
+  - test-writer   : 테스트 커버리지 확장
+  - docs-writer   : 문서 작성과 동기화</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">description이 디스패치 정확도를 결정한다</span>
+    메인은 사용자 요청과 각 에이전트의 <strong>description을 대조해 자동 선택</strong>합니다.
+    "코드를 분석하는 도우미"처럼 모호하거나 "모든 개발 작업을 돕는 만능"처럼 광범위하면 잘못된 디스패치가 발생합니다.
+    구체적 역할 + <strong>사용 시점</strong>을 명시하고, 에이전트끼리 경계를 겹치지 않게 하세요.
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">이 정의 파일들은 Git으로 팀과 공유됩니다</span>
+    <code class="inline">.claude/agents/</code>는 프로젝트 단위(팀 공유, Git 커밋 대상),
+    <code class="inline">~/.claude/agents/</code>는 개인 전역(모든 프로젝트에서 사용)입니다.
+    지금 만든 3종을 커밋해 두면 팀 전체가 동일한 에이전트를 사용합니다.
+  </div>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="t3"><span>@ typeahead 또는 Claude 응답에서 code-reviewer, test-writer, docs-writer 3종을 확인했습니다</span></label>
+  </div>
+</section>
+
+<!-- ================= Task 4 ================= -->
+<section class="task" id="t4">
+  <div class="task-head">
+    <span class="task-num">TASK 04</span>
+    <h2>Task 디스패치 3패턴</h2>
+    <span class="time-badge">10분</span>
+  </div>
+  <p class="task-goal">
+    같은 에이전트들을 <strong>자동 디스패치, 명시적 호출, 병렬 호출</strong> 3가지 방식으로 부려 보고,
+    <code class="inline">/cost</code>로 에이전트별 비용을 비교합니다. 각 패턴 사이에 <code class="inline">/exit</code>로 나갔다 들어오거나 <code class="inline">/clear</code>로 컨텍스트를 정리하면 관찰이 깨끗해집니다.
+  </p>
+
+  <div class="callout tip">
+    <span class="co-title">현재 버전 참고, Agent 도구와 백그라운드 실행</span>
+    위임에 쓰이는 내부 도구 이름이 <strong>Task에서 Agent로 변경</strong>되었습니다(구 Task 표기는 별칭으로 동작).
+    또한 서브에이전트는 <strong>기본적으로 백그라운드로 실행</strong>됩니다. 진행 상황은 프롬프트 아래 패널과
+    <code class="inline">/tasks</code>에서 확인하고, 권한 요청은 메인 세션에 표시되며, <kbd>Ctrl</kbd> + <kbd>B</kbd>로 실행 중 작업을 백그라운드로 보낼 수 있습니다.
+  </div>
+
+  <div class="step-title"><span class="step-no">1</span>패턴 A, 자동 디스패치</div>
+  <p class="body">에이전트를 지정하지 않고 요청합니다. 메인이 description을 대조해 <strong>스스로 code-reviewer를 선택</strong>하는지 관찰하세요.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>이 프로젝트의 최근 변경 사항을 코드 리뷰해 주세요</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">관찰 포인트</span></div>
+    <pre><code>[메인] 코드 리뷰 요청으로 판단, code-reviewer를 호출합니다.
+  → Agent(code-reviewer, "Review recent changes")
+<span class="cmt"># 사용자가 지정하지 않아도 description 매칭으로 선택됨</span></code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">2</span>패턴 B, 명시적 호출</div>
+  <p class="body">이름으로 직접 지정하면 메인은 다른 에이전트를 검토하지 않고 <strong>예측 가능하게</strong> 해당 에이전트를 호출합니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>test-writer 에이전트를 사용해서 src/userService.js의 테스트 커버리지를 분석하고, 존재하지 않는 사용자 id 같은 누락된 엣지 케이스 테스트를 추가해 주세요</code></pre>
+  </div>
+  <p class="body">test-writer가 테스트를 추가하고 <strong>npm test를 직접 실행해 통과를 확인</strong>하는지 지켜보세요(시스템 프롬프트의 작업 절차 4번).
+    특정 에이전트 실행을 <strong>보장</strong>하고 싶다면 자연어 대신 <code class="inline">@</code>를 입력해 typeahead에서
+    test-writer (agent)를 선택하는 @-멘션 방식을 쓸 수 있습니다.</p>
+
+  <div class="step-title"><span class="step-no">3</span>패턴 C, 병렬 호출</div>
+  <p class="body">독립적인 3개 작업을 한 번에 요청합니다. 메인이 <strong>3개의 Task를 동시에 발행</strong>하고, 총 시간은 합산이 아니라 가장 오래 걸린 작업 기준(max)이 됩니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>이 코드베이스를 종합 점검해 주세요. 다음 세 가지를 병렬로 진행해 주세요.
+1) 코드 품질 리뷰
+2) 테스트 커버리지 분석
+3) README 문서 초안 작성</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">관찰 포인트</span></div>
+    <pre><code>[메인] 3개의 Subagent를 병렬로 호출합니다.
+  → Agent(code-reviewer, ...)
+  → Agent(test-writer, ...)
+  → Agent(docs-writer, ...)
+[reviewer] 분석 중... 이슈 2건
+[tester  ] 분석 중... 엣지 케이스 1건 보강
+[docs    ] README.md 초안 작성 중...
+[메인] 결과 종합: 코드 이슈 2건, 테스트 1건 추가, README 초안 완료.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">4</span>비용 확인</div>
+  <p class="body">현재 버전에서 <code class="inline">/cost</code>는 <code class="inline">/usage</code>의 별칭입니다. 세션 사용량과 어떤 서브에이전트가 한도를 소비했는지 확인할 수 있습니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/cost</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">출력 예시 (개념, 실제 표시 형식은 버전에 따라 다름)</span></div>
+    <pre><code>Current session cost: $0.42
+Breakdown:
+  Main agent    (Sonnet): $0.09
+  code-reviewer (Sonnet): $0.11
+  test-writer   (Sonnet): $0.13
+  docs-writer   (Sonnet): $0.09</code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="co-title">병렬화의 트레이드오프</span>
+    병렬 호출은 <strong>시간은 max로 단축</strong>되지만 <strong>비용은 합산</strong>됩니다.
+    강의 예시 기준 단일 $0.23 대비 3개 병렬 약 7배까지 증가할 수 있습니다.
+    반복적인 단순 작업은 <code class="inline">model: haiku</code>로 지정해 비용을 조절하고, Opus는 심층 분석에만 사용하세요.
+  </div>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="t4a"><span>자동 / 명시 / 병렬 3가지 패턴의 호출 차이를 관찰했습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="t4b"><span>/cost(/usage)에서 세션 사용량과 서브에이전트별 소비를 확인했습니다</span></label>
+  </div>
+</section>
+
+<!-- ================= Task 5 ================= -->
+<section class="task" id="t5">
+  <div class="task-head">
+    <span class="task-num">TASK 05</span>
+    <h2>Headless 통합과 CI 맛보기</h2>
+    <span class="time-badge">7분</span>
+  </div>
+  <p class="task-goal">
+    서브에이전트를 <strong>대화 없이 스크립트에서</strong> 호출하고 JSON으로 후처리합니다.
+    마지막으로 같은 패턴이 GitHub Actions에서 어떻게 동작하는지 확인합니다. 세션 밖 터미널에서 실행하세요.
+  </p>
+
+  <div class="step-title"><span class="step-no">1</span>헤드리스로 에이전트 호출</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>git diff HEAD~1 | claude -p \
+  "code-reviewer 에이전트로 이 diff를 검토해 주세요" \
+  --output-format json &gt; review-result.json
+
+head -c 400 review-result.json</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">2</span>JSON 후처리</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code><span class="cmt"># jq가 있다면: 요약과 high severity만 추출</span>
+jq '.summary' review-result.json
+jq '.issues | map(select(.severity == "high"))' review-result.json 2&gt;/dev/null
+
+<span class="cmt"># jq가 없다면</span>
+python3 -m json.tool review-result.json | head -30</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">3</span>CI 통합 패턴 확인 (참고)</div>
+  <p class="body">
+    같은 명령을 GitHub Actions에 넣으면 <strong>PR마다 자동 리뷰</strong>가 됩니다.
+    아래는 강의에서 다룬 직렬(리뷰) + 병렬(테스트와 보안) 복합 패턴의 워크플로입니다.
+    GitHub 저장소가 있다면 push해서 실험해 보세요. 선택 과제입니다.
+  </p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">.github/workflows/pr-check.yml, 참고용</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>name: PR Check with Subagents
+on: pull_request
+
+jobs:
+  comprehensive-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - run: npm install -g @anthropic-ai/claude-code
+
+      # 직렬: code-reviewer 먼저 실행 후 결과 보고
+      - name: Code Review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p "code-reviewer 에이전트로 git diff origin/main..HEAD를 검토해 주세요" \
+            --output-format text &gt; review.md
+
+      # 병렬 요청: 테스트와 보안을 한 번에
+      - name: Tests + Security
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p "다음을 모두 점검해 주세요: 1) 테스트 커버리지 부족 2) 보안 이슈" \
+            --output-format json &gt; result.json
+
+      # 결과를 PR 코멘트로 게시
+      - uses: peter-evans/create-pr-comment@v1
+        with: { body-path: review.md }</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">CI에서의 안전장치</span>
+    무인 실행에서는 API Key를 <strong>반드시 Secrets로 주입</strong>하고,
+    읽기 전용 검사라면 <code class="inline">--allowed-tools "Read,Grep,Glob"</code>으로 도구를 제한하세요.
+    Chapter 5(CLI Reference)에서 권한 플래그와 파이프라인 패턴을 심화합니다.
+  </div>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="t5a"><span>review-result.json이 생성되었습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="t5b"><span>jq 또는 python3로 JSON 필드를 추출했습니다</span></label>
+  </div>
+</section>
+
+<!-- ================= Wrap-up ================= -->
+<section class="wrapup" id="wrapup">
+  <h2>마무리, 학습 목표 체크리스트</h2>
+  <p class="sub">Chapter 2의 학습 목표를 스스로 점검하세요. 미달성 항목은 강의 자료의 해당 Part를 다시 확인하거나 Slack 채널에 질문을 남기세요.</p>
+  <table class="tbl">
+    <tr><th>목표</th><th>확인 질문</th><th>관련</th></tr>
+    <tr><td>Concept</td><td>Context Isolation과 위임의 가치를 설명할 수 있는가</td><td>강의 Part 1</td></tr>
+    <tr><td>Define</td><td>YAML frontmatter 4필드로 에이전트를 정의했는가</td><td>Task 1</td></tr>
+    <tr><td>Least Privilege</td><td>tools 화이트리스트로 권한 거부와 부여를 체험했는가</td><td>Task 2</td></tr>
+    <tr><td>Description</td><td>자동 디스패치가 description 기반임을 확인했는가</td><td>Task 3, 4</td></tr>
+    <tr><td>Dispatch</td><td>자동 / 명시 / 병렬 3패턴을 모두 실행했는가</td><td>Task 4</td></tr>
+    <tr><td>Cost</td><td>/cost로 에이전트별 비용과 병렬 트레이드오프를 확인했는가</td><td>Task 4</td></tr>
+    <tr><td>Automation</td><td>헤드리스 + JSON으로 CI 통합 패턴을 실행했는가</td><td>Task 5</td></tr>
+  </table>
+
+  <div class="next-box">
+    <div>
+      <div class="nx-label">NEXT CHAPTER</div>
+      <h3>Chapter 3 - Admin Setup</h3>
+      <p>Enterprise 환경 배포의 모든 것. 사내 배포 전략(npm 미러, 대량 배포), 자격증명 관리(Bedrock, SSO, IAM), 네트워크와 보안(프록시, 화이트리스트), 거버넌스(조직 정책, 사용량 모니터링)를 다룹니다.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<footer>
+  <div class="who">Claude Code Deep Dive Workshop, Chapter 2 Hands-on Lab</div>
+  <div>기준: Claude Code 2.1.x, 2026.07 / 명령어와 출력은 버전에 따라 일부 다를 수 있습니다</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Copy buttons ---------- */
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".code-wrap").querySelector("pre");
+      var text = pre.textContent.replace(/\n{3,}/g, "\n\n").trim();
+      function done() {
+        var old = btn.textContent;
+        btn.textContent = "복사됨 ✓";
+        btn.classList.add("copied");
+        setTimeout(function () {
+          btn.textContent = old;
+          btn.classList.remove("copied");
+        }, 1600);
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () { fallback(); });
+      } else {
+        fallback();
+      }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ---------- Checkpoints: task 완료 상태 (메모리 내 관리) ---------- */
+  var taskGroups = {
+    t0: ["t0", "t0jq"],
+    t1: ["t1a", "t1b"],
+    t2: ["t2a", "t2b"],
+    t3: ["t3"],
+    t4: ["t4a", "t4b"],
+    t5: ["t5a", "t5b"]
+  };
+  var state = {};
+
+  function refresh() {
+    var doneCount = 0;
+    Object.keys(taskGroups).forEach(function (task) {
+      var allDone = taskGroups[task].every(function (cp) { return state[cp]; });
+      if (allDone) doneCount++;
+      var seg = document.querySelector('.seg[data-task="' + task + '"]');
+      if (seg) seg.classList.toggle("done", allDone);
+      var nav = document.querySelector('.sidenav a[data-nav="' + task + '"]');
+      if (nav) nav.classList.toggle("done", allDone);
+    });
+    var pc = document.getElementById("progress-count");
+    if (pc) pc.textContent = doneCount + "/6";
+  }
+
+  document.querySelectorAll('.cp-item input[type="checkbox"]').forEach(function (cb) {
+    cb.addEventListener("change", function () {
+      state[cb.dataset.cp] = cb.checked;
+      refresh();
+    });
+  });
+
+  /* ---------- Timeline seg 클릭 시 이동 ---------- */
+  document.querySelectorAll(".seg").forEach(function (seg) {
+    seg.addEventListener("click", function () {
+      var el = document.getElementById(seg.dataset.task);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+
+  /* ---------- Scrollspy ---------- */
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidenav a[data-nav]");
+  var segs = document.querySelectorAll(".seg[data-task]");
+  if ("IntersectionObserver" in window) {
+    var current = null;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) current = entry.target.id;
+      });
+      if (!current) return;
+      navLinks.forEach(function (a) { a.classList.toggle("active", a.dataset.nav === current); });
+      segs.forEach(function (s) { s.classList.toggle("active", s.dataset.task === current); });
+    }, { rootMargin: "-20% 0px -65% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
+<script>
+(function(){
+  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
+  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
+  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
+  if(saved==='light'){ root.setAttribute('data-theme','light'); }
+  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
+  label();
+  btn.addEventListener('click',function(){
+    var light = root.getAttribute('data-theme')==='light';
+    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
+    label();
+  });
+})();
+</script>
+</body>
+</html>

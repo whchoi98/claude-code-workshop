@@ -1,657 +1,162 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
-<title>Chapter 3 Hands-on Lab - Claude Code Deep Dive Workshop</title>
-<style>
-:root {
-  --bg: #12181F;
-  --bg-card: #1B242E;
-  --bg-code: #0C1117;
-  --bg-inline: #232E3A;
-  --line: #2A3542;
-  --orange: #FF9900;
-  --orange-dim: rgba(255, 153, 0, 0.14);
-  --crimson: #B6002E;
-  --green: #3FB950;
-  --green-dim: rgba(63, 185, 80, 0.12);
-  --text: #E2E4EC;
-  --muted: #A6ABBE;
-  --dim: #7B8198;
-  --font-body: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --font-code: "D2Coding", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 76px; }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-}
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 15.5px;
-  line-height: 1.75;
-  -webkit-font-smoothing: antialiased;
-}
-::selection { background: rgba(255, 153, 0, 0.3); }
-a { color: var(--orange); text-decoration: none; }
-a:hover { text-decoration: underline; }
-button:focus-visible, a:focus-visible, input:focus-visible {
-  outline: 2px solid var(--orange);
-  outline-offset: 2px;
-}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 3 Hands-on Lab - Claude Code Deep Dive Workshop · My Workshop</title>
 
-/* ============ Hero ============ */
-.hero {
-  position: relative;
-  padding: 64px 32px 44px;
-  max-width: 1160px;
-  margin: 0 auto;
-  overflow: hidden;
-}
-.hero::after {
-  content: "";
-  position: absolute;
-  top: -140px; right: -180px;
-  width: 460px; height: 460px;
-  background: radial-gradient(closest-side, rgba(182, 0, 46, 0.28), rgba(255, 153, 0, 0.10) 55%, transparent 75%);
-  pointer-events: none;
-}
-.eyebrow {
-  display: inline-block;
-  background: var(--crimson);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  padding: 5px 12px;
-  border-radius: 3px;
-  text-transform: uppercase;
-  margin-bottom: 22px;
-}
-.hero h1 {
-  font-size: clamp(28px, 4.4vw, 42px);
-  font-weight: 800;
-  line-height: 1.28;
-  letter-spacing: -0.01em;
-  max-width: 780px;
-}
-.hero .subtitle {
-  margin-top: 14px;
-  color: var(--orange);
-  font-size: clamp(16px, 2.2vw, 19px);
-  font-weight: 700;
-}
-.hero .lede {
-  margin-top: 18px;
-  color: var(--muted);
-  max-width: 720px;
-  font-size: 15.5px;
-}
-.hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 26px;
-  margin-top: 26px;
-  color: var(--dim);
-  font-size: 13px;
-}
-.hero-meta strong { color: var(--text); font-weight: 700; }
 
-/* ============ Sticky timeline ============ */
-.timeline {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: rgba(12, 17, 23, 0.92);
-  backdrop-filter: blur(8px);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.timeline-inner {
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 10px 32px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-.timeline-label {
-  flex: none;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--dim);
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-}
-.timeline-label strong { color: var(--orange); font-size: 13px; }
-.segments {
-  flex: 1;
-  display: flex;
-  gap: 4px;
-  height: 26px;
-}
-.seg {
-  position: relative;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  background: var(--bg-card);
-  cursor: pointer;
-  overflow: hidden;
-  transition: border-color 0.15s;
-  padding: 0;
-  font-family: var(--font-body);
-}
-.seg:hover { border-color: var(--orange); }
-.seg .fill {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(255, 153, 0, 0.85), rgba(255, 153, 0, 0.65));
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.35s ease;
-}
-.seg.done .fill { transform: scaleX(1); }
-.seg .seg-txt {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--dim);
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  overflow: hidden;
-}
-.seg.done .seg-txt { color: #12181F; }
-.seg.active { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
 
-/* ============ Layout ============ */
-.layout {
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 44px 32px 80px;
-  display: grid;
-  grid-template-columns: 216px minmax(0, 1fr);
-  gap: 52px;
-  align-items: start;
-}
-.sidenav {
-  position: sticky;
-  top: 66px;
-  font-size: 13.5px;
-}
-.sidenav .nav-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--dim);
-  letter-spacing: 0.14em;
-  margin-bottom: 14px;
-}
-.sidenav a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--muted);
-  padding: 7px 10px;
-  border-radius: 6px;
-  border-left: 2px solid transparent;
-}
-.sidenav a:hover { color: var(--text); background: var(--bg-card); text-decoration: none; }
-.sidenav a.active { color: var(--orange); border-left-color: var(--orange); background: var(--bg-card); }
-.sidenav .dot {
-  flex: none;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  border: 1.5px solid var(--dim);
-}
-.sidenav a.done .dot { background: var(--green); border-color: var(--green); }
-.sidenav .nav-time { margin-left: auto; font-size: 11px; color: var(--dim); }
 
-/* ============ Task sections ============ */
-.task { margin-bottom: 72px; }
-.task-head {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 26px;
-}
-.task-num {
-  font-family: var(--font-code);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--orange);
-  letter-spacing: 0.1em;
-}
-.task-head h2 {
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-.time-badge {
-  margin-left: auto;
-  flex: none;
-  background: var(--orange-dim);
-  color: var(--orange);
-  font-size: 12.5px;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 20px;
-}
-.task-goal {
-  color: var(--muted);
-  margin-bottom: 24px;
-  max-width: 760px;
-}
-.task-goal strong { color: var(--text); }
-.step-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16.5px;
-  font-weight: 800;
-  margin: 34px 0 12px;
-}
-.step-title .step-no {
-  flex: none;
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  background: var(--orange);
-  color: #12181F;
-  font-size: 12.5px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-p.body { color: var(--muted); margin: 10px 0 14px; max-width: 760px; }
-p.body strong, li strong { color: var(--text); }
-code.inline {
-  font-family: var(--font-code);
-  font-size: 0.88em;
-  background: var(--bg-inline);
-  color: #FFC466;
-  padding: 2px 7px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-kbd {
-  font-family: var(--font-code);
-  font-size: 0.82em;
-  background: var(--bg-inline);
-  border: 1px solid var(--line);
-  border-bottom-width: 2px;
-  border-radius: 5px;
-  padding: 2px 8px;
-  color: var(--text);
-}
 
-/* ============ Code blocks ============ */
-.code-wrap {
-  background: var(--bg-code);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  margin: 14px 0 20px;
-  overflow: hidden;
-}
-.code-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.02);
-}
-.code-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--dim);
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.copy-btn {
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-  background: var(--bg-inline);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 4px 12px;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-}
-.copy-btn:hover { color: var(--orange); border-color: var(--orange); }
-.copy-btn.copied { color: var(--green); border-color: var(--green); }
-.code-wrap pre {
-  padding: 16px 18px;
-  overflow-x: auto;
-  font-family: var(--font-code);
-  font-size: 13.5px;
-  line-height: 1.7;
-}
-.code-wrap code { font-family: inherit; color: #D8DEE9; }
-.code-wrap.output pre { color: var(--dim); }
-.code-wrap .cmt { color: #5E6B7E; }
-.code-wrap .hl { color: #FFC466; }
-.code-wrap .ok { color: var(--green); }
 
-/* ============ Callouts ============ */
-.callout {
-  border-radius: 8px;
-  background: var(--bg-card);
-  padding: 14px 18px;
-  margin: 18px 0;
-  font-size: 14.5px;
-  color: var(--muted);
-  max-width: 760px;
-}
-.callout strong { color: var(--text); }
-.callout.tip .co-title { color: var(--orange); }
 
-.callout .co-title {
-  display: block;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  margin-bottom: 5px;
-}
 
-.callout.warn .co-title { color: #FF5C85; }
-
-/* ============ Checkpoint ============ */
-.checkpoint {
-  background: var(--green-dim);
-  border: 1px solid rgba(63, 185, 80, 0.35);
-  border-radius: 10px;
-  padding: 16px 20px;
-  margin-top: 28px;
-}
-.checkpoint .cp-title {
-  font-size: 12.5px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  color: var(--green);
-  margin-bottom: 10px;
-}
-.cp-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 5px 0;
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 14.5px;
-}
-.cp-item input {
-  flex: none;
-  margin-top: 5px;
-  width: 15px; height: 15px;
-  accent-color: var(--green);
-  cursor: pointer;
-}
-.cp-item input:checked + span { color: var(--text); }
-
-/* ============ Tabs ============ */
-.tabs { margin: 18px 0 6px; }
-.tab-btns {
-  display: flex;
-  gap: 6px;
-  border-bottom: 1px solid var(--line);
-  flex-wrap: wrap;
-}
-.tab-btn {
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--dim);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 9px 16px;
-  cursor: pointer;
-  margin-bottom: -1px;
-}
-.tab-btn:hover { color: var(--text); }
-.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
-.tab-pane { display: none; padding-top: 16px; }
-.tab-pane.active { display: block; }
-
-/* ============ Tables ============ */
-.tbl {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 14px 0 22px;
-  font-size: 14px;
-  background: var(--bg-card);
-  border-radius: 10px;
-  overflow: hidden;
-}
-.tbl th, .tbl td {
-  text-align: left;
-  padding: 10px 16px;
-  border-bottom: 1px solid #FFFFFF14;
-}
-.tbl th {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--orange);
-  background: rgba(255, 255, 255, 0.03);
-}
-.tbl td { color: var(--muted); vertical-align: middle; }
-.tbl td:first-child { color: var(--text); font-weight: 700; white-space: nowrap; }
-.tbl tr:last-child td { border-bottom: none; }
-.tbl code { font-family: var(--font-code); font-size: 0.9em; color: #FFC466; }
-
-/* ============ Wrap-up ============ */
-.wrapup {
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 32px 34px;
-  margin-bottom: 56px;
-}
-.wrapup h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
-.wrapup .sub { color: var(--muted); font-size: 14.5px; margin-bottom: 18px; }
-.next-box {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
-  background: linear-gradient(90deg, rgba(182, 0, 46, 0.16), rgba(255, 153, 0, 0.08));
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 22px 26px;
-}
-.next-box .nx-label {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  color: var(--orange);
-}
-.next-box h3 { font-size: 19px; font-weight: 800; }
-.next-box p { color: var(--muted); font-size: 14px; }
-
-footer {
-  border-top: 1px solid var(--line);
-  padding: 30px 32px 46px;
-  text-align: center;
-  color: var(--dim);
-  font-size: 13px;
-  line-height: 1.9;
-}
-footer .who { color: var(--muted); font-weight: 700; }
-footer .mail { color: var(--orange); }
-
-@media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 20px 64px; }
-  .sidenav { display: none; }
-  .hero { padding: 44px 20px 32px; }
-  .timeline-inner { padding: 10px 20px; }
-  .seg .seg-txt { font-size: 9px; }
-  .task-head h2 { font-size: 20px; }
-}
-
-/* ── Korean typography fix: 단어 단위 줄바꿈, 히어로 정돈 ── */
-body { word-break: keep-all; overflow-wrap: break-word; }
-.hero h1 { max-width: 980px; font-size: clamp(26px, 4vw, 38px); text-wrap: balance; }
-.hero .subtitle, .hero .lede, .task-goal, .wrapup .sub { text-wrap: pretty; }
-
-/* ── 잘림 방지 v2: 히어로 압축 + 좁은 화면 대응 ── */
-.hero { padding: 44px 28px 34px; }
-.eyebrow { margin-bottom: 14px; }
-.hero h1 { line-height: 1.3; }
-.hero .subtitle { margin-top: 10px; }
-.hero .lede { margin-top: 12px; }
-.seg-txt { text-overflow: ellipsis; }
-@media (max-width: 620px) {
-  .hero { padding: 26px 16px 24px; }
-  .hero h1 { font-size: 23px; }
-  .hero .subtitle { font-size: 15px; }
-  .hero .lede { font-size: 14px; }
-  .hero-meta { gap: 6px 14px; font-size: 12px; }
-  .seg .seg-txt { display: none; }
-  .timeline-inner { padding: 0 10px; }
-}
-
-/* ── 잘림 방지 v3: 좁은 화면 가로 넘침 제거 ── */
-.tbl { display: block; overflow-x: auto; max-width: 100%; }
-.hero, .layout, .timeline-inner, main, section { min-width: 0; }
-@media (max-width: 620px) {
-  .timeline-label:last-child { display: none; }
-}
-
-/* ── 잘림 방지 v4: 인라인 코드 칩의 최소폭 강제 해제 ── */
-code.inline { white-space: normal; overflow-wrap: anywhere; }
-
-/* ── v5: 소개문/본문 전체 폭 사용 (가독성 캡 해제) ── */
-.hero .lede, .task-goal, p.body, .callout, .part-divider p, .wrapup .sub { max-width: none; }
-.hero .lede { text-wrap: wrap; }
-
-/* ── macOS 터미널 스타일: 신호등 3버튼 ── */
-.code-head { position: relative; padding-left: 76px; }
-.code-head::before {
-  content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-  width: 11px; height: 11px; border-radius: 50%; background: #FF5F57;
-  box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
-}
-</style>
-<style id="hol-theme">
-html[data-theme="light"]{
-  --bg:#F3F4F7; --bg-card:#FFFFFF; --bg-code:#EEF1F5; --bg-inline:#E4E9EF; --line:#D7DDE5;
-  --orange:#B45309; --orange-dim:rgba(180,83,9,.12);
-  --green:#1F883D; --green-dim:rgba(31,136,61,.12);
-  --text:#1B2430; --muted:#5B6472; --dim:#75808F;
-  background:#F3F4F7;
-}
-html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
-html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
-#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
-background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
-border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
-font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-#themeToggle:hover{border-color:var(--orange,#FF9900)}
-html[data-theme="light"] .code-wrap code{color:#2A3542}
-html[data-theme="light"] .code-wrap.output code{color:#57606E}
-html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
-html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
-html[data-theme="light"] .k.s{background:#DCEEDC}
-html[data-theme="light"] .k.w{background:#E9E2F7}
-html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
-html[data-theme="light"] .code-wrap .hl{color:#B45309}
-html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
-html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
-html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
-html[data-theme="light"] .head .when{color:#FF9900}
-html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
-html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
-html[data-theme="light"] .part-divider{background:linear-gradient(135deg,#EDE6FA 0%,#FFFFFF 65%);border-color:#B79CEF}
-html[data-theme="light"] .part-divider h2{color:#1B2430}
-html[data-theme="light"] .part-divider .rules span{background:#EDE6FA;border-color:#B79CEF;color:#5B21C7}
-html[data-theme="light"] .tbl code{color:#B45309}
-@media print{#themeToggle{display:none}}
-</style>
+<link rel="stylesheet" href="assets/reader.css">
+<link rel="stylesheet" href="assets/legacy/ClaudeCode_Ch3_HandsOnLab.css">
+<link rel="stylesheet" href="assets/workshop.css">
+<script src="assets/theme.js"></script>
 </head>
-<body>
+<body data-course-key="6fd7cd9eb237" data-page="ClaudeCode_Ch3_HandsOnLab.html" data-current-chapter="ClaudeCode_Ch3_HandsOnLab">
+<a class="skip-link" href="#workshop-main">실습 본문으로 건너뛰기</a>
 
+<aside id="course-nav" class="sidebar" aria-label="워크샵 과정 목차">
+  <div class="sidebar-brand">
+    <a class="brand" href="index.html">
+      <img class="brand-aws-logo" src="assets/aws-logo.png" alt="AWS" width="48" height="29">
+      <span><strong>Claude Code</strong><span>DEEP DIVE WORKSHOP</span></span>
+    </a>
+    <button class="icon-button mobile-only js-only" type="button" data-nav-close aria-label="목차 닫기"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="sidebar-caption"><span class="eyebrow-dot"></span> HANDS-ON LAB HANDBOOK</div>
+  <label class="nav-search js-only" for="chapter-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+    <input id="chapter-search" type="search" placeholder="실습 제목 검색" autocomplete="off" aria-label="실습 제목 검색"><kbd>/</kbd>
+  </label>
+  <nav class="chapter-navigation" id="chapter-navigation" aria-label="전체 과정">
+    <a class="overview-link" href="index.html">워크샵 전체 보기 <span>HOME</span></a>
+    <section class="nav-group" data-nav-group><h2><span>시작하기</span><span>2개</span></h2><ol><li data-nav-entry data-search="시작하기 INFO 교육 안내와 일정 Claude Code Deep Dive Workshop"><a class="chapter-link" href="eDM.html" data-chapter-link="eDM" data-core-chapter="false" title="Claude Code Deep Dive Workshop"><span class="nav-number">INFO</span><span class="nav-title">교육 안내와 일정</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="시작하기 PRE 실습 전 환경 점검 핸즈온 랩 시작 전 확인"><a class="chapter-link" href="ClaudeCode_Preflight_Check.html" data-chapter-link="ClaudeCode_Preflight_Check" data-core-chapter="false" title="핸즈온 랩 시작 전 확인"><span class="nav-number">PRE</span><span class="nav-title">실습 전 환경 점검</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>기본 실습</span><span>6개</span></h2><ol><li data-nav-entry data-search="기본 실습 01 설치부터 Headless 자동화까지 Claude Code, 설치부터 Headless 자동화까지"><a class="chapter-link" href="ClaudeCode_Ch1_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch1_HandsOnLab" data-core-chapter="true" title="Claude Code, 설치부터 Headless 자동화까지"><span class="nav-number">01</span><span class="nav-title">설치부터 Headless 자동화까지</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 02 Subagents · 전문 에이전트 Subagents, 전문 에이전트를 만들고 지휘하기"><a class="chapter-link" href="ClaudeCode_Ch2_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch2_HandsOnLab" data-core-chapter="true" title="Subagents, 전문 에이전트를 만들고 지휘하기"><span class="nav-number">02</span><span class="nav-title">Subagents · 전문 에이전트</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 03 Admin Setup · 기업 환경 Admin Setup, 통제 가능한 Enterprise 배포"><a class="chapter-link" href="ClaudeCode_Ch3_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch3_HandsOnLab" data-core-chapter="true" title="Admin Setup, 통제 가능한 Enterprise 배포" aria-current="page"><span class="nav-number">03</span><span class="nav-title">Admin Setup · 기업 환경</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 04 Settings · 팀의 플랫폼 Settings, 나의 Claude Code를 팀의 플랫폼으로"><a class="chapter-link" href="ClaudeCode_Ch4_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch4_HandsOnLab" data-core-chapter="true" title="Settings, 나의 Claude Code를 팀의 플랫폼으로"><span class="nav-number">04</span><span class="nav-title">Settings · 팀의 플랫폼</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 05 CLI Reference · 자동화 CLI Reference, Claude Code를 파이프라인의 부품으로"><a class="chapter-link" href="ClaudeCode_Ch5_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch5_HandsOnLab" data-core-chapter="true" title="CLI Reference, Claude Code를 파이프라인의 부품으로"><span class="nav-number">05</span><span class="nav-title">CLI Reference · 자동화</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 06 Agent SDK · 자율 실습 Agent SDK, Claude Code를 코드에서 부른다"><a class="chapter-link" href="ClaudeCode_Ch6_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch6_HandsOnLab" data-core-chapter="false" title="Agent SDK, Claude Code를 코드에서 부른다"><span class="nav-number">06</span><span class="nav-title">Agent SDK · 자율 실습</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>캡스톤 준비</span><span>1개</span></h2><ol><li data-nav-entry data-search="캡스톤 준비 SET 도구와 플러그인 준비 Capstone 시작 전, 설치하면 좋은 것들"><a class="chapter-link" href="ClaudeCode_Capstone_Setup.html" data-chapter-link="ClaudeCode_Capstone_Setup" data-core-chapter="false" title="Capstone 시작 전, 설치하면 좋은 것들"><span class="nav-number">SET</span><span class="nav-title">도구와 플러그인 준비</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>캡스톤 · 프로젝트 선택</span><span>6개</span></h2><ol><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M1 Clawd Jump · 게임 개발 Clawd Jump, 에이전틱 게임 개발"><a class="chapter-link" href="ClaudeCode_Capstone1_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone1_HandsOnLab" data-core-chapter="false" title="Clawd Jump, 에이전틱 게임 개발"><span class="nav-number">M1</span><span class="nav-title">Clawd Jump · 게임 개발</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M2 Market Desk · 시황 대시보드 웹 시황 대시보드"><a class="chapter-link" href="ClaudeCode_Capstone2_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone2_HandsOnLab" data-core-chapter="false" title="웹 시황 대시보드"><span class="nav-number">M2</span><span class="nav-title">Market Desk · 시황 대시보드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M3 Generative Hours · 미디어 아트 Generative Hours, 코드로 그린 전시를 배포하라"><a class="chapter-link" href="ClaudeCode_Capstone3_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone3_HandsOnLab" data-core-chapter="false" title="Generative Hours, 코드로 그린 전시를 배포하라"><span class="nav-number">M3</span><span class="nav-title">Generative Hours · 미디어 아트</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M4 Trend Radar · 유튜브 트렌드 유튜브 급상승 30, 트렌드 레이더"><a class="chapter-link" href="ClaudeCode_Capstone4_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone4_HandsOnLab" data-core-chapter="false" title="유튜브 급상승 30, 트렌드 레이더"><span class="nav-number">M4</span><span class="nav-title">Trend Radar · 유튜브 트렌드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M5 Quake Watch · 지진 모니터링 지구의 맥박, 실시간 지진 워치"><a class="chapter-link" href="ClaudeCode_Capstone5_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone5_HandsOnLab" data-core-chapter="false" title="지구의 맥박, 실시간 지진 워치"><span class="nav-number">M5</span><span class="nav-title">Quake Watch · 지진 모니터링</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M6 Newsroom Lens · 뉴스 비교 뉴스룸 렌즈, 4개 매체 관점 비교"><a class="chapter-link" href="ClaudeCode_Capstone6_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone6_HandsOnLab" data-core-chapter="false" title="뉴스룸 렌즈, 4개 매체 관점 비교"><span class="nav-number">M6</span><span class="nav-title">Newsroom Lens · 뉴스 비교</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>참고 자료</span><span>3개</span></h2><ol><li data-nav-entry data-search="참고 자료 R1 디렉토리 구조 디렉토리 구조, 무엇이 어디에 있는가"><a class="chapter-link" href="ClaudeCode_Reference1_Directory.html" data-chapter-link="ClaudeCode_Reference1_Directory" data-core-chapter="false" title="디렉토리 구조, 무엇이 어디에 있는가"><span class="nav-number">R1</span><span class="nav-title">디렉토리 구조</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="참고 자료 R2 슬래시 커맨드 슬래시 커맨드, 세션을 조종하는 레버들"><a class="chapter-link" href="ClaudeCode_Reference2_Commands.html" data-chapter-link="ClaudeCode_Reference2_Commands" data-core-chapter="false" title="슬래시 커맨드, 세션을 조종하는 레버들"><span class="nav-number">R2</span><span class="nav-title">슬래시 커맨드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="참고 자료 R3 플러그인 플러그인, 팀의 하네스를 배포하는 단위"><a class="chapter-link" href="ClaudeCode_Reference3_Plugins.html" data-chapter-link="ClaudeCode_Reference3_Plugins" data-core-chapter="false" title="플러그인, 팀의 하네스를 배포하는 단위"><span class="nav-number">R3</span><span class="nav-title">플러그인</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section>
+    <p class="search-empty" data-search-empty hidden>검색 결과가 없습니다.</p>
+    <span class="sr-only" role="status" data-search-result></span>
+  </nav>
+  <div class="reading-progress">
+    <div class="progress-label"><span>정규 챕터 읽기</span><strong data-progress-count>0 / 5 읽음</strong></div>
+    <progress max="5" value="0" data-reading-progress aria-label="정규 챕터 읽기 진행률"></progress>
+    <p data-storage-note>읽기 기록은 이 브라우저에 저장됩니다.</p>
+    <button class="text-button js-only" type="button" data-reset-progress hidden>읽기 기록 초기화</button>
+  </div>
+</aside>
+<button class="nav-backdrop" type="button" data-nav-backdrop aria-label="목차 닫기" hidden></button>
+<div class="workspace" data-workspace>
+  <header class="topbar">
+    <div class="topbar-leading">
+      <button class="toolbar-button mobile-only js-only" type="button" data-nav-toggle aria-controls="course-nav" aria-expanded="false" aria-label="과정 목차 열기"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <nav class="breadcrumb" aria-label="현재 위치"><a href="index.html">Claude Code Workshop</a><span aria-hidden="true">/</span><span>기본 실습 · 03</span></nav>
+    </div>
+    <div class="toolbar js-only">
+      <button class="toolbar-button" type="button" data-theme-toggle aria-label="어두운 화면으로 전환" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A9 9 0 0 1 9.5 3.5a9 9 0 1 0 11 11Z"/></svg><span data-theme-label>다크</span></button>
+      <button class="toolbar-button" type="button" data-print aria-label="이 페이지 인쇄"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6Z"/></svg><span>인쇄</span></button>
+    </div>
+  </header>
+  <main id="workshop-main" tabindex="-1">
+    <noscript><p class="noscript-note">본문과 목차는 그대로 읽을 수 있습니다. 복사·테마·읽기 기록 기능에는 JavaScript가 필요합니다.</p></noscript>
+    <div class="article-layout">
+      <article class="lesson"><div class="legacy-content" id="workshop-content">
 <header class="hero">
-  <span class="eyebrow">Hands-on Lab / Chapter 3</span>
-  <h1>Admin Setup, 통제 가능한 Enterprise 배포</h1>
-  <div class="subtitle">Claude Code Deep Dive Workshop, Chapter 3 - Admin Setup 실습</div>
-  <p class="lede">
+<span class="eyebrow">Hands-on Lab / Chapter 3</span>
+<h1>Admin Setup, 통제 가능한 Enterprise 배포</h1>
+<div class="subtitle">Claude Code Deep Dive Workshop, Chapter 3 - Admin Setup 실습</div>
+<p class="lede">
     관리자의 40분입니다. <strong>사내 npm 미러</strong>(Verdaccio)로 배포 경로를 통제하고,
     <strong>Bedrock + SSO</strong> 자격증명 패턴을 구성하고, <strong>managed-settings</strong>로 조직 정책을 강제한 뒤
     <strong>DLP Hook</strong>과 <strong>OpenTelemetry</strong>까지 연결합니다. 전부 로컬 머신에서 검증 가능하게 구성했으며,
     AWS 콘솔이 필요한 부분은 선택 트랙으로 분리했습니다.
   </p>
-  <div class="hero-meta">
-    <span>소요 시간 <strong>40분 내외</strong></span>
-    <span>Task <strong>준비 + 5개</strong></span>
-    <span>기준 버전 <strong>Claude Code 2.1.x</strong></span>
-    <span>Update <strong>2026.07</strong></span>
-  </div>
+<div class="hero-meta">
+<span>소요 시간 <strong>40분 내외</strong></span>
+<span>Task <strong>준비 + 5개</strong></span>
+<span>기준 버전 <strong>Claude Code 2.1.267</strong></span>
+<span>Update <strong>2026.09</strong></span>
+</div>
 </header>
-
-<nav class="timeline" aria-label="랩 진행 타임라인">
-  <div class="timeline-inner">
-    <span class="timeline-label">진행 <strong id="progress-count">0/6</strong></span>
-    <div class="segments" id="segments">
-      <button class="seg" data-task="t0" style="flex:2" title="준비, 2분"><span class="fill"></span><span class="seg-txt">준비</span></button>
-      <button class="seg" data-task="t1" style="flex:9" title="Task 1 사내 npm 미러, 9분"><span class="fill"></span><span class="seg-txt">1 npm 미러</span></button>
-      <button class="seg" data-task="t2" style="flex:7" title="Task 2 Bedrock SSO, 7분"><span class="fill"></span><span class="seg-txt">2 Bedrock SSO</span></button>
-      <button class="seg" data-task="t3" style="flex:10" title="Task 3 managed-settings, 10분"><span class="fill"></span><span class="seg-txt">3 조직 정책</span></button>
-      <button class="seg" data-task="t4" style="flex:9" title="Task 4 DLP Hook, 9분"><span class="fill"></span><span class="seg-txt">4 DLP Hook</span></button>
-      <button class="seg" data-task="t5" style="flex:3" title="Task 5 OTel, 3분"><span class="fill"></span><span class="seg-txt">5 OTel</span></button>
-    </div>
-    <span class="timeline-label">40 min</span>
-  </div>
+<nav aria-label="랩 진행 타임라인" class="timeline">
+<div class="timeline-inner">
+<span class="timeline-label">진행 <strong id="progress-count">0/6</strong></span>
+<div class="segments" id="segments">
+<button class="seg" data-task="t0" style="flex:2" title="준비, 2분"><span class="fill"></span><span class="seg-txt">준비</span></button>
+<button class="seg" data-task="t1" style="flex:9" title="Task 1 사내 npm 미러, 9분"><span class="fill"></span><span class="seg-txt">1 npm 미러</span></button>
+<button class="seg" data-task="t2" style="flex:7" title="Task 2 Bedrock SSO, 7분"><span class="fill"></span><span class="seg-txt">2 Bedrock SSO</span></button>
+<button class="seg" data-task="t3" style="flex:10" title="Task 3 managed-settings, 10분"><span class="fill"></span><span class="seg-txt">3 조직 정책</span></button>
+<button class="seg" data-task="t4" style="flex:9" title="Task 4 DLP Hook, 9분"><span class="fill"></span><span class="seg-txt">4 DLP Hook</span></button>
+<button class="seg" data-task="t5" style="flex:3" title="Task 5 OTel, 3분"><span class="fill"></span><span class="seg-txt">5 OTel</span></button>
+</div>
+<span class="timeline-label">40 min</span>
+</div>
 </nav>
-
 <div class="layout">
 
-<aside class="sidenav" aria-label="랩 목차">
-  <div class="nav-title">LAB CONTENTS</div>
-  <a href="#t0" data-nav="t0"><span class="dot"></span>사전 준비 확인<span class="nav-time">2분</span></a>
-  <a href="#t1" data-nav="t1"><span class="dot"></span>Task 1 사내 npm 미러<span class="nav-time">9분</span></a>
-  <a href="#t2" data-nav="t2"><span class="dot"></span>Task 2 Bedrock + SSO<span class="nav-time">7분</span></a>
-  <a href="#t3" data-nav="t3"><span class="dot"></span>Task 3 managed-settings<span class="nav-time">10분</span></a>
-  <a href="#t4" data-nav="t4"><span class="dot"></span>Task 4 DLP Hook<span class="nav-time">9분</span></a>
-  <a href="#t5" data-nav="t5"><span class="dot"></span>Task 5 OTel 텔레메트리<span class="nav-time">3분</span></a>
-  <a href="#wrapup" data-nav="wrapup"><span class="dot"></span>마무리와 실행 로드맵<span class="nav-time"></span></a>
-</aside>
-
-<main>
-
+<div class="original-main">
 <!-- ================= Task 0 ================= -->
+<section class="task" id="flow">
+<div class="task-head">
+<span class="task-num">TASK FLOW</span>
+<h2>이 챕터의 진행 흐름</h2>
+<span class="time-badge">개요</span>
+</div>
+<p class="task-goal">
+    전반의 세 Task로 <strong>공급망과 자격</strong>을 세우고, 후반의 세 Task로 <strong>조직의 통제선과 관측</strong>을 올립니다.<br/>
+    진행 중 위치가 헷갈리면 이 흐름도로 돌아오세요.
+  </p>
+<nav aria-label="챕터 실습 진행 순서" class="workshop-flow-guide"><ol><li><a class="flow-step" href="#t0"><span class="flow-step-number">00</span><span class="flow-step-content"><strong>사전 준비 확인</strong><span class="flow-step-summary">sudo 권한, 실습 폴더, 테스트용 가짜 시크릿 준비</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#t1"><span class="flow-step-number">01</span><span class="flow-step-content"><strong>사내 npm 미러, Verdaccio</strong><span class="flow-step-summary">Verdaccio 미러를 경유한 설치와 캐시 기반 배포 확인</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#t2"><span class="flow-step-number">02</span><span class="flow-step-content"><strong>Bedrock + SSO 자격증명 패턴</strong><span class="flow-step-summary">SSO 프로필과 IAM 정책을 통해 단기 자격증명 인증 흐름 이해</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#t3"><span class="flow-step-number">03</span><span class="flow-step-content"><strong>managed-settings로 조직 정책 강제</strong><span class="flow-step-summary">Managed 설정의 우선순위와 조직 권한 규칙 적용 확인</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#t4"><span class="flow-step-number">04</span><span class="flow-step-content"><strong>DLP Hook, 시크릿 유출 차단</strong><span class="flow-step-summary">PreToolUse Hook으로 내용 기반 DLP 차단 동작 확인</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#t5"><span class="flow-step-number">05</span><span class="flow-step-content"><strong>OpenTelemetry 텔레메트리 맛보기</strong><span class="flow-step-summary">console exporter에서 사용량·비용·감사 텔레메트리 확인</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li></ol></nav><details class="workshop-flow-original"><summary data-flow-original-label="">상세 흐름도 펼쳐 보기</summary><div class="flow-original-scroll"><svg aria-label="챕터 Task 진행 흐름" role="img" style="display:block;max-width:940px;margin:8px auto 2px" viewbox="0 0 940 312" width="100%" xmlns="http://www.w3.org/2000/svg">
+
+<text fill="var(--orange)" font-size="14" font-weight="800" letter-spacing="1.5" x="0" y="24">공급망과 자격</text>
+<rect fill="var(--bg-card)" height="92" rx="12" stroke="var(--line)" stroke-width="1.4" width="303" x="0" y="38"></rect>
+<text fill="var(--orange)" font-size="13.5" font-weight="800" x="14" y="62">T0</text>
+<text fill="var(--text)" font-size="18" font-weight="800" x="14" y="93">사전 준비</text>
+<text fill="var(--dim)" font-size="13" x="14" y="116">환경 확인</text>
+<path d="M 303 84 L 311 84" fill="none" stroke="var(--orange)" stroke-width="2"></path><path d="M 311 79 L 319 84 L 311 89" fill="var(--orange)"></path>
+<rect fill="var(--bg-card)" height="92" rx="12" stroke="var(--line)" stroke-width="1.4" width="303" x="319" y="38"></rect>
+<text fill="var(--orange)" font-size="13.5" font-weight="800" x="333" y="62">T1</text>
+<text fill="var(--text)" font-size="18" font-weight="800" x="333" y="93">Verdaccio</text>
+<text fill="var(--dim)" font-size="13" x="333" y="116">사내 npm 미러</text>
+<path d="M 622 84 L 629 84" fill="none" stroke="var(--orange)" stroke-width="2"></path><path d="M 629 79 L 637 84 L 629 89" fill="var(--orange)"></path>
+<rect fill="var(--bg-card)" height="92" rx="12" stroke="var(--line)" stroke-width="1.4" width="303" x="637" y="38"></rect>
+<text fill="var(--orange)" font-size="13.5" font-weight="800" x="651" y="62">T2</text>
+<text fill="var(--text)" font-size="18" font-weight="800" x="651" y="93">Bedrock + SSO</text>
+<text fill="var(--dim)" font-size="13" x="651" y="116">자격증명 패턴</text>
+<text fill="var(--orange)" font-size="14" font-weight="800" letter-spacing="1.5" x="0" y="194">통제선과 관측</text>
+<rect fill="var(--bg-card)" height="92" rx="12" stroke="var(--line)" stroke-width="1.4" width="303" x="0" y="208"></rect>
+<text fill="var(--orange)" font-size="13.5" font-weight="800" x="14" y="232">T3</text>
+<text fill="var(--text)" font-size="18" font-weight="800" x="14" y="263">managed-settings</text>
+<text fill="var(--dim)" font-size="13" x="14" y="286">조직 정책 강제</text>
+<path d="M 303 254 L 311 254" fill="none" stroke="var(--orange)" stroke-width="2"></path><path d="M 311 249 L 319 254 L 311 259" fill="var(--orange)"></path>
+<rect fill="var(--bg-card)" height="92" rx="12" stroke="var(--line)" stroke-width="1.4" width="303" x="319" y="208"></rect>
+<text fill="var(--orange)" font-size="13.5" font-weight="800" x="333" y="232">T4</text>
+<text fill="var(--text)" font-size="18" font-weight="800" x="333" y="263">DLP Hook</text>
+<text fill="var(--dim)" font-size="13" x="333" y="286">시크릿 유출 차단</text>
+<path d="M 622 254 L 629 254" fill="none" stroke="var(--orange)" stroke-width="2"></path><path d="M 629 249 L 637 254 L 629 259" fill="var(--orange)"></path>
+<rect fill="var(--orange)" height="92" rx="12" stroke="var(--orange)" stroke-width="1.4" width="303" x="637" y="208"></rect>
+<text class="fm" font-size="13.5" font-weight="800" x="651" y="232">T5</text>
+<text class="fm" font-size="18" font-weight="800" x="651" y="263">OpenTelemetry</text>
+<text class="fms" font-size="13" x="651" y="286">사용량 관측</text>
+<path d="M 788 138 L 788 170 L 151 170 L 151 196" fill="none" stroke="var(--orange)" stroke-dasharray="6 5" stroke-width="2"></path>
+<path d="M 146 189 L 151 198 L 156 189 Z" fill="var(--orange)"></path>
+<text fill="var(--text)" font-size="14" font-weight="800" text-anchor="middle" x="470" y="163">공급망과 자격을 세우고, 통제와 관측으로</text>
+</svg></div></details>
+</section>
 <section class="task" id="t0">
-  <div class="task-head">
-    <span class="task-num">TASK 00</span>
-    <h2>사전 준비 확인</h2>
-    <span class="time-badge">2분</span>
-  </div>
-  <p class="task-goal">
+<div class="task-head">
+<span class="task-num">TASK 00</span>
+<h2>사전 준비 확인</h2>
+<span class="time-badge">2분</span>
+</div>
+<p class="task-goal">
     이번 랩은 시스템 경로에 파일을 배포하므로 <strong>sudo 권한</strong>이 필요합니다(Task 3, 4).
     검증에 쓸 작업 폴더와 가짜 시크릿 파일도 만들어 둡니다.
   </p>
-
-  <div class="step-title"><span class="step-no">1</span>권한과 도구 확인, 작업 폴더 생성</div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>sudo -v &amp;&amp; echo "sudo OK"
+<div class="step-title"><span class="step-no">1</span>권한과 도구 확인, 작업 폴더 생성</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-001" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
+<pre id="workshop-code-001"><code>sudo -v &amp;&amp; echo "sudo OK"
 node -v &amp;&amp; npm -v
 
 mkdir -p ~/claude-lab/ch3/src &amp;&amp; cd ~/claude-lab/ch3
@@ -666,117 +171,106 @@ cat &gt; src/app.js &lt;&lt; 'EOF'
 export function hello() { return "admin lab"; }
 EOF
 ls -la</code></pre>
-  </div>
-
-  <div class="callout warn">
-    <span class="co-title">sudo가 없는 회사 노트북이라면</span>
+</div>
+<div class="callout warn">
+<span class="co-title">sudo가 없는 회사 노트북이라면</span>
     Task 3, 4의 managed-settings 경로 대신 <code class="inline">~/.claude/settings.json</code>(User 스코프)에
     같은 JSON을 넣으면 정책 <strong>동작 자체는 동일하게 체험</strong>할 수 있습니다.
     차이는 강제성뿐입니다. User 설정은 본인이 언제든 바꿀 수 있지만, Managed는 사용자가 덮어쓸 수 없습니다.
   </div>
-
-  <div class="checkpoint">
-    <div class="cp-title">CHECKPOINT</div>
-    <label class="cp-item"><input type="checkbox" data-cp="t0"><span>sudo OK 확인, ~/claude-lab/ch3에 .env와 src/app.js가 준비되었습니다</span></label>
-  </div>
+<div class="checkpoint">
+<div class="cp-title">CHECKPOINT</div>
+<label class="cp-item"><input data-cp="t0" type="checkbox"/><span>sudo OK 확인, ~/claude-lab/ch3에 .env와 src/app.js가 준비되었습니다</span></label>
+</div>
 </section>
-
 <!-- ================= Task 1 ================= -->
 <section class="task" id="t1">
-  <div class="task-head">
-    <span class="task-num">TASK 01</span>
-    <h2>사내 npm 미러, Verdaccio</h2>
-    <span class="time-badge">9분</span>
-  </div>
-  <p class="task-goal">
-    npmjs를 직접 열 수 없는 사내망을 가정하고, <strong>Verdaccio 미러를 띄워 Claude Code를 미러 경유로 설치</strong>합니다.
+<div class="task-head">
+<span class="task-num">TASK 01</span>
+<h2>사내 npm 미러, Verdaccio</h2>
+<span class="time-badge">9분</span>
+</div>
+<p class="task-goal">
+    npmjs를 직접 열 수 없는 사내망을 가정하고, <strong>Verdaccio 미러를 띄워 Claude Code를 미러 경유로 설치</strong>합니다.<br/>
     한 번 캐시된 패키지는 npmjs가 두절돼도 배포 가능하다는 것(오프라인/에어갭의 기초)을 확인합니다.
   </p>
-
-  <div class="step-title"><span class="step-no">1</span>Verdaccio 설치와 기동</div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>npm install -g verdaccio
+<div class="step-title"><span class="step-no">1</span>Verdaccio 설치와 기동</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-002" data-copy-label="Terminal 복사" type="button">복사</button></div>
+<pre id="workshop-code-002"><code>npm install -g verdaccio
 verdaccio --listen 4873 &gt; /tmp/verdaccio.log 2&gt;&amp;1 &amp;
 sleep 3
 npm ping --registry http://localhost:4873   <span class="cmt"># PONG이면 미러 정상</span></code></pre>
-  </div>
-
-  <div class="step-title"><span class="step-no">2</span>미러 경유로 Claude Code 설치</div>
-  <p class="body">
+</div>
+<div class="step-title"><span class="step-no">2</span>미러 경유로 Claude Code 설치</div>
+<p class="body">
     전역 registry를 바꾸는 대신 <strong><code class="inline">--registry</code> 플래그</strong>를 씁니다.
     실습 머신의 npm 상태를 건드리지 않으므로 원복이 필요 없습니다.
   </p>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>npm install -g @anthropic-ai/claude-code --registry http://localhost:4873
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-003" data-copy-label="Terminal 복사" type="button">복사</button></div>
+<pre id="workshop-code-003"><code>npm install -g @anthropic-ai/claude-code --registry http://localhost:4873
 claude --version</code></pre>
-  </div>
-
-  <div class="step-title"><span class="step-no">3</span>캐시 확인, 오프라인 배포의 핵심</div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>ls ~/.config/verdaccio/storage/@anthropic-ai/claude-code/</code></pre>
-  </div>
-  <div class="code-wrap output">
-    <div class="code-head"><span class="code-label">출력 예시</span></div>
-    <pre><code>claude-code-2.1.x.tgz    package.json</code></pre>
-  </div>
-  <div class="callout tip">
-    <span class="co-title">이 tgz가 사내 배포의 자산입니다</span>
+</div>
+<div class="step-title"><span class="step-no">3</span>캐시 확인, 오프라인 배포의 핵심</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-004" data-copy-label="Terminal 복사" type="button">복사</button></div>
+<pre id="workshop-code-004"><code>ls ~/.config/verdaccio/storage/@anthropic-ai/claude-code/</code></pre>
+</div>
+<div class="code-wrap output" data-code-kind="output">
+<div class="code-head"><span class="code-label">출력 예시</span><button aria-label="출력 예시 복사" class="ws-copy" data-copy-code="workshop-code-005" data-copy-label="출력 예시 복사" type="button">복사</button></div>
+<pre id="workshop-code-005"><code>claude-code-2.1.x.tgz    package.json</code></pre>
+</div>
+<div class="callout tip">
+<span class="co-title">이 tgz가 사내 배포의 자산입니다</span>
     미러를 한 번 통과한 패키지는 <strong>storage에 캐시</strong>되어, 이후 npmjs가 차단되거나 두절돼도
     사내 클라이언트에 계속 배포할 수 있습니다. 에어갭 환경은 이 storage 디렉토리를 반입하는 방식으로 운영합니다.
   </div>
-
-  <div class="step-title"><span class="step-no">4</span>정리</div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal, 미러 종료</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>pkill -f verdaccio &amp;&amp; echo "미러 종료됨"</code></pre>
-  </div>
-
-  <div class="callout tip">
-    <span class="co-title">프로덕션 운영 참고</span>
+<div class="step-title"><span class="step-no">4</span>정리</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 미러 종료</span><button aria-label="Terminal, 미러 종료 복사" class="ws-copy" data-copy-code="workshop-code-006" data-copy-label="Terminal, 미러 종료 복사" type="button">복사</button></div>
+<pre id="workshop-code-006"><code>pkill -f verdaccio &amp;&amp; echo "미러 종료됨"</code></pre>
+</div>
+<div class="callout tip">
+<span class="co-title">프로덕션 운영 참고</span>
     실제 조직에서는 Verdaccio 또는 Nexus / JFrog Artifactory에 <strong>@anthropic-ai 스코프를 고정</strong>하고
     (config.yaml에 <code class="inline">'@anthropic-ai/*': proxy: npmjs</code>),
     클라이언트에는 <code class="inline">npm config set registry http://npm.corp.local</code>을 MDM으로 일괄 배포합니다.
     버전 통제는 managed-settings의 <code class="inline">requiredMinimumVersion</code> / <code class="inline">requiredMaximumVersion</code>으로
     승인 범위를 강제할 수 있습니다.
   </div>
-
-  <div class="checkpoint">
-    <div class="cp-title">CHECKPOINT</div>
-    <label class="cp-item"><input type="checkbox" data-cp="t1a"><span>미러 경유 설치가 성공하고 claude --version이 출력됩니다</span></label>
-    <label class="cp-item"><input type="checkbox" data-cp="t1b"><span>storage 디렉토리에서 캐시된 패키지를 확인했습니다</span></label>
-  </div>
+<div class="checkpoint">
+<div class="cp-title">CHECKPOINT</div>
+<label class="cp-item"><input data-cp="t1a" type="checkbox"/><span>미러 경유 설치가 성공하고 claude --version이 출력됩니다</span></label>
+<label class="cp-item"><input data-cp="t1b" type="checkbox"/><span>storage 디렉토리에서 캐시된 패키지를 확인했습니다</span></label>
+</div>
 </section>
-
 <!-- ================= Task 2 ================= -->
 <section class="task" id="t2">
-  <div class="task-head">
-    <span class="task-num">TASK 02</span>
-    <h2>Bedrock + SSO 자격증명 패턴</h2>
-    <span class="time-badge">7분</span>
-  </div>
-  <p class="task-goal">
+<div class="task-head">
+<span class="task-num">TASK 02</span>
+<h2>Bedrock + SSO 자격증명 패턴</h2>
+<span class="time-badge">7분</span>
+</div>
+<p class="task-goal">
     장기 API Key를 뿌리는 대신 <strong>IAM Identity Center(SSO)의 단기 자격증명으로 Bedrock을 호출</strong>하는
-    표준 패턴을 구성합니다. 프로파일 작성과 IAM 정책 이해는 전원 진행하고,
+    표준 패턴을 구성합니다.<br/>
+    프로파일 작성과 IAM 정책 이해는 전원 진행하고,
     실제 로그인 검증은 AWS 계정 보유자용 선택 트랙입니다.
   </p>
-
-  <div class="callout warn">
-    <span class="co-title">왜 API Key 분배가 위험한가</span>
+<div class="callout warn">
+<span class="co-title">왜 API Key 분배가 위험한가</span>
     장기 Key는 <strong>회전이 수동</strong>이고, 퇴사자 처리(offboarding)가 누락되기 쉬우며, 유출 시 폭발 반경이 큽니다.
     SSO 경로는 자격증명이 <strong>시간 제한부로 자동 발급</strong>되고, IdP에서 계정을 끄는 순간 접근이 끊깁니다.
   </div>
-
-  <div class="step-title"><span class="step-no">1</span>SSO 프로파일 작성 (격리된 config 파일)</div>
-  <p class="body">
+<div class="step-title"><span class="step-no">1</span>SSO 프로파일 작성 (격리된 config 파일)</div>
+<p class="body">
     실습에서는 <code class="inline">AWS_CONFIG_FILE</code>로 <strong>격리된 설정 파일</strong>을 사용해
     기존 ~/.aws/config를 건드리지 않습니다. 값은 조직 환경에 맞게 바꾸세요.
   </p>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>export AWS_CONFIG_FILE=~/claude-lab/ch3/aws-config
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-007" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
+<pre id="workshop-code-007"><code>export AWS_CONFIG_FILE=~/claude-lab/ch3/aws-config
 
 cat &gt; "$AWS_CONFIG_FILE" &lt;&lt; 'EOF'
 [sso-session corp]
@@ -792,13 +286,12 @@ region = ap-northeast-2
 EOF
 
 cat "$AWS_CONFIG_FILE"</code></pre>
-  </div>
-
-  <div class="step-title"><span class="step-no">2</span>Permission Set에 부여할 IAM 정책 이해</div>
-  <p class="body">역할(ClaudeCodeWorkshop)에는 최소 권한 원칙으로 아래 정책을 부여합니다. 읽고 각 항목의 목적을 확인하세요.</p>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">IAM Policy, 참고용</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>{
+</div>
+<div class="step-title"><span class="step-no">2</span>Permission Set에 부여할 IAM 정책 이해</div>
+<p class="body">역할(ClaudeCodeWorkshop)에는 최소 권한 원칙으로 아래 정책을 부여합니다. 읽고 각 항목의 목적을 확인하세요.</p>
+<div class="code-wrap" data-code-kind="file">
+<div class="code-head"><span class="code-label">IAM Policy, 참고용</span><button aria-label="IAM Policy, 참고용 복사" class="ws-copy" data-copy-code="workshop-code-008" data-copy-label="IAM Policy, 참고용 복사" type="button">복사</button></div>
+<pre id="workshop-code-008"><code>{
   "Version": "2012-10-17",
   "Statement": [{
     "Effect": "Allow",
@@ -813,78 +306,72 @@ cat "$AWS_CONFIG_FILE"</code></pre>
     ]
   }]
 }</code></pre>
-  </div>
-  <p class="body">
-    <code class="inline">InvokeModelWithResponseStream</code>은 Claude Code가 스트리밍으로 응답을 받는 데 필수입니다.
+</div>
+<p class="body">
+<code class="inline">InvokeModelWithResponseStream</code>은 Claude Code가 스트리밍으로 응답을 받는 데 필수입니다.
     <code class="inline">inference-profile</code> 리소스는 교차 리전 추론(CRIS)을 쓸 때 필요합니다.
     조직 요건에 맞게 모델 ARN과 리전 범위를 더 좁힐 수 있습니다.
   </p>
-
-  <div class="step-title"><span class="step-no">3</span>선택 트랙, 실제 로그인 검증 (AWS 계정 + IAM Identity Center 보유자)</div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal, 선택</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>aws sso login --profile claude-workshop
+<div class="step-title"><span class="step-no">3</span>선택 트랙, 실제 로그인 검증 (AWS 계정 + IAM Identity Center 보유자)</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 선택</span><button aria-label="Terminal, 선택 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Terminal, 선택 복사" type="button">복사</button></div>
+<pre id="workshop-code-009"><code>aws sso login --profile claude-workshop
 
 export CLAUDE_CODE_USE_BEDROCK=1
 export AWS_PROFILE=claude-workshop
 export AWS_REGION=ap-northeast-2
 
 claude doctor   <span class="cmt"># API Provider: AWS Bedrock 표시 확인</span></code></pre>
-  </div>
-
-  <div class="callout tip">
-    <span class="co-title">Bedrock 경로의 텔레메트리 주의점</span>
+</div>
+<div class="callout tip">
+<span class="co-title">Bedrock 경로의 텔레메트리 주의점</span>
     Bedrock 인증에는 Claude 계정이 없으므로 OTel 이벤트에 <code class="inline">user.email</code>이 비어 있습니다.
     사용자별 비용 추적이 필요하면 <code class="inline">OTEL_RESOURCE_ATTRIBUTES="enduser.id=user@corp.com"</code>처럼
     신원 속성을 managed-settings로 부착하세요. Task 5에서 이어집니다.
   </div>
-
-  <div class="step-title"><span class="step-no">4</span>정리</div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>unset AWS_CONFIG_FILE CLAUDE_CODE_USE_BEDROCK AWS_PROFILE AWS_REGION</code></pre>
-  </div>
-
-  <div class="checkpoint">
-    <div class="cp-title">CHECKPOINT</div>
-    <label class="cp-item"><input type="checkbox" data-cp="t2a"><span>SSO 프로파일 구조(sso-session + profile)와 IAM 정책의 각 항목을 설명할 수 있습니다</span></label>
-    <label class="cp-item"><input type="checkbox" data-cp="t2b"><span>선택 트랙 진행 시, claude doctor에서 Bedrock 확인 (미진행 시 개념 이해로 체크)</span></label>
-  </div>
+<div class="step-title"><span class="step-no">4</span>정리</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="Terminal 복사" type="button">복사</button></div>
+<pre id="workshop-code-010"><code>unset AWS_CONFIG_FILE CLAUDE_CODE_USE_BEDROCK AWS_PROFILE AWS_REGION</code></pre>
+</div>
+<div class="checkpoint">
+<div class="cp-title">CHECKPOINT</div>
+<label class="cp-item"><input data-cp="t2a" type="checkbox"/><span>SSO 프로파일 구조(sso-session + profile)와 IAM 정책의 각 항목을 설명할 수 있습니다</span></label>
+<label class="cp-item"><input data-cp="t2b" type="checkbox"/><span>선택 트랙 진행 시, claude doctor에서 Bedrock을 확인했습니다 (미진행 시 개념 이해로 체크)</span></label>
+</div>
 </section>
 <!-- ================= Task 3 ================= -->
 <section class="task" id="t3">
-  <div class="task-head">
-    <span class="task-num">TASK 03</span>
-    <h2>managed-settings로 조직 정책 강제</h2>
-    <span class="time-badge">10분</span>
-  </div>
-  <p class="task-goal">
-    사용자가 덮어쓸 수 없는 <strong>Managed 스코프</strong>에 권한 규칙을 배포하고, 실제로 적용되는지 검증합니다.
+<div class="task-head">
+<span class="task-num">TASK 03</span>
+<h2>managed-settings로 조직 정책 강제</h2>
+<span class="time-badge">10분</span>
+</div>
+<p class="task-goal">
+    사용자가 덮어쓸 수 없는 <strong>Managed 스코프</strong>에 권한 규칙을 배포하고, 실제로 적용되는지 검증합니다.<br/>
     Settings 우선순위의 최상단(Managed &gt; CLI &gt; Local &gt; Project &gt; User)을 체감하는 것이 목표입니다.
   </p>
-
-  <div class="step-title"><span class="step-no">1</span>OS별 managed-settings 경로</div>
-  <p class="body">아래는 파일 기반 managed-settings의 표준 경로입니다. 본인 OS 탭의 경로를 사용하세요.</p>
-  <table class="tbl">
-    <tr><th>OS</th><th>경로</th></tr>
-    <tr><td>Linux, WSL</td><td><code>/etc/claude-code/managed-settings.json</code></td></tr>
-    <tr><td>macOS</td><td><code>/Library/Application Support/ClaudeCode/managed-settings.json</code></td></tr>
-    <tr><td>Windows</td><td><code>C:\Program Files\ClaudeCode\managed-settings.json</code></td></tr>
-  </table>
-  <div class="callout warn">
-    <span class="co-title">경로 주의</span>
+<div class="step-title"><span class="step-no">1</span>OS별 managed-settings 경로</div>
+<p class="body">아래는 파일 기반 managed-settings의 표준 경로입니다. 본인 OS 탭의 경로를 사용하세요.</p>
+<table class="tbl">
+<tr><th>OS</th><th>경로</th></tr>
+<tr><td>Linux, WSL</td><td><code>/etc/claude-code/managed-settings.json</code></td></tr>
+<tr><td>macOS</td><td><code>/Library/Application Support/ClaudeCode/managed-settings.json</code></td></tr>
+<tr><td>Windows</td><td><code>C:\Program Files\ClaudeCode\managed-settings.json</code></td></tr>
+</table>
+<div class="callout warn">
+<span class="co-title">경로 주의</span>
     Linux 경로는 <code class="inline">/etc/claude-code/</code>입니다(하이픈 포함). Windows 구경로
     <code class="inline">C:\ProgramData\ClaudeCode\</code>는 v2.1.75부터 미지원이니 <code class="inline">C:\Program Files\ClaudeCode\</code>를 쓰세요.
     아래 실습은 Linux / WSL 경로 기준이며, macOS는 경로만 바꾸면 됩니다.
   </div>
-
-  <div class="step-title"><span class="step-no">2</span>정책 배포, 권한 규칙 + 시작 배너</div>
-  <p class="body">
-    <code class="inline">companyAnnouncements</code>로 시작 배너를 함께 넣어, 관리 설정이 실제로 적용됐는지 눈으로 확인합니다.
+<div class="step-title"><span class="step-no">2</span>정책 배포, 권한 규칙 + 시작 배너</div>
+<p class="body">
+<code class="inline">companyAnnouncements</code>로 시작 배너를 함께 넣어, 관리 설정이 실제로 적용됐는지 눈으로 확인합니다.
   </p>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal, Linux/WSL 기준 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>sudo mkdir -p /etc/claude-code
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, Linux/WSL 기준 전체 복사</span><button aria-label="Terminal, Linux/WSL 기준 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-011" data-copy-label="Terminal, Linux/WSL 기준 전체 복사 복사" type="button">복사</button></div>
+<pre id="workshop-code-011"><code>sudo mkdir -p /etc/claude-code
 sudo tee /etc/claude-code/managed-settings.json &gt; /dev/null &lt;&lt; 'EOF'
 {
   "permissions": {
@@ -898,75 +385,93 @@ sudo tee /etc/claude-code/managed-settings.json &gt; /dev/null &lt;&lt; 'EOF'
 }
 EOF
 echo "배포 완료"</code></pre>
-  </div>
-
-  <div class="step-title"><span class="step-no">3</span>적용 검증 A, 배너와 설정 소스 확인</div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>cd ~/claude-lab/ch3
+</div>
+<div class="step-title"><span class="step-no">3</span>적용 검증 A, 배너와 설정 소스 확인</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-012" data-copy-label="Terminal 복사" type="button">복사</button></div>
+<pre id="workshop-code-012"><code>cd ~/claude-lab/ch3
 claude</code></pre>
-  </div>
-  <p class="body">세션이 시작되면 <strong>상단에 배너 문구</strong>가 뜨는지 보고, 아래로 설정 소스를 확인합니다.</p>
-  <div class="code-wrap prompt">
-    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>/status</code></pre>
-  </div>
-  <div class="code-wrap output">
-    <div class="code-head"><span class="code-label">관찰 포인트</span></div>
-    <pre><code>Setting sources:
+</div>
+<p class="body">세션이 시작되면 <strong>상단에 배너 문구</strong>가 뜨는지 보고, 아래로 설정 소스를 확인합니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-013" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-013"><code>/status</code></pre>
+</div>
+<div class="code-wrap output" data-code-kind="output">
+<div class="code-head"><span class="code-label">관찰 포인트</span><button aria-label="관찰 포인트 복사" class="ws-copy" data-copy-code="workshop-code-014" data-copy-label="관찰 포인트 복사" type="button">복사</button></div>
+<pre id="workshop-code-014"><code>Setting sources:
   - managed  (/etc/claude-code/managed-settings.json)   <span class="cmt"># 이 줄이 보여야 함</span>
   - user, project ...</code></pre>
-  </div>
-
-  <div class="step-title"><span class="step-no">4</span>적용 검증 B, deny 규칙이 .env 읽기를 차단</div>
-  <div class="code-wrap prompt">
-    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>.env 파일의 내용을 읽어서 보여주세요</code></pre>
-  </div>
-  <div class="code-wrap output">
-    <div class="code-head"><span class="code-label">관찰 포인트</span></div>
-    <pre><code>Read(./.env) 는 관리 정책(deny)에 의해 차단되었습니다.
+</div>
+<div class="step-title"><span class="step-no">4</span>적용 검증 B, deny 규칙이 .env 읽기를 차단</div>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-015" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-015"><code>.env 파일의 내용을 읽어서 보여주세요</code></pre>
+</div>
+<div class="code-wrap output" data-code-kind="output">
+<div class="code-head"><span class="code-label">관찰 포인트</span><button aria-label="관찰 포인트 복사" class="ws-copy" data-copy-code="workshop-code-016" data-copy-label="관찰 포인트 복사" type="button">복사</button></div>
+<pre id="workshop-code-016"><code>Read(./.env) 는 관리 정책(deny)에 의해 차단되었습니다.
 <span class="cmt"># 프롬프트 없이 거부됨. Read(**)로 허용돼 있어도 deny가 우선</span></code></pre>
-  </div>
-  <p class="body">
-    <code class="inline">Read(**)</code>로 전체 읽기를 allow 했더라도 <strong>deny 규칙이 우선</strong>하여 .env는 차단됩니다.
+</div>
+<p class="body">
+<code class="inline">Read(**)</code>로 전체 읽기를 allow 했더라도 <strong>deny 규칙이 우선</strong>하여 .env는 차단됩니다.
     권한 규칙은 스코프 간 병합되며, deny가 항상 이깁니다. <code class="inline">/exit</code>로 세션을 나옵니다.
   </p>
-
-  <div class="callout tip">
-    <span class="co-title">배포 전 검증 습관</span>
+<div class="callout tip">
+<span class="co-title">배포 전 검증 습관</span>
     관리 설정은 <strong>관대하게 파싱</strong>되어 잘못된 항목만 버려지고 나머지는 적용됩니다.
     배포 전 테스트 머신에서 <code class="inline">claude doctor</code>를 돌리면 무시된 항목을 소스 파일과 필드까지 알려줍니다.
     fleet 배포 전 필수 습관입니다.
   </div>
-
-  <div class="checkpoint">
-    <div class="cp-title">CHECKPOINT</div>
-    <label class="cp-item"><input type="checkbox" data-cp="t3a"><span>시작 배너가 표시되고 /status에 managed 소스가 보입니다</span></label>
-    <label class="cp-item"><input type="checkbox" data-cp="t3b"><span>allow에 Read(**)가 있어도 .env 읽기가 deny로 차단되는 것을 확인했습니다</span></label>
+<div class="step-title"><span class="step-no">5</span>조직 MCP 서버 배포, managedMcpServers (v2.1.259+)</div>
+<p class="body">
+    2026년 9월부터 관리 설정으로 <strong>조직 공용 MCP 서버를 전 사용자에게 배포</strong>할 수 있습니다.
+    항목 형식은 <code class="inline">.mcp.json</code>과 같고(HTTP/SSE만, 로컬 명령 실행형은 제외),
+    기존 <code class="inline">allowedMcpServers</code>는 <strong>사용자가 직접 추가하는 서버</strong>만 통제하도록 역할이 정리되었습니다.
+  </p>
+<div class="code-wrap" data-code-kind="file">
+<div class="code-head"><span class="code-label">managed-settings.json에 추가</span><button aria-label="managed-settings.json에 추가 복사" class="ws-copy" data-copy-code="workshop-code-017" data-copy-label="managed-settings.json에 추가 복사" type="button">복사</button></div>
+<pre id="workshop-code-017"><code>{
+  "managedMcpServers": {
+    "internal-kb": {
+      "type": "http",
+      "url": "https://mcp.example.internal/kb"
+    }
+  }
+}</code></pre>
+</div>
+<div class="callout warn">
+<span class="co-title">통제선이 더 단단해졌습니다 (v2.1.259 - 2.1.267)</span>
+    관리 설정 파일이나 MDM 값이 <strong>파싱되지 않으면 이제 조용히 무시하지 않고 기동을 거부</strong>하며 원인 소스를 표시합니다(v2.1.259+).
+    <code class="inline">/status</code>와 <code class="inline">claude doctor</code>에는 조직 정책을 왜 못 읽었는지 설명하는
+    <strong>Organization policy</strong> 라인이 추가되었고(v2.1.261+, Chapter 1의 doctor 출력 예시에서 확인할 수 있습니다),
+    <code class="inline">maxEffortLevel</code> 설정으로 <strong>Bedrock을 포함한 모든 프로바이더에서 effort 상한</strong>을 걸 수 있습니다(v2.1.267+).
   </div>
+<div class="checkpoint">
+<div class="cp-title">CHECKPOINT</div>
+<label class="cp-item"><input data-cp="t3a" type="checkbox"/><span>시작 배너가 표시되고 /status에 managed 소스가 보입니다</span></label>
+<label class="cp-item"><input data-cp="t3b" type="checkbox"/><span>allow에 Read(**)가 있어도 .env 읽기가 deny로 차단되는 것을 확인했습니다</span></label>
+</div>
 </section>
-
 <!-- ================= Task 4 ================= -->
 <section class="task" id="t4">
-  <div class="task-head">
-    <span class="task-num">TASK 04</span>
-    <h2>DLP Hook, 시크릿 유출 차단</h2>
-    <span class="time-badge">9분</span>
-  </div>
-  <p class="task-goal">
-    코드에 AWS 액세스 키가 섞여 들어가는 것을 <strong>PreToolUse Hook</strong>으로 실시간 차단합니다.
+<div class="task-head">
+<span class="task-num">TASK 04</span>
+<h2>DLP Hook, 시크릿 유출 차단</h2>
+<span class="time-badge">9분</span>
+</div>
+<p class="task-goal">
+    코드에 AWS 액세스 키가 섞여 들어가는 것을 <strong>PreToolUse Hook</strong>으로 실시간 차단합니다.<br/>
     권한 규칙이 도구 단위 통제라면, Hook은 <strong>내용 기반 통제(DLP)</strong>라는 점이 핵심입니다.
   </p>
-
-  <div class="step-title"><span class="step-no">1</span>DLP 검사 스크립트 작성</div>
-  <p class="body">
+<div class="step-title"><span class="step-no">1</span>DLP 검사 스크립트 작성</div>
+<p class="body">
     stdin으로 들어오는 JSON에서 <code class="inline">tool_input</code>을 꺼내 AWS 키 패턴을 찾고,
     발견 시 <strong>exit code 2</strong>로 차단합니다. stderr 메시지는 Claude에게 전달되어 차단 사유가 됩니다.
   </p>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>sudo mkdir -p /opt/claude
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-018" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
+<pre id="workshop-code-018"><code>sudo mkdir -p /opt/claude
 sudo tee /opt/claude/dlp.sh &gt; /dev/null &lt;&lt; 'EOF'
 #!/bin/bash
 # PreToolUse DLP: AWS Access Key ID 패턴을 도구 입력에서 차단
@@ -979,18 +484,17 @@ exit 0
 EOF
 sudo chmod +x /opt/claude/dlp.sh
 echo "DLP 스크립트 준비 완료"</code></pre>
-  </div>
-  <div class="callout warn">
-    <span class="co-title">exit code 2가 핵심입니다</span>
+</div>
+<div class="callout warn">
+<span class="co-title">exit code 2가 핵심입니다</span>
     PreToolUse Hook은 <strong>exit code 2로 도구 실행을 차단</strong>하고 stderr를 Claude에 전달합니다.
     exit 0은 통과, 그 외 코드는 비차단 오류로 처리됩니다(구 자료의 <code class="inline">exit 1 + JSON</code> 방식은 현행과 다릅니다).
   </div>
-
-  <div class="step-title"><span class="step-no">2</span>managed-settings에 Hook 추가</div>
-  <p class="body">Task 3의 managed-settings에 <code class="inline">hooks</code> 블록을 더해 재배포합니다. 권한 규칙은 그대로 유지합니다.</p>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal, Linux/WSL 기준 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>sudo tee /etc/claude-code/managed-settings.json &gt; /dev/null &lt;&lt; 'EOF'
+<div class="step-title"><span class="step-no">2</span>managed-settings에 Hook 추가</div>
+<p class="body">Task 3의 managed-settings에 <code class="inline">hooks</code> 블록을 더해 재배포합니다. 권한 규칙은 그대로 유지합니다.</p>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, Linux/WSL 기준 전체 복사</span><button aria-label="Terminal, Linux/WSL 기준 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-019" data-copy-label="Terminal, Linux/WSL 기준 전체 복사 복사" type="button">복사</button></div>
+<pre id="workshop-code-019"><code>sudo tee /etc/claude-code/managed-settings.json &gt; /dev/null &lt;&lt; 'EOF'
 {
   "permissions": {
     "allow": ["Read(**)", "Grep", "Glob", "Bash(npm test:*)"],
@@ -1009,144 +513,160 @@ echo "DLP 스크립트 준비 완료"</code></pre>
 }
 EOF
 echo "Hook 포함 재배포 완료"</code></pre>
-  </div>
-
-  <div class="step-title"><span class="step-no">3</span>차단 검증</div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>cd ~/claude-lab/ch3
+</div>
+<div class="step-title"><span class="step-no">3</span>차단 검증</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-020" data-copy-label="Terminal 복사" type="button">복사</button></div>
+<pre id="workshop-code-020"><code>cd ~/claude-lab/ch3
 claude</code></pre>
-  </div>
-  <p class="body">Hook은 설정 핫 리로드로 적용됩니다. 세션에서 AWS 키가 포함된 파일 작성을 요청하세요.</p>
-  <div class="code-wrap prompt">
-    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>src/aws.js 파일을 만들고 그 안에 다음 줄을 넣어주세요: const key = "AKIAIOSFODNN7EXAMPLE";</code></pre>
-  </div>
-  <div class="code-wrap output">
-    <div class="code-head"><span class="code-label">관찰 포인트</span></div>
-    <pre><code>[Write 시도] → PreToolUse Hook 실행 (/opt/claude/dlp.sh)
+</div>
+<p class="body">Hook은 설정 핫 리로드로 적용됩니다. 세션에서 AWS 키가 포함된 파일 작성을 요청하세요.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-021" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-021"><code>src/aws.js 파일을 만들고 그 안에 다음 줄을 넣어주세요: const key = "AKIAIOSFODNN7EXAMPLE";</code></pre>
+</div>
+<div class="code-wrap output" data-code-kind="output">
+<div class="code-head"><span class="code-label">관찰 포인트</span><button aria-label="관찰 포인트 복사" class="ws-copy" data-copy-code="workshop-code-022" data-copy-label="관찰 포인트 복사" type="button">복사</button></div>
+<pre id="workshop-code-022"><code>[Write 시도] → PreToolUse Hook 실행 (/opt/claude/dlp.sh)
 Blocked by DLP: AWS Access Key ID detected in tool input
 <span class="cmt"># exit 2로 Write가 차단됨. Claude는 차단 사유를 전달받음</span></code></pre>
-  </div>
-  <p class="body">키 없는 일반 파일 작성은 정상 통과하는지도 확인해 보세요(대조군). 확인 후 <code class="inline">/exit</code>.</p>
-
-  <div class="step-title"><span class="step-no">4</span>전체 원복, 중요</div>
-  <div class="callout warn">
-    <span class="co-title">시스템 경로 정리는 반드시 수행</span>
+</div>
+<p class="body">키 없는 일반 파일 작성은 정상 통과하는지도 확인해 보세요(대조군). 확인 후 <code class="inline">/exit</code>.</p>
+<div class="step-title"><span class="step-no">4</span>전체 원복, 중요</div>
+<div class="callout warn">
+<span class="co-title">시스템 경로 정리는 반드시 수행</span>
     관리 설정과 Hook은 <strong>이 머신의 모든 Claude Code 세션에 계속 적용</strong>됩니다.
     실습이 끝나면 아래로 반드시 제거하세요.
   </div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal, 전체 원복</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>sudo rm -f /etc/claude-code/managed-settings.json
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 원복</span><button aria-label="Terminal, 전체 원복 복사" class="ws-copy" data-copy-code="workshop-code-023" data-copy-label="Terminal, 전체 원복 복사" type="button">복사</button></div>
+<pre id="workshop-code-023"><code>sudo rm -f /etc/claude-code/managed-settings.json
 sudo rm -f /opt/claude/dlp.sh
 sudo rmdir /etc/claude-code /opt/claude 2&gt;/dev/null
 echo "원복 완료"</code></pre>
-  </div>
-
-  <div class="checkpoint">
-    <div class="cp-title">CHECKPOINT</div>
-    <label class="cp-item"><input type="checkbox" data-cp="t4a"><span>AWS 키가 포함된 파일 쓰기가 DLP Hook(exit 2)으로 차단되었습니다</span></label>
-    <label class="cp-item"><input type="checkbox" data-cp="t4b"><span>managed-settings.json과 dlp.sh를 모두 제거해 원복했습니다</span></label>
-  </div>
+</div>
+<div class="checkpoint">
+<div class="cp-title">CHECKPOINT</div>
+<label class="cp-item"><input data-cp="t4a" type="checkbox"/><span>AWS 키가 포함된 파일 쓰기가 DLP Hook(exit 2)으로 차단되었습니다</span></label>
+<label class="cp-item"><input data-cp="t4b" type="checkbox"/><span>managed-settings.json과 dlp.sh를 모두 제거해 원복했습니다</span></label>
+</div>
 </section>
-
 <!-- ================= Task 5 ================= -->
 <section class="task" id="t5">
-  <div class="task-head">
-    <span class="task-num">TASK 05</span>
-    <h2>OpenTelemetry 텔레메트리 맛보기</h2>
-    <span class="time-badge">3분</span>
-  </div>
-  <p class="task-goal">
+<div class="task-head">
+<span class="task-num">TASK 05</span>
+<h2>OpenTelemetry 텔레메트리 맛보기</h2>
+<span class="time-badge">3분</span>
+</div>
+<p class="task-goal">
     사용량과 비용, 감사 이벤트를 사내 관측 스택으로 보내는 첫 단계로,
-    <strong>console exporter</strong>로 텔레메트리가 실제로 흐르는지 눈으로 확인합니다. SIEM 연동은 이 흐름의 목적지만 바꾼 것입니다.
+    <strong>console exporter</strong>로 텔레메트리가 실제로 흐르는지 눈으로 확인합니다.<br/>
+    SIEM 연동은 이 흐름의 목적지만 바꾼 것입니다.
   </p>
-
-  <div class="step-title"><span class="step-no">1</span>console exporter로 메트릭 출력</div>
-  <p class="body">
+<div class="step-title"><span class="step-no">1</span>console exporter로 메트릭 출력</div>
+<p class="body">
     OTLP 수집기 없이도 <code class="inline">console</code> exporter로 표준 출력에서 메트릭을 볼 수 있습니다.
     수집 간격을 짧게 잡아 바로 확인합니다. 세션 밖 터미널에서 실행하세요.
   </p>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>cd ~/claude-lab/ch3
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-024" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
+<pre id="workshop-code-024"><code>cd ~/claude-lab/ch3
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
 export OTEL_METRICS_EXPORTER=console
 export OTEL_METRIC_EXPORT_INTERVAL=5000
 
 claude -p "src/app.js가 무엇을 하는지 한 줄로 설명해줘"</code></pre>
-  </div>
-  <div class="code-wrap output">
-    <div class="code-head"><span class="code-label">관찰 포인트</span></div>
-    <pre><code># stdout에 메트릭 스코프가 출력됨
+</div>
+<div class="code-wrap output" data-code-kind="output">
+<div class="code-head"><span class="code-label">관찰 포인트</span><button aria-label="관찰 포인트 복사" class="ws-copy" data-copy-code="workshop-code-025" data-copy-label="관찰 포인트 복사" type="button">복사</button></div>
+<pre id="workshop-code-025"><code># stdout에 메트릭 스코프가 출력됨
 descriptor:
   name: claude_code.token.usage ...
   name: claude_code.cost.usage ...
 <span class="cmt"># session.count, token.usage, cost.usage 등이 흐르는지 확인</span></code></pre>
-  </div>
-
-  <div class="callout tip">
-    <span class="co-title">SIEM으로 가는 길은 목적지 변경뿐</span>
+</div>
+<div class="callout tip">
+<span class="co-title">SIEM으로 가는 길은 목적지 변경뿐</span>
     실제 조직에서는 console 대신 <code class="inline">OTEL_LOGS_EXPORTER=otlp</code>와
     <code class="inline">OTEL_EXPORTER_OTLP_LOGS_ENDPOINT</code>를 managed-settings의 <code class="inline">env</code>로 배포합니다.
     감사에는 <code class="inline">OTEL_LOG_TOOL_DETAILS=1</code>을 켜서 tool_decision, mcp_server_connection 등
     보안 이벤트에 Bash 명령과 MCP 호출 상세를 포함시킵니다.
   </div>
-
-  <div class="step-title"><span class="step-no">2</span>정리</div>
-  <div class="code-wrap">
-    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
-    <pre><code>unset CLAUDE_CODE_ENABLE_TELEMETRY OTEL_METRICS_EXPORTER OTEL_METRIC_EXPORT_INTERVAL</code></pre>
-  </div>
-
-  <div class="checkpoint">
-    <div class="cp-title">CHECKPOINT</div>
-    <label class="cp-item"><input type="checkbox" data-cp="t5"><span>console exporter로 token/cost 메트릭이 출력되는 것을 확인했습니다</span></label>
-  </div>
+<div class="step-title"><span class="step-no">2</span>정리</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-026" data-copy-label="Terminal 복사" type="button">복사</button></div>
+<pre id="workshop-code-026"><code>unset CLAUDE_CODE_ENABLE_TELEMETRY OTEL_METRICS_EXPORTER OTEL_METRIC_EXPORT_INTERVAL</code></pre>
+</div>
+<div class="checkpoint">
+<div class="cp-title">CHECKPOINT</div>
+<label class="cp-item"><input data-cp="t5" type="checkbox"/><span>console exporter로 token/cost 메트릭이 출력되는 것을 확인했습니다</span></label>
+</div>
 </section>
-
 <!-- ================= Wrap-up ================= -->
 <section class="wrapup" id="wrapup">
-  <h2>마무리, 학습 목표 체크리스트</h2>
-  <p class="sub">Chapter 3의 관리자 학습 목표를 스스로 점검하세요. 미달성 항목은 진행자에게 질문하거나 강의 자료의 해당 Part를 다시 확인합니다.</p>
-  <table class="tbl">
-    <tr><th>목표</th><th>확인 질문</th><th>관련</th></tr>
-    <tr><td>Deploy</td><td>사내 미러로 오프라인 배포의 기초(캐시)를 확인했는가</td><td>Task 1</td></tr>
-    <tr><td>Credential</td><td>API Key 대비 SSO+Bedrock의 이점과 IAM 정책을 설명할 수 있는가</td><td>Task 2</td></tr>
-    <tr><td>Governance</td><td>Managed 스코프의 우선순위와 deny 우선 규칙을 체험했는가</td><td>Task 3</td></tr>
-    <tr><td>DLP</td><td>PreToolUse Hook(exit 2)으로 내용 기반 차단을 구현했는가</td><td>Task 4</td></tr>
-    <tr><td>Observe</td><td>텔레메트리 흐름을 확인하고 SIEM 연동 경로를 이해했는가</td><td>Task 5</td></tr>
-    <tr><td>Cleanup</td><td>시스템 경로의 managed-settings와 Hook을 원복했는가</td><td>Task 4</td></tr>
-  </table>
-
-  <div class="step-title"><span class="step-no" style="background:transparent;color:var(--accent);border:1px solid var(--accent)">R</span>실행 로드맵, 분기별 도입</div>
-  <table class="tbl">
-    <tr><th>분기</th><th>목표</th><th>주요 활동</th></tr>
-    <tr><td>Q1 / PoC</td><td>5-10인 시범 도입</td><td>API Key + 사용 패턴 관찰</td></tr>
-    <tr><td>Q2 / Foundation</td><td>클라우드 자격증명 전환</td><td>Bedrock + SSO 통합</td></tr>
-    <tr><td>Q3 / Governance</td><td>권한 정책과 감사 시스템</td><td>managed-settings + SIEM</td></tr>
-    <tr><td>Q4 / Scale</td><td>전 조직 확산</td><td>교육 + 자동화 + 모니터링</td></tr>
-  </table>
-  <p class="body">한 번에 모든 것을 하지 말고 점진적으로 도입하세요. 각 분기의 학습을 다음 분기 계획에 반영하는 사이클이 가장 효과적입니다.</p>
-
-  <div class="next-box">
-    <div>
-      <div class="nx-label">NEXT CHAPTER</div>
-      <h3>Chapter 4 - Settings</h3>
-      <p>이번 챕터에서 관리자 관점으로 다룬 설정 계층을, Chapter 4에서는 개발자 관점의 일상 설정으로 심화합니다. settings.json의 주요 키, Hooks 활용 패턴, MCP 서버 연결을 다룹니다.</p>
-    </div>
-  </div>
-</section>
-
-</main>
+<h2>마무리, 학습 목표 체크리스트</h2>
+<p class="sub">Chapter 3의 관리자 학습 목표를 스스로 점검하세요. 미달성 항목은 강사에게 질문하거나 강의 자료의 해당 Part를 다시 확인합니다.</p>
+<table class="tbl">
+<tr><th>목표</th><th>확인 질문</th><th>관련</th></tr>
+<tr><td>Deploy</td><td>사내 미러로 오프라인 배포의 기초(캐시)를 확인했는가</td><td>Task 1</td></tr>
+<tr><td>Credential</td><td>API Key 대비 SSO+Bedrock의 이점과 IAM 정책을 설명할 수 있는가</td><td>Task 2</td></tr>
+<tr><td>Governance</td><td>Managed 스코프의 우선순위와 deny 우선 규칙을 체험했는가</td><td>Task 3</td></tr>
+<tr><td>DLP</td><td>PreToolUse Hook(exit 2)으로 내용 기반 차단을 구현했는가</td><td>Task 4</td></tr>
+<tr><td>Observe</td><td>텔레메트리 흐름을 확인하고 SIEM 연동 경로를 이해했는가</td><td>Task 5</td></tr>
+<tr><td>Cleanup</td><td>시스템 경로의 managed-settings와 Hook을 원복했는가</td><td>Task 4</td></tr>
+</table>
+<div class="step-title"><span class="step-no" style="background:transparent;color:var(--accent);border:1px solid var(--accent)">R</span>실행 로드맵, 분기별 도입</div>
+<table class="tbl">
+<tr><th>분기</th><th>목표</th><th>주요 활동</th></tr>
+<tr><td>Q1 / PoC</td><td>5-10인 시범 도입</td><td>API Key + 사용 패턴 관찰</td></tr>
+<tr><td>Q2 / Foundation</td><td>클라우드 자격증명 전환</td><td>Bedrock + SSO 통합</td></tr>
+<tr><td>Q3 / Governance</td><td>권한 정책과 감사 시스템</td><td>managed-settings + SIEM</td></tr>
+<tr><td>Q4 / Scale</td><td>전 조직 확산</td><td>교육 + 자동화 + 모니터링</td></tr>
+</table>
+<p class="body">한 번에 모든 것을 하지 말고 점진적으로 도입하세요. 각 분기의 학습을 다음 분기 계획에 반영하는 사이클이 가장 효과적입니다.</p>
+<div class="next-box">
+<div>
+<div class="nx-label">NEXT CHAPTER</div>
+<h3>Chapter 4 - Settings</h3>
+<p>이번 챕터에서 관리자 관점으로 다룬 설정 계층을, Chapter 4에서는 개발자 관점의 일상 설정으로 심화합니다. settings.json의 주요 키, Hooks 활용 패턴, MCP 서버 연결을 다룹니다.</p>
 </div>
-
+</div>
+</section>
+</div>
+</div>
 <footer>
-  <div class="who">Claude Code Deep Dive Workshop, Chapter 3 Hands-on Lab</div>
-  <div>기준: Claude Code 2.1.x, 2026.07 / 경로와 출력은 OS와 버전에 따라 일부 다를 수 있습니다</div>
+<div class="who">Claude Code Deep Dive Workshop, Chapter 3 Hands-on Lab</div>
+<div>기준: Claude Code 2.1.267, 2026.09 / 경로와 출력은 OS와 버전에 따라 일부 다를 수 있습니다</div>
 </footer>
 
+
+
+</div>
+<section class="reading-check js-only" aria-label="읽기 기록">
+  <div><p class="eyebrow">READING CHECK</p><h2>이 페이지를 읽으셨나요?</h2>
+    <p>읽음 표시는 실습 체크포인트와 별도로 관리됩니다. <span data-chapter-state>아직 읽지 않음</span></p></div>
+  <button class="button primary-button" type="button" data-progress-toggle aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span data-toggle-label>읽음으로 표시</span></button>
+</section>
+<nav class="page-pagination" aria-label="과정 이동">
+  <a class="pagination-link" href="index.html"><span><small>전체 과정</small><strong>워크샵 홈으로</strong></span></a>
+  <a class="pagination-link next" href="ClaudeCode_Ch4_HandsOnLab.html"><span><small>다음으로</small><strong>Settings · 팀의 플랫폼</strong></span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a>
+</nav></article>
+      <details class="article-toc" data-page-toc open><summary>이 페이지에서<span class="toc-toggle" aria-hidden="true">⌄</span></summary><nav aria-label="페이지 목차"><aside aria-label="랩 목차" class="sidenav">
+<div class="nav-title">LAB CONTENTS</div>
+<a data-nav="flow" data-toc-link="" href="#flow"><span class="dot"></span>진행 흐름<span class="nav-time"></span></a>
+<a data-nav="t0" data-toc-link="" href="#t0"><span class="dot"></span>사전 준비 확인<span class="nav-time">2분</span></a>
+<a data-nav="t1" data-toc-link="" href="#t1"><span class="dot"></span>Task 1 사내 npm 미러<span class="nav-time">9분</span></a>
+<a data-nav="t2" data-toc-link="" href="#t2"><span class="dot"></span>Task 2 Bedrock + SSO<span class="nav-time">7분</span></a>
+<a data-nav="t3" data-toc-link="" href="#t3"><span class="dot"></span>Task 3 managed-settings<span class="nav-time">10분</span></a>
+<a data-nav="t4" data-toc-link="" href="#t4"><span class="dot"></span>Task 4 DLP Hook<span class="nav-time">9분</span></a>
+<a data-nav="t5" data-toc-link="" href="#t5"><span class="dot"></span>Task 5 OTel 텔레메트리<span class="nav-time">3분</span></a>
+<a data-nav="wrapup" data-toc-link="" href="#wrapup"><span class="dot"></span>마무리와 실행 로드맵<span class="nav-time"></span></a>
+</aside></nav><a class="back-to-top" href="#workshop-main">맨 위로 ↑</a></details>
+    </div>
+  </main>
+  <footer class="site-footer"><span>CLAUDE CODE DEEP DIVE WORKSHOP <span class="footer-date">My Workshop Reader</span></span><a href="index.html">전체 과정 ↑</a></footer>
+</div>
+<p class="reader-status" data-reader-status role="status" aria-live="polite"></p>
 <script>
 (function () {
   "use strict";
@@ -1241,22 +761,6 @@ descriptor:
   }
 })();
 </script>
-<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
-<script>
-(function(){
-  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
-  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
-  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
-  if(saved==='light'){ root.setAttribute('data-theme','light'); }
-  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
-  label();
-  btn.addEventListener('click',function(){
-    var light = root.getAttribute('data-theme')==='light';
-    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
-    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
-    label();
-  });
-})();
-</script>
-</body>
-</html>
+<script src="assets/reader.js"></script>
+<script src="assets/workshop.js"></script>
+</body></html>

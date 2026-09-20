@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+<title>Capstone 시작 전 설치 - Claude Code Deep Dive Workshop</title>
+<style>
+:root {
+  --bg: #12181F;
+  --bg-card: #1B242E;
+  --bg-code: #0C1117;
+  --bg-inline: #232E3A;
+  --line: #2A3542;
+  --orange: #FF9900;
+  --orange-dim: rgba(255, 153, 0, 0.14);
+  --crimson: #B6002E;
+  --green: #3FB950;
+  --green-dim: rgba(63, 185, 80, 0.12);
+  --text: #E2E4EC;
+  --muted: #A6ABBE;
+  --dim: #7B8198;
+  --font-body: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-code: "D2Coding", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(255, 153, 0, 0.3); }
+a { color: var(--orange); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+/* ============ Hero ============ */
+.hero {
+  position: relative;
+  padding: 64px 32px 44px;
+  max-width: 1160px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -140px; right: -180px;
+  width: 460px; height: 460px;
+  background: radial-gradient(closest-side, rgba(182, 0, 46, 0.28), rgba(255, 153, 0, 0.10) 55%, transparent 75%);
+  pointer-events: none;
+}
+.eyebrow {
+  display: inline-block;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.hero h1 {
+  font-size: clamp(28px, 4.4vw, 42px);
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  max-width: 780px;
+}
+.hero .subtitle {
+  margin-top: 14px;
+  color: var(--orange);
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 700;
+}
+.hero .lede {
+  margin-top: 18px;
+  color: var(--muted);
+  max-width: 720px;
+  font-size: 15.5px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin-top: 26px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.hero-meta strong { color: var(--text); font-weight: 700; }
+
+/* ============ Sticky timeline ============ */
+.timeline {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(12, 17, 23, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.timeline-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.timeline-label {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.timeline-label strong { color: var(--orange); font-size: 13px; }
+.segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  height: 26px;
+}
+.seg {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg-card);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  padding: 0;
+  font-family: var(--font-body);
+}
+.seg:hover { border-color: var(--orange); }
+.seg .fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 153, 0, 0.85), rgba(255, 153, 0, 0.65));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.seg.done .fill { transform: scaleX(1); }
+.seg .seg-txt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.seg.done .seg-txt { color: #12181F; }
+.seg.active { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
+
+/* ============ Layout ============ */
+.layout {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 44px 32px 80px;
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 52px;
+  align-items: start;
+}
+.sidenav {
+  position: sticky;
+  top: 66px;
+  font-size: 13.5px;
+}
+.sidenav .nav-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  margin-bottom: 14px;
+}
+.sidenav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 7px 10px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+.sidenav a:hover { color: var(--text); background: var(--bg-card); text-decoration: none; }
+.sidenav a.active { color: var(--orange); border-left-color: var(--orange); background: var(--bg-card); }
+.sidenav .dot {
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dim);
+}
+.sidenav a.done .dot { background: var(--green); border-color: var(--green); }
+.sidenav .nav-time { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+/* ============ Task sections ============ */
+.task { margin-bottom: 72px; }
+.task-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.task-num {
+  font-family: var(--font-code);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 0.1em;
+}
+.task-head h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.time-badge {
+  margin-left: auto;
+  flex: none;
+  background: var(--orange-dim);
+  color: var(--orange);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.task-goal {
+  color: var(--muted);
+  margin-bottom: 24px;
+  max-width: 760px;
+}
+.task-goal strong { color: var(--text); }
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16.5px;
+  font-weight: 800;
+  margin: 34px 0 12px;
+}
+.step-title .step-no {
+  flex: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #12181F;
+  font-size: 12.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+p.body { color: var(--muted); margin: 10px 0 14px; max-width: 760px; }
+p.body strong, li strong { color: var(--text); }
+code.inline {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  background: var(--bg-inline);
+  color: #FFC466;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+kbd {
+  font-family: var(--font-code);
+  font-size: 0.82em;
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: var(--text);
+}
+
+/* ============ Code blocks ============ */
+.code-wrap {
+  background: var(--bg-code);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 14px 0 20px;
+  overflow: hidden;
+}
+.code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+.code-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.copy-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.code-wrap pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.code-wrap code { font-family: inherit; color: #D8DEE9; }
+.code-wrap.output pre { color: var(--dim); }
+.code-wrap .cmt { color: #5E6B7E; }
+.code-wrap .hl { color: #FFC466; }
+.code-wrap .ok { color: var(--green); }
+
+/* ============ Callouts ============ */
+.callout {
+  border-radius: 8px;
+  background: var(--bg-card);
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14.5px;
+  color: var(--muted);
+  max-width: 760px;
+}
+.callout strong { color: var(--text); }
+.callout.tip .co-title { color: var(--orange); }
+
+.callout .co-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 5px;
+}
+
+.callout.warn .co-title { color: #FF5C85; }
+
+/* ============ Checkpoint ============ */
+.checkpoint {
+  background: var(--green-dim);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 28px;
+}
+.checkpoint .cp-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+.cp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+.cp-item input {
+  flex: none;
+  margin-top: 5px;
+  width: 15px; height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+.cp-item input:checked + span { color: var(--text); }
+
+/* ============ Tabs ============ */
+.tabs { margin: 18px 0 6px; }
+.tab-btns {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dim);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 9px 16px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+.tab-pane { display: none; padding-top: 16px; }
+.tab-pane.active { display: block; }
+
+/* ============ Tables ============ */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 14px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tbl th, .tbl td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid #FFFFFF14;
+}
+.tbl th {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+  background: rgba(255, 255, 255, 0.03);
+}
+.tbl td { color: var(--muted); vertical-align: middle; }
+.tbl td:first-child { color: var(--text); font-weight: 700; white-space: nowrap; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl code { font-family: var(--font-code); font-size: 0.9em; color: #FFC466; }
+
+/* ============ Wrap-up ============ */
+.wrapup {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 32px 34px;
+  margin-bottom: 56px;
+}
+.wrapup h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.wrapup .sub { color: var(--muted); font-size: 14.5px; margin-bottom: 18px; }
+.next-box {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(182, 0, 46, 0.16), rgba(255, 153, 0, 0.08));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 26px;
+}
+.next-box .nx-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--orange);
+}
+.next-box h3 { font-size: 19px; font-weight: 800; }
+.next-box p { color: var(--muted); font-size: 14px; }
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 30px 32px 46px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.9;
+}
+footer .who { color: var(--muted); font-weight: 700; }
+footer .mail { color: var(--orange); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 20px 64px; }
+  .sidenav { display: none; }
+  .hero { padding: 44px 20px 32px; }
+  .timeline-inner { padding: 10px 20px; }
+  .seg .seg-txt { font-size: 9px; }
+  .task-head h2 { font-size: 20px; }
+}
+
+/* ===== Chapter 4 additions: Super Lab ===== */
+.part-divider { margin: 72px 0 12px; padding: 30px 34px; border-radius: 14px;
+  background: linear-gradient(135deg, #1d1433 0%, #12181F 65%); border: 1px solid #45306b; }
+.part-divider .pd-eyebrow { display: inline-block; background: #7a3ff2; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: .14em; padding: 4px 12px; border-radius: 4px; }
+.part-divider h2 { margin: 14px 0 8px; font-size: 26px; color: var(--text); }
+.part-divider p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.75; max-width: 860px; }
+.part-divider .rules { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+.part-divider .rules span { background: #241a3d; border: 1px solid #45306b; color: #d9c9ff;
+  font-size: 12.5px; padding: 6px 12px; border-radius: 999px; }
+.task.mission .task-num { color: #c9a2ff; }
+.task.mission { border-color: #3a2a57; }
+.checkpoint.dod { border-color: #7a3ff2; background: rgba(122, 63, 242, .06); }
+.checkpoint.dod .cp-title { color: #c9a2ff; }
+details.solution { margin: 18px 0; border: 1px dashed #FF9900; border-radius: 10px; background: rgba(255,153,0,.04); }
+details.solution summary { cursor: pointer; padding: 12px 16px; color: var(--accent); font-weight: 700; font-size: 13.5px; list-style: none; }
+details.solution summary::before { content: "▸ "; }
+details.solution[open] summary::before { content: "▾ "; }
+details.solution .sol-body { padding: 0 16px 14px; }
+
+/* ── Korean typography fix: 단어 단위 줄바꿈, 히어로 정돈 ── */
+body { word-break: keep-all; overflow-wrap: break-word; }
+.hero h1 { max-width: 980px; font-size: clamp(26px, 4vw, 38px); text-wrap: balance; }
+.hero .subtitle, .hero .lede, .task-goal, .wrapup .sub { text-wrap: pretty; }
+
+/* ── 잘림 방지 v2: 히어로 압축 + 좁은 화면 대응 ── */
+.hero { padding: 44px 28px 34px; }
+.eyebrow { margin-bottom: 14px; }
+.hero h1 { line-height: 1.3; }
+.hero .subtitle { margin-top: 10px; }
+.hero .lede { margin-top: 12px; }
+.seg-txt { text-overflow: ellipsis; }
+@media (max-width: 620px) {
+  .hero { padding: 26px 16px 24px; }
+  .hero h1 { font-size: 23px; }
+  .hero .subtitle { font-size: 15px; }
+  .hero .lede { font-size: 14px; }
+  .hero-meta { gap: 6px 14px; font-size: 12px; }
+  .seg .seg-txt { display: none; }
+  .timeline-inner { padding: 0 10px; }
+}
+
+/* ── 잘림 방지 v3: 좁은 화면 가로 넘침 제거 ── */
+.tbl { display: block; overflow-x: auto; max-width: 100%; }
+.hero, .layout, .timeline-inner, main, section { min-width: 0; }
+@media (max-width: 620px) {
+  .timeline-label:last-child { display: none; }
+}
+
+/* ── 잘림 방지 v4: 인라인 코드 칩의 최소폭 강제 해제 ── */
+code.inline { white-space: normal; overflow-wrap: anywhere; }
+
+/* ── v5: 소개문/본문 전체 폭 사용 (가독성 캡 해제) ── */
+.hero .lede, .task-goal, p.body, .callout, .part-divider p, .wrapup .sub { max-width: none; }
+.hero .lede { text-wrap: wrap; }
+
+/* ── macOS 터미널 스타일: 신호등 3버튼 ── */
+.code-head { position: relative; padding-left: 76px; }
+.code-head::before {
+  content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 11px; height: 11px; border-radius: 50%; background: #FF5F57;
+  box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
+}
+</style>
+<style id="hol-theme">
+html[data-theme="light"]{
+  --bg:#F3F4F7; --bg-card:#FFFFFF; --bg-code:#EEF1F5; --bg-inline:#E4E9EF; --line:#D7DDE5;
+  --orange:#B45309; --orange-dim:rgba(180,83,9,.12);
+  --green:#1F883D; --green-dim:rgba(31,136,61,.12);
+  --text:#1B2430; --muted:#5B6472; --dim:#75808F;
+  background:#F3F4F7;
+}
+html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
+html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
+#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
+background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
+border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
+font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#themeToggle:hover{border-color:var(--orange,#FF9900)}
+html[data-theme="light"] .code-wrap code{color:#2A3542}
+html[data-theme="light"] .code-wrap.output code{color:#57606E}
+html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
+html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
+html[data-theme="light"] .k.s{background:#DCEEDC}
+html[data-theme="light"] .k.w{background:#E9E2F7}
+html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
+html[data-theme="light"] .code-wrap .hl{color:#B45309}
+html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
+html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
+html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
+html[data-theme="light"] .head .when{color:#FF9900}
+html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
+html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
+html[data-theme="light"] .part-divider{background:linear-gradient(135deg,#EDE6FA 0%,#FFFFFF 65%);border-color:#B79CEF}
+html[data-theme="light"] .part-divider h2{color:#1B2430}
+html[data-theme="light"] .part-divider .rules span{background:#EDE6FA;border-color:#B79CEF;color:#5B21C7}
+html[data-theme="light"] .tbl code{color:#B45309}
+html[data-theme="light"] .task.mission .task-num{color:#6b46c1}
+html[data-theme="light"] .checkpoint.dod .cp-title{color:#6b46c1}
+@media print{#themeToggle{display:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">HANDS-ON LAB / CAPSTONE SETUP</span>
+  <h1>Capstone 시작 전, 설치하면 좋은 것들</h1>
+  <div class="subtitle">HUD, superpowers, AWS 툴킷, 그리고 풀 스택 플러그인 세트</div>
+  <p class="lede">
+    캡스톤은 빌드 밀도가 높아서 <strong>세션 계기판과 도구 셋업</strong>이 곧 속도입니다.
+    상태 HUD로 토큰과 에이전트를 상시 관찰하고, 캡스톤 M0가 쓰는 superpowers와
+    AWS 툴킷, 그리고 취향껏 고르는 풀 스택 플러그인까지 15분에 정리합니다.
+    전부 선택이지만, 1번(HUD)과 2번(superpowers)은 강력 추천입니다.
+  </p>
+  <div class="hero-meta">
+    <span>소요 시간 <strong>15분 내외</strong></span>
+    <span>단계 <strong>4개</strong></span>
+    <span>필요 <strong>네트워크 (플러그인 다운로드)</strong></span>
+    <span>Update <strong>2026.07</strong></span>
+  </div>
+</header>
+
+<nav class="timeline" aria-label="설치 진행 타임라인">
+  <div class="timeline-inner">
+    <span class="timeline-label">진행 <strong id="progress-count">0/4</strong></span>
+    <div class="segments" id="segments">
+      <button class="seg" data-task="s1" style="flex:5" title="Claude HUD, 5분"><span class="fill"></span><span class="seg-txt">1 HUD</span></button>
+      <button class="seg" data-task="s2" style="flex:2" title="superpowers, 2분"><span class="fill"></span><span class="seg-txt">2 superpowers</span></button>
+      <button class="seg" data-task="s3" style="flex:3" title="AWS 툴킷, 3분"><span class="fill"></span><span class="seg-txt">3 AWS 툴킷</span></button>
+      <button class="seg" data-task="s4" style="flex:5" title="풀 스택 세트, 5분"><span class="fill"></span><span class="seg-txt">4 풀 스택 세트</span></button>
+    </div>
+    <span class="timeline-label">15 min</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+<aside class="sidenav" aria-label="목차">
+  <div class="nav-title">SETUP / 15분</div>
+  <a href="#s1" data-nav="s1"><span class="dot"></span>1 Claude HUD<span class="nav-time">5분</span></a>
+  <a href="#s2" data-nav="s2"><span class="dot"></span>2 superpowers<span class="nav-time">2분</span></a>
+  <a href="#s3" data-nav="s3"><span class="dot"></span>3 Agent Toolkit for AWS<span class="nav-time">3분</span></a>
+  <a href="#s4" data-nav="s4"><span class="dot"></span>4 풀 스택 플러그인 세트<span class="nav-time">5분</span></a>
+  <a href="#wrapup" data-nav="wrapup"><span class="dot"></span>마무리 점검<span class="nav-time"></span></a>
+</aside>
+
+<main>
+
+<section class="task" id="s1">
+  <div class="task-head"><span class="task-num">SETUP 01</span><h2>Claude HUD, 세션 계기판</h2><span class="time-badge">5분</span></div>
+  <p class="task-goal">
+    상태줄에 <strong>토큰 사용량, 활성 에이전트, 투두, 깃 상태</strong>를 상시 표시하는 HUD 플러그인입니다.
+    캡스톤처럼 긴 빌드에서 컨텍스트가 얼마나 남았는지 감으로가 아니라 눈으로 봅니다.
+    원본: <a href="https://github.com/jarrodwatts/claude-hud" style="color:#c9a2ff">github.com/jarrodwatts/claude-hud</a>
+  </p>
+
+  <div class="step-title"><span class="step-no">1</span>설치와 설정, 순서대로 한 줄씩</div>
+  <p class="body">Claude 세션 안에서 다섯 줄이면 끝납니다. <strong>순서가 중요합니다</strong>: 마켓 등록 → 설치 → 리로드 → 표시 항목 설정 → 상태줄 활성화. 마지막 setup까지 마쳐야 하단 바가 나타납니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력 1/5</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/plugin marketplace add jarrodwatts/claude-hud</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력 2/5</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/plugin install claude-hud</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력 3/5</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/reload-plugins</code></pre>
+  </div>
+  <p class="body"><code class="inline">/reload-plugins</code>로 설치를 세션에 반영한 뒤 설정 커맨드가 열립니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력 4/5</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/claude-hud:configure</code></pre>
+  </div>
+  <p class="body"><code class="inline">/claude-hud:configure</code>는 상태줄에 무엇을 띄울지(토큰, 도구, 스킬, 에이전트, 깃 상태 등)
+  대화형으로 고르는 단계입니다. 고민되면 프리셋 Full로 전부 켜 두고, 나중에 같은 커맨드로 다시 조정하면 됩니다.
+  스킬, 도구, 에이전트 표시는 기본 숨김이라 여기서 켜야 하며, 해당 활동이 있을 때만 바에 나타납니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력 5/5</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/claude-hud:setup</code></pre>
+  </div>
+  <div class="callout tip">
+    <span class="co-title">하단 바가 안 보인다면</span>
+    다섯 줄의 <strong>순서</strong>를 지켰는지 먼저 확인하세요, 특히 리로드 전에 configure를 치면 커맨드가 없다고 나옵니다.
+    그래도 조용하면 <code class="inline">/exit</code>로 나갔다가 <code class="inline">claude</code>로 재진입하면 상태줄이 뜹니다.
+  </div>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="s1"><span>재진입 후 상태줄에 토큰/깃 정보가 표시된다</span></label>
+  </div>
+</section>
+
+<section class="task" id="s2">
+  <div class="task-head"><span class="task-num">SETUP 02</span><h2>superpowers</h2><span class="time-badge">2분</span></div>
+  <p class="task-goal">
+    캡스톤 M0가 사용하는 <strong>브레인스토밍부터 실행까지의 구조화 워크플로</strong>입니다.
+    공식 마켓은 자동 등록이므로 설치 한 줄이면 됩니다.
+  </p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/plugin install superpowers@claude-plugins-official</code></pre>
+  </div>
+  <p class="body">이미 설치돼 있으면 already 메시지가 나옵니다. 정상입니다.
+  설치 확인은 <code class="inline">/plugin</code> 목록에서 <code class="inline">/brainstorm</code>이 보이는지로 합니다.</p>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="s2"><span>슬래시 목록에 /brainstorm이 보인다</span></label>
+  </div>
+</section>
+
+<section class="task" id="s3">
+  <div class="task-head"><span class="task-num">SETUP 03</span><h2>Agent Toolkit for AWS</h2><span class="time-badge">3분</span></div>
+  <p class="task-goal">
+    캡스톤의 <strong>CDK 배포, Lambda 작업, 데이터 파이프라인</strong>에서 Claude에게 AWS 지식과
+    안전 가드를 쥐여 주는 툴킷 6종입니다. 역할을 훑고 터미널 루프로 일괄 설치합니다.
+  </p>
+  <table class="tbl">
+    <tr><th>플러그인</th><th>역할</th></tr>
+    <tr><td><code class="inline">aws-core</code></td><td>공통 기반. 최신 AWS 문서와 검증된 절차, IAM 가드레일을 세션에 공급, 나머지 다섯의 토대</td></tr>
+    <tr><td><code class="inline">aws-agents</code></td><td>Bedrock 기반 에이전트 설계와 배포(AgentCore 계열) 작업 지원</td></tr>
+    <tr><td><code class="inline">aws-data-analytics</code></td><td>데이터 파이프라인과 분석 스택(수집, 카탈로그, 쿼리) 작업 지원</td></tr>
+    <tr><td><code class="inline">aws-agents-for-devsecops</code></td><td>보안과 컴플라이언스 관점의 점검, DevSecOps 워크플로 지원</td></tr>
+    <tr><td><code class="inline">databases-on-aws</code></td><td>RDS, DynamoDB 등 데이터베이스 설계와 운영 작업 지원</td></tr>
+    <tr><td><code class="inline">aws-serverless</code></td><td>Lambda, API Gateway 등 서버리스 개발과 배포 지원. 캡스톤의 Lambda 작업과 직결</td></tr>
+  </table>
+  <p class="body">정확한 커맨드와 범위는 설치 후 <code class="inline">/plugin</code> 목록의 설명에서 확인하세요.</p>
+
+  <div class="step-title"><span class="step-no">1</span>일괄 설치, 터미널 루프</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>for p in aws-core aws-agents aws-data-analytics aws-agents-for-devsecops databases-on-aws aws-serverless; do
+  claude plugin install "$p@claude-plugins-official"
+done</code></pre>
+  </div>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="s3"><span>/plugin 목록에 AWS 툴킷 6종이 설치됨으로 보인다</span></label>
+  </div>
+</section>
+
+<section class="task" id="s4">
+  <div class="task-head"><span class="task-num">SETUP 04</span><h2>풀 스택 플러그인 세트, 32종 일괄</h2><span class="time-badge">5분</span></div>
+  <p class="task-goal">
+    프론트엔드부터 인프라까지 <strong>취향껏 고르는 확장 세트</strong>입니다. 특히
+    <code class="inline">context7</code>(라이브러리 최신 문서를 컨텍스트로 주입)과
+    <code class="inline">playwright</code>(브라우저 자동화)는 캡스톤 C, D의 프런트 검증에서 바로 씁니다.
+  </p>
+
+  <table class="tbl">
+    <tr><th>갈래</th><th>플러그인</th></tr>
+    <tr><td>개발 워크플로</td><td>feature-dev, commit-commands, pr-review-toolkit, code-review, ralph-loop, hookify, plugin-dev, agent-sdk-dev, claude-code-setup, claude-md-management</td></tr>
+    <tr><td>코드 품질 / LSP</td><td>code-simplifier, security-guidance, typescript-lsp, pyright-lsp, serena</td></tr>
+    <tr><td>문서 / 컨텍스트</td><td>context7, microsoft-docs, remember, explanatory-output-style</td></tr>
+    <tr><td>브라우저 / 프런트</td><td>playwright, chrome-devtools-mcp, frontend-design, figma, playground</td></tr>
+    <tr><td>외부 서비스</td><td>github, slack, linear, vercel, supabase</td></tr>
+    <tr><td>데이터 / 인프라</td><td>data-engineering, deploy-on-aws, terraform</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">1</span>일괄 설치, 터미널 루프</div>
+  <p class="body">세션 밖 터미널에서 CLI로 한 번에 설치합니다. 이미 설치된 것은 already로 지나갑니다.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>for p in frontend-design code-review context7 code-simplifier github playwright claude-md-management feature-dev security-guidance typescript-lsp vercel ralph-loop claude-code-setup commit-commands figma supabase pr-review-toolkit pyright-lsp chrome-devtools-mcp serena slack plugin-dev agent-sdk-dev explanatory-output-style playground hookify linear remember microsoft-docs data-engineering deploy-on-aws terraform; do
+  claude plugin install "$p@claude-plugins-official"
+done</code></pre>
+  </div>
+  <div class="callout warn">
+    <span class="co-title">많이 깔수록 공짜가 아닙니다</span>
+    Chapter 4에서 본 것처럼 플러그인의 도구와 스킬 설명은 <strong>세션 컨텍스트에 로드</strong>됩니다.
+    설치 후 <code class="inline">/context all</code>로 비용을 확인하고, 당장 안 쓰는 것은
+    <code class="inline">/plugin</code>에서 disable해 두는 것이 캡스톤 컨텍스트 관리의 정석입니다.
+    개별 플러그인의 정확한 역할은 /plugin 목록의 설명으로 확인하세요.
+  </div>
+
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="s4"><span>일괄 설치가 끝났고 /plugin 목록으로 확인했다 (또는 의도적으로 스킵)</span></label>
+  </div>
+
+  <div class="step-title"><span class="step-no">+</span>보너스, 실시간 웹 검색 붙이기</div>
+  <p class="body">
+    이 워크샵 환경에는 <strong>Amazon Bedrock AgentCore Gateway</strong>의 Web Search 도구가
+    미리 배포되어 있습니다. 아래 명령 하나로 MCP 서버로 등록됩니다 - 게이트웨이 주소 조회부터
+    등록까지 스크립트가 알아서 처리하므로 인자가 필요 없습니다.
+    캡스톤 리서치(최신 서비스 발표, 라이브러리 문서 이후의 변경 사항)에서 바로 씁니다.
+  </p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>use_websearch</code></pre>
+  </div>
+  <p class="body">
+    등록 후 <code class="inline">claude</code>에서 <code class="inline">/mcp</code>에
+    <code class="inline">agentcore-web-search ✔ connected</code>가 보이면 완료 -
+    "최근 AWS 신규 서비스 발표 알려줘"처럼 최신 정보 질문을 던지면 실제 웹 출처(URL, 발행일)가
+    인용됩니다. 쿼리는 AWS 밖으로 나가지 않습니다(Amazon 자체 웹 인덱스).
+    "게이트웨이가 준비되지 않았습니다"가 나오면 이 환경에선 미제공이니 그대로 진행하세요.
+  </p>
+</section>
+
+<section class="wrapup" id="wrapup">
+  <h2>마무리 점검</h2>
+  <p class="sub">새 세션으로 들어가 계기판과 도구가 제자리인지 봅니다.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 재진입</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/claude-lab &amp;&amp; claude</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 최종 확인</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/plugin
+/context all</code></pre>
+  </div>
+  <table class="tbl">
+    <tr><th>확인</th><th>기대</th></tr>
+    <tr><td>상태줄</td><td>HUD가 토큰, 에이전트, 깃 상태를 표시</td></tr>
+    <tr><td>/plugin</td><td>superpowers, AWS 툴킷 6종, 선택 설치분이 목록에</td></tr>
+    <tr><td>/context all</td><td>플러그인 도구가 차지하는 컨텍스트 파악, 과하면 disable</td></tr>
+  </table>
+  <div class="next-box">
+    <div>
+      <div class="nx-label">NEXT</div>
+      <h3>Capstone으로</h3>
+      <p>포털의 네 트랙 중, Day 1에는 <strong>Capstone 1(Press Start, 게임)</strong> 또는 <strong>Capstone 3(Frame It, 미술관)</strong>을, Day 1 라운드 1은 <strong>Capstone 1(게임)</strong> / <strong>Capstone 3(미술관)</strong> / <strong>Capstone 5(지진 워치)</strong>, Day 2 라운드 2는 <strong>Capstone 2(증시)</strong> / <strong>Capstone 4(유튜브)</strong> / <strong>Capstone 6(뉴스룸 렌즈)</strong> 중 하나를 골라 미션을 시작하세요.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<footer>
+  <div class="who">Claude Code Deep Dive Workshop, Capstone Setup</div>
+  <div>기준: Claude Code 2.1.x + claude-plugins-official, 2026.07</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".code-wrap").querySelector("pre");
+      var text = pre.textContent.replace(/\n{3,}/g, "\n\n").trim();
+      function done() {
+        var old = btn.textContent;
+        btn.textContent = "복사됨 ✓";
+        btn.classList.add("copied");
+        setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () { fallback(); });
+      } else { fallback(); }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+  var taskGroups = { s1:["s1"], s2:["s2"], s3:["s3"], s4:["s4"] };
+  /* 챕터형 예: { t0:["t0"], t1:["t1a","t1b"], ... } 진행 라벨 "0/5"
+     캡스톤형 예: { m0:["m0a","m0b"], m1:["m1"], ... m5:["m5"] } 진행 라벨 "0/6" */
+  var state = {};
+  function refresh() {
+    var doneCount = 0;
+    Object.keys(taskGroups).forEach(function (task) {
+      var allDone = taskGroups[task].every(function (cp) { return state[cp]; });
+      if (allDone) doneCount++;
+      var seg = document.querySelector('.seg[data-task="' + task + '"]');
+      if (seg) seg.classList.toggle("done", allDone);
+      var nav = document.querySelector('.sidenav a[data-nav="' + task + '"]');
+      if (nav) nav.classList.toggle("done", allDone);
+    });
+    var pc = document.getElementById("progress-count");
+    if (pc) pc.textContent = doneCount + "/4";
+  }
+  document.querySelectorAll('.cp-item input[type="checkbox"]').forEach(function (cb) {
+    cb.addEventListener("change", function () { state[cb.dataset.cp] = cb.checked; refresh(); });
+  });
+  document.querySelectorAll(".seg").forEach(function (seg) {
+    seg.addEventListener("click", function () {
+      var el = document.getElementById(seg.dataset.task);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidenav a[data-nav]");
+  var segs = document.querySelectorAll(".seg[data-task]");
+  if ("IntersectionObserver" in window) {
+    var current = null;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) current = entry.target.id; });
+      if (!current) return;
+      navLinks.forEach(function (a) { a.classList.toggle("active", a.dataset.nav === current); });
+      segs.forEach(function (s) { s.classList.toggle("active", s.dataset.task === current); });
+    }, { rootMargin: "-20% 0px -65% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
+<script>
+(function(){
+  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
+  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
+  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
+  if(saved==='light'){ root.setAttribute('data-theme','light'); }
+  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
+  label();
+  btn.addEventListener('click',function(){
+    var light = root.getAttribute('data-theme')==='light';
+    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
+    label();
+  });
+})();
+</script>
+</body>
+</html>

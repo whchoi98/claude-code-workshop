@@ -1,237 +1,211 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
-<title>Reference 2, 슬래시 커맨드 - Claude Code Deep Dive Workshop</title>
-<style>
-  :root { --bg:#12181F; --card:#1B242E; --code:#0C1117; --line:#2A3542; --text:#E8ECF1;
-    --muted:#8B96A5; --charcoal:#C7CDD6; --orange:#FF9900; --crimson:#B6002E;
-    --green:#3FB950; --lavender:#c9a2ff; --dim:#7B8198; }
-  * { box-sizing:border-box; margin:0; }
-  body { background:var(--bg); color:var(--text); line-height:1.65; word-break:keep-all; overflow-wrap:break-word;
-    font-family: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif; }
-  a { color:var(--orange); text-decoration:none; }
-  code, code.inline { font-family: "D2Coding", "JetBrains Mono",ui-monospace,monospace; font-size:.86em;
-    background:#232D38; color:#FFC466; padding:2px 7px; border-radius:4px; white-space:normal; overflow-wrap:anywhere; }
-  .hero { position:relative; max-width:1160px; margin:0 auto; padding:44px 28px 30px; overflow:hidden; }
-  .hero::after { content:""; position:absolute; top:-150px; right:-170px; width:440px; height:440px;
-    background:radial-gradient(circle, rgba(182,0,46,.28), transparent 62%); pointer-events:none; }
-  .eyebrow { display:inline-block; background:var(--crimson); color:#fff; font-size:11.5px; font-weight:800;
-    letter-spacing:.14em; padding:5px 12px; border-radius:4px; margin-bottom:14px; }
-  h1 { font-size:clamp(24px,3.4vw,34px); line-height:1.3; text-wrap:balance; }
-  .subtitle { color:var(--orange); font-weight:700; font-size:16px; margin-top:8px; }
-  .lede { color:var(--charcoal); font-size:15px; margin-top:12px; }
-  .wrap { max-width:1160px; margin:0 auto; padding:22px 28px 6px; }
-  h2 { font-size:19px; margin-bottom:4px; }
-  .sec-desc { color:var(--muted); font-size:13.5px; margin-bottom:14px; }
-  table.tbl { width:100%; border-collapse:collapse; font-size:13.5px; display:block; overflow-x:auto; max-width:100%; }
-  .tbl th { text-align:left; color:var(--dim); font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
-    padding:8px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
-  .tbl td { padding:9px 12px; border-bottom:1px solid #202A35; vertical-align:top; }
-  .tbl tr:last-child td { border-bottom:0; }
-  .tbl td:first-child { white-space:nowrap; }
-  .badge { display:inline-block; font-size:11px; font-weight:700; color:var(--bg); background:var(--lavender);
-    border-radius:10px; padding:1px 8px; white-space:nowrap; }
-  .badge.ch { background:var(--orange); }
-  .callout { background:var(--card); border-radius:8px; padding:14px 18px; margin:16px 0; font-size:14px; color:var(--muted); }
-  .co-title { display:block; font-size:12px; font-weight:800; letter-spacing:.1em; margin-bottom:5px; color:var(--orange); }
-  .code-wrap { background:var(--code); border:1px solid var(--line); border-radius:10px; margin:14px 0 20px; overflow:hidden; }
-  .code-head { display:flex; align-items:center; justify-content:space-between; padding:8px 14px 8px 76px;
-    border-bottom:1px solid var(--line); background:rgba(255,255,255,.02); position:relative; }
-  .code-head::before { content:""; position:absolute; left:16px; top:50%; transform:translateY(-50%);
-    width:11px; height:11px; border-radius:50%; background:#FF5F57; box-shadow:18px 0 0 #FEBC2E, 36px 0 0 #28C840; }
-  .code-label { font-size:11px; font-weight:700; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
-  .code-wrap pre { margin:0; padding:14px 16px; overflow-x:auto; }
-  .code-wrap pre code { background:none; color:#D6DEE8; padding:0; font-size:13px; line-height:1.75; white-space:pre; }
-  .cmt { color:#5A6676; }
-  footer { max-width:1160px; margin:36px auto 0; padding:20px 28px 44px; border-top:1px solid var(--line);
-    color:var(--muted); font-size:12.5px; line-height:1.9; }
-  footer .who { color:var(--charcoal); font-weight:700; }
-  @media (max-width:620px){ .hero{padding:26px 16px 22px} .wrap,footer{padding-left:16px;padding-right:16px} }
+<title>Reference 2, 슬래시 커맨드 - Claude Code Deep Dive Workshop · My Workshop</title>
 
-  .k { display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.05em;
-       border-radius:4px; padding:1px 6px; margin-right:6px; vertical-align:1px; }
-  .k.s { background:#233524; color:var(--green); }
-  .k.w { background:#2A2338; color:var(--lavender); }
-  .alias { color:#5A6676; font-size:12px; white-space:nowrap; }
-</style>
-<style id="hol-theme">
-html[data-theme="light"]{
-  --bg:#F3F4F7; --card:#FFFFFF; --code:#EEF1F5; --line:#D7DDE5;
-  --text:#1B2430; --muted:#5B6472; --charcoal:#3A4453;
-  --orange:#B45309; --green:#1F883D; --purple:#6D28D9; --lavender:#6b46c1;
-  background:#F3F4F7;
-}
-html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
-html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
-#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
-background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
-border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
-font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-#themeToggle:hover{border-color:var(--orange,#FF9900)}
-html[data-theme="light"] .code-wrap code{color:#2A3542}
-html[data-theme="light"] .code-wrap.output code{color:#57606E}
-html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
-html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
-html[data-theme="light"] .k.s{background:#DCEEDC}
-html[data-theme="light"] .k.w{background:#E9E2F7}
-html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
-html[data-theme="light"] .code-wrap .hl{color:#B45309}
-html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
-html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
-html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
-html[data-theme="light"] .head .when{color:#FF9900}
-html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
-html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
-@media print{#themeToggle{display:none}}
-</style>
+
+
+
+
+
+
+
+<link rel="stylesheet" href="assets/reader.css">
+<link rel="stylesheet" href="assets/legacy/ClaudeCode_Reference2_Commands.css">
+<link rel="stylesheet" href="assets/workshop.css">
+<script src="assets/theme.js"></script>
 </head>
-<body>
+<body data-course-key="6fd7cd9eb237" data-page="ClaudeCode_Reference2_Commands.html" data-current-chapter="ClaudeCode_Reference2_Commands">
+<a class="skip-link" href="#workshop-main">실습 본문으로 건너뛰기</a>
+
+<aside id="course-nav" class="sidebar" aria-label="워크샵 과정 목차">
+  <div class="sidebar-brand">
+    <a class="brand" href="index.html">
+      <img class="brand-aws-logo" src="assets/aws-logo.png" alt="AWS" width="48" height="29">
+      <span><strong>Claude Code</strong><span>DEEP DIVE WORKSHOP</span></span>
+    </a>
+    <button class="icon-button mobile-only js-only" type="button" data-nav-close aria-label="목차 닫기"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="sidebar-caption"><span class="eyebrow-dot"></span> HANDS-ON LAB HANDBOOK</div>
+  <label class="nav-search js-only" for="chapter-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+    <input id="chapter-search" type="search" placeholder="실습 제목 검색" autocomplete="off" aria-label="실습 제목 검색"><kbd>/</kbd>
+  </label>
+  <nav class="chapter-navigation" id="chapter-navigation" aria-label="전체 과정">
+    <a class="overview-link" href="index.html">워크샵 전체 보기 <span>HOME</span></a>
+    <section class="nav-group" data-nav-group><h2><span>시작하기</span><span>2개</span></h2><ol><li data-nav-entry data-search="시작하기 INFO 교육 안내와 일정 Claude Code Deep Dive Workshop"><a class="chapter-link" href="eDM.html" data-chapter-link="eDM" data-core-chapter="false" title="Claude Code Deep Dive Workshop"><span class="nav-number">INFO</span><span class="nav-title">교육 안내와 일정</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="시작하기 PRE 실습 전 환경 점검 핸즈온 랩 시작 전 확인"><a class="chapter-link" href="ClaudeCode_Preflight_Check.html" data-chapter-link="ClaudeCode_Preflight_Check" data-core-chapter="false" title="핸즈온 랩 시작 전 확인"><span class="nav-number">PRE</span><span class="nav-title">실습 전 환경 점검</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>기본 실습</span><span>6개</span></h2><ol><li data-nav-entry data-search="기본 실습 01 설치부터 Headless 자동화까지 Claude Code, 설치부터 Headless 자동화까지"><a class="chapter-link" href="ClaudeCode_Ch1_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch1_HandsOnLab" data-core-chapter="true" title="Claude Code, 설치부터 Headless 자동화까지"><span class="nav-number">01</span><span class="nav-title">설치부터 Headless 자동화까지</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 02 Subagents · 전문 에이전트 Subagents, 전문 에이전트를 만들고 지휘하기"><a class="chapter-link" href="ClaudeCode_Ch2_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch2_HandsOnLab" data-core-chapter="true" title="Subagents, 전문 에이전트를 만들고 지휘하기"><span class="nav-number">02</span><span class="nav-title">Subagents · 전문 에이전트</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 03 Admin Setup · 기업 환경 Admin Setup, 통제 가능한 Enterprise 배포"><a class="chapter-link" href="ClaudeCode_Ch3_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch3_HandsOnLab" data-core-chapter="true" title="Admin Setup, 통제 가능한 Enterprise 배포"><span class="nav-number">03</span><span class="nav-title">Admin Setup · 기업 환경</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 04 Settings · 팀의 플랫폼 Settings, 나의 Claude Code를 팀의 플랫폼으로"><a class="chapter-link" href="ClaudeCode_Ch4_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch4_HandsOnLab" data-core-chapter="true" title="Settings, 나의 Claude Code를 팀의 플랫폼으로"><span class="nav-number">04</span><span class="nav-title">Settings · 팀의 플랫폼</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 05 CLI Reference · 자동화 CLI Reference, Claude Code를 파이프라인의 부품으로"><a class="chapter-link" href="ClaudeCode_Ch5_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch5_HandsOnLab" data-core-chapter="true" title="CLI Reference, Claude Code를 파이프라인의 부품으로"><span class="nav-number">05</span><span class="nav-title">CLI Reference · 자동화</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 06 Agent SDK · 자율 실습 Agent SDK, Claude Code를 코드에서 부른다"><a class="chapter-link" href="ClaudeCode_Ch6_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch6_HandsOnLab" data-core-chapter="false" title="Agent SDK, Claude Code를 코드에서 부른다"><span class="nav-number">06</span><span class="nav-title">Agent SDK · 자율 실습</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>캡스톤 준비</span><span>1개</span></h2><ol><li data-nav-entry data-search="캡스톤 준비 SET 도구와 플러그인 준비 Capstone 시작 전, 설치하면 좋은 것들"><a class="chapter-link" href="ClaudeCode_Capstone_Setup.html" data-chapter-link="ClaudeCode_Capstone_Setup" data-core-chapter="false" title="Capstone 시작 전, 설치하면 좋은 것들"><span class="nav-number">SET</span><span class="nav-title">도구와 플러그인 준비</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>캡스톤 · 프로젝트 선택</span><span>6개</span></h2><ol><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M1 Clawd Jump · 게임 개발 Clawd Jump, 에이전틱 게임 개발"><a class="chapter-link" href="ClaudeCode_Capstone1_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone1_HandsOnLab" data-core-chapter="false" title="Clawd Jump, 에이전틱 게임 개발"><span class="nav-number">M1</span><span class="nav-title">Clawd Jump · 게임 개발</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M2 Market Desk · 시황 대시보드 웹 시황 대시보드"><a class="chapter-link" href="ClaudeCode_Capstone2_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone2_HandsOnLab" data-core-chapter="false" title="웹 시황 대시보드"><span class="nav-number">M2</span><span class="nav-title">Market Desk · 시황 대시보드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M3 Generative Hours · 미디어 아트 Generative Hours, 코드로 그린 전시를 배포하라"><a class="chapter-link" href="ClaudeCode_Capstone3_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone3_HandsOnLab" data-core-chapter="false" title="Generative Hours, 코드로 그린 전시를 배포하라"><span class="nav-number">M3</span><span class="nav-title">Generative Hours · 미디어 아트</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M4 Trend Radar · 유튜브 트렌드 유튜브 급상승 30, 트렌드 레이더"><a class="chapter-link" href="ClaudeCode_Capstone4_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone4_HandsOnLab" data-core-chapter="false" title="유튜브 급상승 30, 트렌드 레이더"><span class="nav-number">M4</span><span class="nav-title">Trend Radar · 유튜브 트렌드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M5 Quake Watch · 지진 모니터링 지구의 맥박, 실시간 지진 워치"><a class="chapter-link" href="ClaudeCode_Capstone5_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone5_HandsOnLab" data-core-chapter="false" title="지구의 맥박, 실시간 지진 워치"><span class="nav-number">M5</span><span class="nav-title">Quake Watch · 지진 모니터링</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M6 Newsroom Lens · 뉴스 비교 뉴스룸 렌즈, 4개 매체 관점 비교"><a class="chapter-link" href="ClaudeCode_Capstone6_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone6_HandsOnLab" data-core-chapter="false" title="뉴스룸 렌즈, 4개 매체 관점 비교"><span class="nav-number">M6</span><span class="nav-title">Newsroom Lens · 뉴스 비교</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>참고 자료</span><span>3개</span></h2><ol><li data-nav-entry data-search="참고 자료 R1 디렉토리 구조 디렉토리 구조, 무엇이 어디에 있는가"><a class="chapter-link" href="ClaudeCode_Reference1_Directory.html" data-chapter-link="ClaudeCode_Reference1_Directory" data-core-chapter="false" title="디렉토리 구조, 무엇이 어디에 있는가"><span class="nav-number">R1</span><span class="nav-title">디렉토리 구조</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="참고 자료 R2 슬래시 커맨드 슬래시 커맨드, 세션을 조종하는 레버들"><a class="chapter-link" href="ClaudeCode_Reference2_Commands.html" data-chapter-link="ClaudeCode_Reference2_Commands" data-core-chapter="false" title="슬래시 커맨드, 세션을 조종하는 레버들" aria-current="page"><span class="nav-number">R2</span><span class="nav-title">슬래시 커맨드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="참고 자료 R3 플러그인 플러그인, 팀의 하네스를 배포하는 단위"><a class="chapter-link" href="ClaudeCode_Reference3_Plugins.html" data-chapter-link="ClaudeCode_Reference3_Plugins" data-core-chapter="false" title="플러그인, 팀의 하네스를 배포하는 단위"><span class="nav-number">R3</span><span class="nav-title">플러그인</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section>
+    <p class="search-empty" data-search-empty hidden>검색 결과가 없습니다.</p>
+    <span class="sr-only" role="status" data-search-result></span>
+  </nav>
+  <div class="reading-progress">
+    <div class="progress-label"><span>정규 챕터 읽기</span><strong data-progress-count>0 / 5 읽음</strong></div>
+    <progress max="5" value="0" data-reading-progress aria-label="정규 챕터 읽기 진행률"></progress>
+    <p data-storage-note>읽기 기록은 이 브라우저에 저장됩니다.</p>
+    <button class="text-button js-only" type="button" data-reset-progress hidden>읽기 기록 초기화</button>
+  </div>
+</aside>
+<button class="nav-backdrop" type="button" data-nav-backdrop aria-label="목차 닫기" hidden></button>
+<div class="workspace" data-workspace>
+  <header class="topbar">
+    <div class="topbar-leading">
+      <button class="toolbar-button mobile-only js-only" type="button" data-nav-toggle aria-controls="course-nav" aria-expanded="false" aria-label="과정 목차 열기"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <nav class="breadcrumb" aria-label="현재 위치"><a href="index.html">Claude Code Workshop</a><span aria-hidden="true">/</span><span>참고 자료 · R2</span></nav>
+    </div>
+    <div class="toolbar js-only">
+      <button class="toolbar-button" type="button" data-theme-toggle aria-label="어두운 화면으로 전환" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A9 9 0 0 1 9.5 3.5a9 9 0 1 0 11 11Z"/></svg><span data-theme-label>다크</span></button>
+      <button class="toolbar-button" type="button" data-print aria-label="이 페이지 인쇄"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6Z"/></svg><span>인쇄</span></button>
+    </div>
+  </header>
+  <main id="workshop-main" tabindex="-1">
+    <noscript><p class="noscript-note">본문과 목차는 그대로 읽을 수 있습니다. 복사·테마·읽기 기록 기능에는 JavaScript가 필요합니다.</p></noscript>
+    <div class="article-layout">
+      <article class="lesson"><div class="legacy-content" id="workshop-content">
 <header class="hero">
-  <span class="eyebrow">REFERENCE 2 / SLASH COMMANDS</span>
-  <h1>슬래시 커맨드, 세션을 조종하는 레버들</h1>
-  <div class="subtitle">문법 규칙, 그룹별 상세 기능, 인자와 별칭, 워크샵 등장 위치</div>
-  <p class="lede">세션 안에서 <code>/</code>로 시작하는 커맨드는 모델 전환부터 병렬 실행, 리뷰, 세션 이동까지 Claude Code를 조종하는 레버입니다. 실무에서 손이 자주 가는 것들을 워크플로 순서로 묶고, 인자와 별칭, 알아 두면 좋은 세부 동작까지 담았습니다.</p>
+<span class="eyebrow">REFERENCE 2 / SLASH COMMANDS</span>
+<h1>슬래시 커맨드, 세션을 조종하는 레버들</h1>
+<div class="subtitle">문법 규칙, 그룹별 상세 기능, 인자와 별칭, 워크샵 등장 위치</div>
+<p class="lede">세션 안에서 <code>/</code>로 시작하는 커맨드는 모델 전환부터 병렬 실행, 리뷰, 세션 이동까지 Claude Code를 조종하는 레버입니다. 실무에서 손이 자주 가는 것들을 워크플로 순서로 묶고, 인자와 별칭, 알아 두면 좋은 세부 동작까지 담았습니다.</p>
 </header>
 <section class="wrap">
-  <h2>커맨드 문법, 30초 규칙</h2>
-  <p class="sec-desc">표를 읽기 전에 알아 둘 동작 규칙입니다.</p>
-  <table class="tbl">
-    <tr><th>규칙</th><th>내용</th></tr>
-    <tr><td>위치</td><td>커맨드는 <strong>메시지 맨 앞</strong>에서만 인식되고, 뒤에 오는 텍스트는 그 커맨드의 인자가 됩니다.</td></tr>
-    <tr><td>큐잉</td><td>Claude가 응답 중일 때 보낸 커맨드는 현재 턴이 끝난 뒤 실행됩니다. 단 /status, /tasks, /usage처럼 조회성 커맨드는 즉시 실행됩니다.</td></tr>
-    <tr><td>스킬 체이닝</td><td>스킬 호출은 예외적으로 여러 개를 이어 쓸 수 있습니다: /skill-a /skill-b 지시문 형태로 최대 6개까지, 뒤 텍스트가 각 스킬의 인자로 전달됩니다 (v2.1.199+).</td></tr>
-    <tr><td>표기</td><td>아래 표에서 &lt;인자&gt;는 필수, [인자]는 선택입니다. <span class="k s">SKILL</span>은 내장 스킬(프롬프트를 Claude가 수행), <span class="k w">WORKFLOW</span>는 다수 서브에이전트를 부채꼴로 펼치는 백그라운드 워크플로입니다.</td></tr>
-  </table>
+<h2 id="section-01">커맨드 문법, 30초 규칙</h2>
+<p class="sec-desc">표를 읽기 전에 알아 둘 동작 규칙입니다.</p>
+<table class="tbl">
+<tr><th>규칙</th><th>내용</th></tr>
+<tr><td>위치</td><td>커맨드는 <strong>메시지 맨 앞</strong>에서만 인식되고, 뒤에 오는 텍스트는 그 커맨드의 인자가 됩니다.</td></tr>
+<tr><td>큐잉</td><td>Claude가 응답 중일 때 보낸 커맨드는 현재 턴이 끝난 뒤 실행됩니다. 단 /status, /tasks, /usage처럼 조회성 커맨드는 즉시 실행됩니다.</td></tr>
+<tr><td>스킬 체이닝</td><td>스킬 호출은 예외적으로 여러 개를 이어 쓸 수 있습니다: /skill-a /skill-b 지시문 형태로 최대 6개까지, 뒤 텍스트가 각 스킬의 인자로 전달됩니다 (v2.1.199+).</td></tr>
+<tr><td>표기</td><td>아래 표에서 &lt;인자&gt;는 필수, [인자]는 선택입니다. <span class="k s">SKILL</span>은 내장 스킬(프롬프트를 Claude가 수행), <span class="k w">WORKFLOW</span>는 다수 서브에이전트를 부채꼴로 펼치는 백그라운드 워크플로입니다.</td></tr>
+</table>
 </section>
 <section class="wrap">
-  <h2>시작과 설정</h2>
-  <p class="sec-desc">새 저장소에서의 첫 세션, 그리고 세션의 뼈대를 잡는 커맨드.</p>
-  <table class="tbl">
-    <tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
-    <tr><td><code>/init</code></td><td>프로젝트를 훑어 시작용 CLAUDE.md 생성. 환경변수 CLAUDE_CODE_NEW_INIT=1이면 스킬, 훅, 개인 메모리까지 함께 잡아 주는 대화형 온보딩으로 동작</td><td><span class="badge ch">Ch1</span></td></tr>
-    <tr><td><code>/memory</code></td><td>CLAUDE.md 메모리 파일 편집, 자동 메모리(auto-memory) 켜고 끄기와 항목 열람</td><td><span class="badge ch">Ch1</span></td></tr>
-    <tr><td><code>/config [key=value ...]</code><br><span class="alias">별칭 /settings</span></td><td>설정 화면. key=value를 붙이면 화면 없이 즉시 변경(/config thinking=false, /config model=sonnet). /config --help가 설정 가능한 전체 키를 출력</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/model [모델]</code></td><td>모델 전환과 기본값 저장. 피커에서 s를 누르면 이 세션만 전환. 대화 이력이 있으면 캐시 재구축 비용을 확인 후 적용</td><td><span class="badge ch">Ch1</span></td></tr>
-    <tr><td><code>/effort [레벨]</code></td><td>추론 강도. low, medium, high, xhigh에 세션 한정 max까지, 가용 레벨은 모델별. 인자 없이 실행하면 좌우 화살표 슬라이더</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/permissions</code><br><span class="alias">별칭 /allowed-tools</span></td><td>도구 allow, ask, deny 규칙을 스코프별로 열람/추가/삭제. 작업 디렉토리 관리와 자동 모드 거부 이력 검토 포함</td><td><span class="badge ch">Ch3</span></td></tr>
-    <tr><td><code>/mcp [reconnect|enable|disable]</code></td><td>MCP 서버 연결과 OAuth 관리. reconnect 서버명으로 재접속, enable/disable에 서버명이나 all</td><td><span class="badge ch">Ch4</span></td></tr>
-    <tr><td><code>/plugin [서브커맨드]</code></td><td>플러그인 메뉴. list, install, enable, disable을 직접 지정 가능 (market은 marketplace 축약)</td><td><span class="badge ch">Ch4, 캡스톤 M0</span></td></tr>
-    <tr><td><code>/hooks</code></td><td>도구 이벤트에 걸린 훅 구성 확인. 훅 자체는 각 스코프 settings.json의 hooks 블록에 정의</td><td><span class="badge ch">Ch4</span></td></tr>
-    <tr><td><code>/agents</code></td><td>서브에이전트 안내. 최신 버전은 .claude/agents/ 또는 ~/.claude/agents/ 직접 편집을 권장</td><td><span class="badge ch">Ch2</span></td></tr>
-  </table>
+<h2 id="section-02">시작과 설정</h2>
+<p class="sec-desc">새 저장소에서의 첫 세션, 그리고 세션의 뼈대를 잡는 커맨드.</p>
+<table class="tbl">
+<tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
+<tr><td><code>/init</code></td><td>프로젝트를 훑어 시작용 CLAUDE.md 생성. 환경변수 CLAUDE_CODE_NEW_INIT=1이면 스킬, 훅, 개인 메모리까지 함께 잡아 주는 대화형 온보딩으로 동작</td><td><span class="badge ch">Ch1</span></td></tr>
+<tr><td><code>/memory</code></td><td>CLAUDE.md 메모리 파일 편집, 자동 메모리(auto-memory) 켜고 끄기와 항목 열람</td><td><span class="badge ch">Ch1</span></td></tr>
+<tr><td><code>/config [key=value ...]</code><br/><span class="alias">별칭 /settings</span></td><td>설정 화면. key=value를 붙이면 화면 없이 즉시 변경(/config thinking=false, /config model=sonnet). /config --help가 설정 가능한 전체 키를 출력</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/model [모델]</code></td><td>모델 전환과 기본값 저장. 피커에서 s를 누르면 이 세션만 전환. 대화 이력이 있으면 캐시 재구축 비용을 확인 후 적용</td><td><span class="badge ch">Ch1</span></td></tr>
+<tr><td><code>/effort [레벨]</code></td><td>추론 강도. low, medium, high, xhigh에 세션 한정 max까지, 가용 레벨은 모델별. 인자 없이 실행하면 좌우 화살표 슬라이더</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/permissions</code><br/><span class="alias">별칭 /allowed-tools</span></td><td>도구 allow, ask, deny 규칙을 스코프별로 열람/추가/삭제. 작업 디렉토리 관리와 자동 모드 거부 이력 검토 포함</td><td><span class="badge ch">Ch3</span></td></tr>
+<tr><td><code>/mcp [reconnect|enable|disable]</code></td><td>MCP 서버 연결과 OAuth 관리. reconnect 서버명으로 재접속, enable/disable에 서버명이나 all</td><td><span class="badge ch">Ch4</span></td></tr>
+<tr><td><code>/plugin [서브커맨드]</code></td><td>플러그인 메뉴. list, install, enable, disable을 직접 지정 가능 (market은 marketplace 축약)</td><td><span class="badge ch">Ch4, 캡스톤 M0</span></td></tr>
+<tr><td><code>/hooks</code></td><td>도구 이벤트에 걸린 훅 구성 확인. 훅 자체는 각 스코프 settings.json의 hooks 블록에 정의</td><td><span class="badge ch">Ch4</span></td></tr>
+<tr><td><code>/agents</code></td><td>서브에이전트 안내. 최신 버전은 .claude/agents/ 또는 ~/.claude/agents/ 직접 편집을 권장</td><td><span class="badge ch">Ch2</span></td></tr>
+</table>
 </section>
 <section class="wrap">
-  <h2>작업 흐름</h2>
-  <p class="sec-desc">한 세션 안에서 컨텍스트와 페이스를 다루는 커맨드.</p>
-  <table class="tbl">
-    <tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
-    <tr><td><code>/plan [설명]</code></td><td>플랜 모드 진입. 설명을 붙이면 그 작업 계획으로 즉시 시작 (/plan 인증 버그 수정)</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/compact [지침]</code></td><td>대화를 요약해 컨텍스트 확보. 요약 초점 지침 전달 가능. 규칙과 스킬, 메모리는 요약을 살아남음</td><td><span class="badge ch">Ch5</span></td></tr>
-    <tr><td><code>/context [all]</code></td><td>컨텍스트 사용량을 색 격자로 시각화하고 무거운 도구, 메모리 비대, 용량 경고와 최적화 제안. all로 상세 펼침</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/clear [이름]</code><br><span class="alias">별칭 /new, /reset</span></td><td>빈 컨텍스트로 새 대화. 이름을 주면 직전 대화가 /resume 목록에 그 라벨로 남음. 되감기 메뉴로 복구도 가능</td><td><span class="badge ch">Ch1</span></td></tr>
-    <tr><td><code>/btw [질문]</code></td><td>대화 기록에 남지 않는 곁다리 질문. 인자 없이 실행하면 이 세션의 지난 곁다리 답들을 다시 열람</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/goal [조건|clear]</code></td><td>조건을 걸면 달성까지 턴을 이어서 작업. clear, stop 등으로 조기 해제</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><span class="k s">SKILL</span><code>/loop [주기] [프롬프트]</code><br><span class="alias">별칭 /proactive</span></td><td>프롬프트를 주기 반복 실행 (/loop 5m 배포 끝났는지 확인). 프롬프트 생략 시 .claude/loop.md 또는 자율 점검</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/copy [N]</code></td><td>마지막(또는 N번째 최근) 응답을 클립보드로. 코드 블록이 있으면 피커 제공, w 키로 파일 저장(SSH에서 유용)</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/diff</code></td><td>미커밋 변경과 턴별 변경의 대화형 뷰어. 좌우로 git diff와 턴 전환, 상하로 파일 탐색, Enter로 상세</td><td><span style="color:#5A6676">-</span></td></tr>
-  </table>
+<h2 id="section-03">작업 흐름</h2>
+<p class="sec-desc">한 세션 안에서 컨텍스트와 페이스를 다루는 커맨드.</p>
+<table class="tbl">
+<tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
+<tr><td><code>/plan [설명]</code></td><td>플랜 모드 진입. 설명을 붙이면 그 작업 계획으로 즉시 시작 (/plan 인증 버그 수정)</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/compact [지침]</code></td><td>대화를 요약해 컨텍스트 확보. 요약 초점 지침 전달 가능. 규칙과 스킬, 메모리는 요약을 살아남음</td><td><span class="badge ch">Ch5</span></td></tr>
+<tr><td><code>/context [all]</code></td><td>컨텍스트 사용량을 색 격자로 시각화하고 무거운 도구, 메모리 비대, 용량 경고와 최적화 제안. all로 상세 펼침</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/clear [이름]</code><br/><span class="alias">별칭 /new, /reset</span></td><td>빈 컨텍스트로 새 대화. 이름을 주면 직전 대화가 /resume 목록에 그 라벨로 남음. 되감기 메뉴로 복구도 가능</td><td><span class="badge ch">Ch1</span></td></tr>
+<tr><td><code>/btw [질문]</code></td><td>대화 기록에 남지 않는 곁다리 질문. 인자 없이 실행하면 이 세션의 지난 곁다리 답들을 다시 열람</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/goal [조건|clear]</code></td><td>조건을 걸면 달성까지 턴을 이어서 작업. clear, stop 등으로 조기 해제</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><span class="k s">SKILL</span><code>/loop [주기] [프롬프트]</code><br/><span class="alias">별칭 /proactive</span></td><td>프롬프트를 주기 반복 실행 (/loop 5m 배포 끝났는지 확인). 프롬프트 생략 시 .claude/loop.md 또는 자율 점검</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/copy [N]</code></td><td>마지막(또는 N번째 최근) 응답을 클립보드로. 코드 블록이 있으면 피커 제공, w 키로 파일 저장(SSH에서 유용)</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/diff</code></td><td>미커밋 변경과 턴별 변경의 대화형 뷰어. 좌우로 git diff와 턴 전환, 상하로 파일 탐색, Enter로 상세</td><td><span style="color:#5A6676">-</span></td></tr>
+</table>
 </section>
 <section class="wrap">
-  <h2>병렬과 백그라운드</h2>
-  <p class="sec-desc">Chapter 2의 서브에이전트 감각이 세션 단위로 확장된 영역.</p>
-  <table class="tbl">
-    <tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
-    <tr><td><code>/tasks</code></td><td>현재 세션의 백그라운드 작업과 완료된 서브에이전트 목록. 응답 중에도 즉시 실행되는 조회 커맨드</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/background [프롬프트]</code><br><span class="alias">별칭 /bg</span></td><td>세션을 백그라운드 에이전트로 분리해 터미널 해방. 분리 전 마지막 지시 전달 가능, claude agents로 모니터</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/fork [프롬프트]</code></td><td>지금까지의 대화를 복사해 별도 백그라운드 세션으로. 프롬프트를 주면 복사본이 즉시 작업 시작</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/branch [이름]</code></td><td>현재 지점에서 대화를 분기해 다른 방향 시도. 원본은 보존되어 /resume으로 복귀</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><span class="k s">SKILL</span><code>/batch <지시></code></td><td>대규모 변경을 5~30개 독립 단위로 분해해 승인 후 단위별 worktree에서 병렬 구현, 테스트, PR까지. git 저장소 필요</td><td><span style="color:#5A6676">-</span></td></tr>
-  </table>
+<h2 id="section-04">병렬과 백그라운드</h2>
+<p class="sec-desc">Chapter 2의 서브에이전트 감각이 세션 단위로 확장된 영역.</p>
+<table class="tbl">
+<tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
+<tr><td><code>/tasks</code></td><td>현재 세션의 백그라운드 작업과 완료된 서브에이전트 목록. 응답 중에도 즉시 실행되는 조회 커맨드</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/background [프롬프트]</code><br/><span class="alias">별칭 /bg</span></td><td>세션을 백그라운드 에이전트로 분리해 터미널 해방. 분리 전 마지막 지시 전달 가능, claude agents로 모니터</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/fork [프롬프트]</code></td><td>지금까지의 대화를 복사해 별도 백그라운드 세션으로. 프롬프트를 주면 복사본이 즉시 작업 시작</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/branch [이름]</code></td><td>현재 지점에서 대화를 분기해 다른 방향 시도. 원본은 보존되어 /resume으로 복귀</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><span class="k s">SKILL</span><code>/batch &lt;지시&gt;</code></td><td>대규모 변경을 5~30개 독립 단위로 분해해 승인 후 단위별 worktree에서 병렬 구현, 테스트, PR까지. git 저장소 필요</td><td><span style="color:#5A6676">-</span></td></tr>
+</table>
 </section>
 <section class="wrap">
-  <h2>검수와 리뷰</h2>
-  <p class="sec-desc">출하 직전의 관문. Chapter 5 리뷰 봇의 내장판.</p>
-  <table class="tbl">
-    <tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
-    <tr><td><span class="k s">SKILL</span><code>/code-review [레벨] [--fix] [대상]</code></td><td>현재 diff의 정확성 리뷰. 레벨 low~max, --fix로 자동 반영, --comment로 GitHub 인라인 코멘트, ultra는 클라우드 다중 에이전트 심층</td><td><span class="badge ch">Ch5 연계</span></td></tr>
-    <tr><td><code>/review [PR]</code></td><td>GitHub PR을 읽기 전용 단일 패스로 빠르게 리뷰</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/security-review</code></td><td>현재 diff의 보안 취약점 점검</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><span class="k s">SKILL</span><code>/verify</code></td><td>변경이 의도대로인지 검증하는 내장 스킬. 명시 호출 시에만 동작</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/export [파일명]</code></td><td>대화를 텍스트로 내보내기. 파일명을 주면 바로 저장, 없으면 클립보드/파일 선택</td><td><span style="color:#5A6676">-</span></td></tr>
-  </table>
+<h2 id="section-05">검수와 리뷰</h2>
+<p class="sec-desc">출하 직전의 관문. Chapter 5 리뷰 봇의 내장판.</p>
+<table class="tbl">
+<tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
+<tr><td><span class="k s">SKILL</span><code>/code-review [레벨] [--fix] [대상]</code></td><td>현재 diff의 정확성 리뷰. 레벨 low~max, --fix로 자동 반영, --comment로 GitHub 인라인 코멘트, ultra는 클라우드 다중 에이전트 심층</td><td><span class="badge ch">Ch5 연계</span></td></tr>
+<tr><td><code>/review [PR]</code></td><td>GitHub PR을 읽기 전용 단일 패스로 빠르게 리뷰</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/security-review</code></td><td>현재 diff의 보안 취약점 점검</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><span class="k s">SKILL</span><code>/verify</code></td><td>변경이 의도대로인지 검증하는 내장 스킬. 명시 호출 시에만 동작</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/export [파일명]</code></td><td>대화를 텍스트로 내보내기. 파일명을 주면 바로 저장, 없으면 클립보드/파일 선택</td><td><span style="color:#5A6676">-</span></td></tr>
+</table>
 </section>
 <section class="wrap">
-  <h2>세션 이동과 복구</h2>
-  <p class="sec-desc">세션을 시간과 기기 너머로 옮기는 커맨드.</p>
-  <table class="tbl">
-    <tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
-    <tr><td><code>/resume</code></td><td>이전 대화로 복귀. 헤드리스 --resume의 대화형 짝</td><td><span class="badge ch">Ch5</span></td></tr>
-    <tr><td><code>/rewind</code></td><td>코드와 대화를 체크포인트로 되감기, 또는 구간 요약. /clear 이전 대화도 항목으로 복구 가능</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/cd <경로></code></td><td>세션을 다른 디렉토리로 이사. 캐시를 보존하고 세션 저장소도 함께 옮겨 그 폴더에서 --resume 가능. 접근만 열려면 /add-dir</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/teleport</code></td><td>claude.ai 웹 세션을 이 터미널로 가져오기</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/remote-control</code></td><td>이 로컬 세션을 다른 기기(claude.ai)에서 이어서 조작</td><td><span style="color:#5A6676">-</span></td></tr>
-  </table>
+<h2 id="section-06">세션 이동과 복구</h2>
+<p class="sec-desc">세션을 시간과 기기 너머로 옮기는 커맨드.</p>
+<table class="tbl">
+<tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
+<tr><td><code>/resume</code></td><td>이전 대화로 복귀. 헤드리스 --resume의 대화형 짝</td><td><span class="badge ch">Ch5</span></td></tr>
+<tr><td><code>/rewind</code></td><td>코드와 대화를 체크포인트로 되감기, 또는 구간 요약. /clear 이전 대화도 항목으로 복구 가능</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/cd &lt;경로&gt;</code></td><td>세션을 다른 디렉토리로 이사. 캐시를 보존하고 세션 저장소도 함께 옮겨 그 폴더에서 --resume 가능. 접근만 열려면 /add-dir</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/teleport</code></td><td>claude.ai 웹 세션을 이 터미널로 가져오기</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/remote-control</code></td><td>이 로컬 세션을 다른 기기(claude.ai)에서 이어서 조작</td><td><span style="color:#5A6676">-</span></td></tr>
+</table>
 </section>
 <section class="wrap">
-  <h2>상태와 도움</h2>
-  <p class="sec-desc">점검, 비용, 그리고 문제가 생겼을 때.</p>
-  <table class="tbl">
-    <tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
-    <tr><td><code>/status</code></td><td>인증, 모델, 컨텍스트, 설정 출처를 한눈에. 즉시 실행 커맨드</td><td><span class="badge ch">Ch1</span></td></tr>
-    <tr><td><code>/usage</code><br><span class="alias">별칭 /cost</span></td><td>사용량과 비용</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><span class="k s">SKILL</span><code>/doctor</code><br><span class="alias">별칭 /checkup</span></td><td>설치/설정 건강검진과 수리 제안: 중복 설치, PATH, 깨진 설정, 미사용 스킬/MCP/플러그인의 컨텍스트 비용, 느린 훅, CLAUDE.md 다이어트까지. 변경 전 항상 확인을 받음</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><span class="k s">SKILL</span><code>/debug [설명]</code></td><td>이 세션의 디버그 로깅을 켜고 로그를 읽어 문제 진단</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/help</code></td><td>사용 가능한 전체 커맨드 목록</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/release-notes</code></td><td>버전별 변경 사항 뷰어</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/feedback [내용]</code><br><span class="alias">별칭 /bug</span></td><td>버그 리포트와 피드백. 포함 범위를 선택하고 동의 화면을 거쳐 전송, 서드파티 연결에선 로컬 번들로 저장</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/login</code> / <code>/logout</code></td><td>Anthropic 계정 로그인과 로그아웃</td><td><span class="badge ch">Ch1</span></td></tr>
-    <tr><td><code>/exit</code><br><span class="alias">별칭 /quit</span></td><td>CLI 종료. 접속해 있던 백그라운드 세션이라면 분리만 되고 세션은 계속 실행</td><td><span style="color:#5A6676">-</span></td></tr>
-  </table>
+<h2 id="section-07">상태와 도움</h2>
+<p class="sec-desc">점검, 비용, 그리고 문제가 생겼을 때.</p>
+<table class="tbl">
+<tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
+<tr><td><code>/status</code></td><td>인증, 모델, 컨텍스트, 설정 출처를 한눈에. 즉시 실행 커맨드</td><td><span class="badge ch">Ch1</span></td></tr>
+<tr><td><code>/usage</code><br/><span class="alias">별칭 /cost</span></td><td>사용량과 비용</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><span class="k s">SKILL</span><code>/doctor</code><br/><span class="alias">별칭 /checkup</span></td><td>설치/설정 건강검진과 수리 제안: 중복 설치, PATH, 깨진 설정, 미사용 스킬/MCP/플러그인의 컨텍스트 비용, 느린 훅, CLAUDE.md 다이어트까지. 변경 전 항상 확인을 받음</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><span class="k s">SKILL</span><code>/debug [설명]</code></td><td>이 세션의 디버그 로깅을 켜고 로그를 읽어 문제 진단</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/help</code></td><td>사용 가능한 전체 커맨드 목록</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/release-notes</code></td><td>버전별 변경 사항 뷰어</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/feedback [내용]</code><br/><span class="alias">별칭 /bug</span></td><td>버그 리포트와 피드백. 포함 범위를 선택하고 동의 화면을 거쳐 전송, 서드파티 연결에선 로컬 번들로 저장</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/login</code> / <code>/logout</code></td><td>Anthropic 계정 로그인과 로그아웃</td><td><span class="badge ch">Ch1</span></td></tr>
+<tr><td><code>/exit</code><br/><span class="alias">별칭 /quit</span></td><td>CLI 종료. 접속해 있던 백그라운드 세션이라면 분리만 되고 세션은 계속 실행</td><td><span style="color:#5A6676">-</span></td></tr>
+</table>
 </section>
 <section class="wrap">
-  <h2>확장과 유지보수</h2>
-  <p class="sec-desc">스킬과 플러그인, 통합을 관리하는 커맨드.</p>
-  <table class="tbl">
-    <tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
-    <tr><td><code>/reload-skills</code></td><td>디스크에서 추가/변경된 스킬을 재스캔해 재시작 없이 반영 (v2.1.152+)</td><td><span class="badge ch">Ch4</span></td></tr>
-    <tr><td><code>/reload-plugins [--force]</code></td><td>플러그인 변경 반영. MCP 도구 구성이 바뀌어 캐시가 무효화될 상황이면 경고 후 --force 요구</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><span class="k s">SKILL</span><code>/fewer-permission-prompts</code></td><td>지난 기록에서 자주 승인한 읽기 전용 명령을 찾아 프로젝트 설정에 허용 목록으로 제안</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/install-github-app</code></td><td>저장소에 Claude GitHub App 설치, Actions 워크플로와 시크릿 구성까지 안내</td><td><span class="badge ch">Ch5 연계</span></td></tr>
-    <tr><td><span class="k w">WORKFLOW</span><code>/deep-research <질문></code></td><td>웹 검색을 부채꼴로 펼쳐 교차 검증하고 출처 있는 리포트로 종합</td><td><span style="color:#5A6676">-</span></td></tr>
-    <tr><td><code>/insights</code></td><td>내 세션들을 분석해 작업 영역, 사용 패턴, 마찰 지점 리포트 생성</td><td><span style="color:#5A6676">-</span></td></tr>
-  </table>
+<h2 id="section-08">확장과 유지보수</h2>
+<p class="sec-desc">스킬과 플러그인, 통합을 관리하는 커맨드.</p>
+<table class="tbl">
+<tr><th>커맨드</th><th>하는 일</th><th>워크샵</th></tr>
+<tr><td><code>/reload-skills</code></td><td>디스크에서 추가/변경된 스킬을 재스캔해 재시작 없이 반영 (v2.1.152+)</td><td><span class="badge ch">Ch4</span></td></tr>
+<tr><td><code>/reload-plugins [--force]</code></td><td>플러그인 변경 반영. MCP 도구 구성이 바뀌어 캐시가 무효화될 상황이면 경고 후 --force 요구</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><span class="k s">SKILL</span><code>/fewer-permission-prompts</code></td><td>지난 기록에서 자주 승인한 읽기 전용 명령을 찾아 프로젝트 설정에 허용 목록으로 제안</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/install-github-app</code></td><td>저장소에 Claude GitHub App 설치, Actions 워크플로와 시크릿 구성까지 안내</td><td><span class="badge ch">Ch5 연계</span></td></tr>
+<tr><td><span class="k w">WORKFLOW</span><code>/deep-research &lt;질문&gt;</code></td><td>웹 검색을 부채꼴로 펼쳐 교차 검증하고 출처 있는 리포트로 종합</td><td><span style="color:#5A6676">-</span></td></tr>
+<tr><td><code>/insights</code></td><td>내 세션들을 분석해 작업 영역, 사용 패턴, 마찰 지점 리포트 생성</td><td><span style="color:#5A6676">-</span></td></tr>
+</table>
 </section>
 <div class="wrap"><div class="callout">
-  <span class="co-title">커스텀 커맨드는 스킬로</span>
+<span class="co-title">커스텀 커맨드는 스킬로</span>
   직접 만드는 슬래시 커맨드는 이제 <code>.claude/skills/이름/SKILL.md</code>가 표준입니다.
   구식 <code>.claude/commands/*.md</code>도 아직 동작하지만 legacy로 분류됩니다 (Chapter 4에서 실습).
   목록은 버전, 플랜, 플랫폼에 따라 다르니 세션에서 <code>/</code>만 입력해 실제 목록을 확인하세요.
   예를 들어 Bedrock 연결에서는 claude.ai에 닿아야 하는 일부 커맨드가 비활성입니다.
 </div></div>
-
 <footer>
-  <div class="who">Claude Code Deep Dive Workshop, Reference 2, 슬래시 커맨드</div>
-  <div>기준: Claude Code 2.1.x, 2026.07 / 전체 목록과 최신 동작: code.claude.com/docs/en/commands</div>
+<div class="who">Claude Code Deep Dive Workshop, Reference 2, 슬래시 커맨드</div>
+<div>기준: Claude Code 2.1.x, 2026.07 / 전체 목록과 최신 동작: code.claude.com/docs/en/commands</div>
 </footer>
-<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
-<script>
-(function(){
-  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
-  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
-  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
-  if(saved==='light'){ root.setAttribute('data-theme','light'); }
-  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
-  label();
-  btn.addEventListener('click',function(){
-    var light = root.getAttribute('data-theme')==='light';
-    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
-    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
-    label();
-  });
-})();
-</script>
-</body>
-</html>
+
+
+</div>
+<section class="reading-check js-only" aria-label="읽기 기록">
+  <div><p class="eyebrow">READING CHECK</p><h2>이 페이지를 읽으셨나요?</h2>
+    <p>읽음 표시는 실습 체크포인트와 별도로 관리됩니다. <span data-chapter-state>아직 읽지 않음</span></p></div>
+  <button class="button primary-button" type="button" data-progress-toggle aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span data-toggle-label>읽음으로 표시</span></button>
+</section>
+<nav class="page-pagination" aria-label="과정 이동">
+  <a class="pagination-link" href="index.html"><span><small>전체 과정</small><strong>워크샵 홈으로</strong></span></a>
+  <a class="pagination-link next" href="index.html#capstones"><span><small>다음으로</small><strong>전체 실습 살펴보기</strong></span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a>
+</nav></article>
+      <details class="article-toc" data-page-toc open><summary>이 페이지에서<span class="toc-toggle" aria-hidden="true">⌄</span></summary><nav aria-label="페이지 목차"><ol><li><a href="#section-01" data-toc-link>커맨드 문법, 30초 규칙</a></li><li><a href="#section-02" data-toc-link>시작과 설정</a></li><li><a href="#section-03" data-toc-link>작업 흐름</a></li><li><a href="#section-04" data-toc-link>병렬과 백그라운드</a></li><li><a href="#section-05" data-toc-link>검수와 리뷰</a></li><li><a href="#section-06" data-toc-link>세션 이동과 복구</a></li><li><a href="#section-07" data-toc-link>상태와 도움</a></li><li><a href="#section-08" data-toc-link>확장과 유지보수</a></li></ol></nav><a class="back-to-top" href="#workshop-main">맨 위로 ↑</a></details>
+    </div>
+  </main>
+  <footer class="site-footer"><span>CLAUDE CODE DEEP DIVE WORKSHOP <span class="footer-date">My Workshop Reader</span></span><a href="index.html">전체 과정 ↑</a></footer>
+</div>
+<p class="reader-status" data-reader-status role="status" aria-live="polite"></p>
+
+<script src="assets/reader.js"></script>
+<script src="assets/workshop.js"></script>
+</body></html>

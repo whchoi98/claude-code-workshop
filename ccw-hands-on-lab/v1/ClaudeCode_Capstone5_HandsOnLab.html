@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+<title>Capstone 5, Quake Watch - Claude Code Deep Dive Workshop</title>
+<style>
+:root {
+  --bg: #12181F;
+  --bg-card: #1B242E;
+  --bg-code: #0C1117;
+  --bg-inline: #232E3A;
+  --line: #2A3542;
+  --orange: #FF9900;
+  --orange-dim: rgba(255, 153, 0, 0.14);
+  --crimson: #B6002E;
+  --green: #3FB950;
+  --green-dim: rgba(63, 185, 80, 0.12);
+  --text: #E2E4EC;
+  --muted: #A6ABBE;
+  --dim: #7B8198;
+  --font-body: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-code: "D2Coding", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(255, 153, 0, 0.3); }
+a { color: var(--orange); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+/* ============ Hero ============ */
+.hero {
+  position: relative;
+  padding: 64px 32px 44px;
+  max-width: 1160px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -140px; right: -180px;
+  width: 460px; height: 460px;
+  background: radial-gradient(closest-side, rgba(182, 0, 46, 0.28), rgba(255, 153, 0, 0.10) 55%, transparent 75%);
+  pointer-events: none;
+}
+.eyebrow {
+  display: inline-block;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.hero h1 {
+  font-size: clamp(28px, 4.4vw, 42px);
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  max-width: 780px;
+}
+.hero .subtitle {
+  margin-top: 14px;
+  color: var(--orange);
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 700;
+}
+.hero .lede {
+  margin-top: 18px;
+  color: var(--muted);
+  max-width: 720px;
+  font-size: 15.5px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin-top: 26px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.hero-meta strong { color: var(--text); font-weight: 700; }
+
+/* ============ Sticky timeline ============ */
+.timeline {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(12, 17, 23, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.timeline-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.timeline-label {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.timeline-label strong { color: var(--orange); font-size: 13px; }
+.segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  height: 26px;
+}
+.seg {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg-card);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  padding: 0;
+  font-family: var(--font-body);
+}
+.seg:hover { border-color: var(--orange); }
+.seg .fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 153, 0, 0.85), rgba(255, 153, 0, 0.65));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.seg.done .fill { transform: scaleX(1); }
+.seg .seg-txt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.seg.done .seg-txt { color: #12181F; }
+.seg.active { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
+
+/* ============ Layout ============ */
+.layout {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 44px 32px 80px;
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 52px;
+  align-items: start;
+}
+.sidenav {
+  position: sticky;
+  top: 66px;
+  font-size: 13.5px;
+}
+.sidenav .nav-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  margin-bottom: 14px;
+}
+.sidenav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 7px 10px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+.sidenav a:hover { color: var(--text); background: var(--bg-card); text-decoration: none; }
+.sidenav a.active { color: var(--orange); border-left-color: var(--orange); background: var(--bg-card); }
+.sidenav .dot {
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dim);
+}
+.sidenav a.done .dot { background: var(--green); border-color: var(--green); }
+.sidenav .nav-time { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+/* ============ Task sections ============ */
+.task { margin-bottom: 72px; }
+.task-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.task-num {
+  font-family: var(--font-code);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 0.1em;
+}
+.task-head h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.time-badge {
+  margin-left: auto;
+  flex: none;
+  background: var(--orange-dim);
+  color: var(--orange);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.task-goal {
+  color: var(--muted);
+  margin-bottom: 24px;
+  max-width: 760px;
+}
+.task-goal strong { color: var(--text); }
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16.5px;
+  font-weight: 800;
+  margin: 34px 0 12px;
+}
+.step-title .step-no {
+  flex: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #12181F;
+  font-size: 12.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+p.body { color: var(--muted); margin: 10px 0 14px; max-width: 760px; }
+p.body strong, li strong { color: var(--text); }
+code.inline {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  background: var(--bg-inline);
+  color: #FFC466;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+kbd {
+  font-family: var(--font-code);
+  font-size: 0.82em;
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: var(--text);
+}
+
+/* ============ Code blocks ============ */
+.code-wrap {
+  background: var(--bg-code);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 14px 0 20px;
+  overflow: hidden;
+}
+.code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+.code-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.copy-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.code-wrap pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.code-wrap code { font-family: inherit; color: #D8DEE9; }
+.code-wrap.output pre { color: var(--dim); }
+.code-wrap .cmt { color: #5E6B7E; }
+.code-wrap .hl { color: #FFC466; }
+.code-wrap .ok { color: var(--green); }
+
+/* ============ Callouts ============ */
+.callout {
+  border-radius: 8px;
+  background: var(--bg-card);
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14.5px;
+  color: var(--muted);
+  max-width: 760px;
+}
+.callout strong { color: var(--text); }
+.callout.tip .co-title { color: var(--orange); }
+
+.callout .co-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 5px;
+}
+
+.callout.warn .co-title { color: #FF5C85; }
+
+/* ============ Checkpoint ============ */
+.checkpoint {
+  background: var(--green-dim);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 28px;
+}
+.checkpoint .cp-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+.cp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+.cp-item input {
+  flex: none;
+  margin-top: 5px;
+  width: 15px; height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+.cp-item input:checked + span { color: var(--text); }
+
+/* ============ Tabs ============ */
+.tabs { margin: 18px 0 6px; }
+.tab-btns {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dim);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 9px 16px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+.tab-pane { display: none; padding-top: 16px; }
+.tab-pane.active { display: block; }
+
+/* ============ Tables ============ */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 14px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tbl th, .tbl td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid #FFFFFF14;
+}
+.tbl th {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+  background: rgba(255, 255, 255, 0.03);
+}
+.tbl td { color: var(--muted); vertical-align: middle; }
+.tbl td:first-child { color: var(--text); font-weight: 700; white-space: nowrap; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl code { font-family: var(--font-code); font-size: 0.9em; color: #FFC466; }
+
+/* ============ Wrap-up ============ */
+.wrapup {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 32px 34px;
+  margin-bottom: 56px;
+}
+.wrapup h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.wrapup .sub { color: var(--muted); font-size: 14.5px; margin-bottom: 18px; }
+.next-box {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(182, 0, 46, 0.16), rgba(255, 153, 0, 0.08));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 26px;
+}
+.next-box .nx-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--orange);
+}
+.next-box h3 { font-size: 19px; font-weight: 800; }
+.next-box p { color: var(--muted); font-size: 14px; }
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 30px 32px 46px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.9;
+}
+footer .who { color: var(--muted); font-weight: 700; }
+footer .mail { color: var(--orange); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 20px 64px; }
+  .sidenav { display: none; }
+  .hero { padding: 44px 20px 32px; }
+  .timeline-inner { padding: 10px 20px; }
+  .seg .seg-txt { font-size: 9px; }
+  .task-head h2 { font-size: 20px; }
+}
+
+/* ===== Chapter 4 additions: Super Lab ===== */
+.part-divider { margin: 72px 0 12px; padding: 30px 34px; border-radius: 14px;
+  background: linear-gradient(135deg, #1d1433 0%, #12181F 65%); border: 1px solid #45306b; }
+.part-divider .pd-eyebrow { display: inline-block; background: #7a3ff2; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: .14em; padding: 4px 12px; border-radius: 4px; }
+.part-divider h2 { margin: 14px 0 8px; font-size: 26px; color: var(--text); }
+.part-divider p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.75; max-width: 860px; }
+.part-divider .rules { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+.part-divider .rules span { background: #241a3d; border: 1px solid #45306b; color: #d9c9ff;
+  font-size: 12.5px; padding: 6px 12px; border-radius: 999px; }
+.task.mission .task-num { color: #c9a2ff; }
+.task.mission { border-color: #3a2a57; }
+.checkpoint.dod { border-color: #7a3ff2; background: rgba(122, 63, 242, .06); }
+.checkpoint.dod .cp-title { color: #c9a2ff; }
+details.solution { margin: 18px 0; border: 1px dashed #FF9900; border-radius: 10px; background: rgba(255,153,0,.04); }
+details.solution summary { cursor: pointer; padding: 12px 16px; color: var(--accent); font-weight: 700; font-size: 13.5px; list-style: none; }
+details.solution summary::before { content: "▸ "; }
+details.solution[open] summary::before { content: "▾ "; }
+details.solution .sol-body { padding: 0 16px 14px; }
+
+/* ── Korean typography fix: 단어 단위 줄바꿈, 히어로 정돈 ── */
+body { word-break: keep-all; overflow-wrap: break-word; }
+.hero h1 { max-width: 980px; font-size: clamp(26px, 4vw, 38px); text-wrap: balance; }
+.hero .subtitle, .hero .lede, .task-goal, .wrapup .sub { text-wrap: pretty; }
+
+/* ── 잘림 방지 v2: 히어로 압축 + 좁은 화면 대응 ── */
+.hero { padding: 44px 28px 34px; }
+.eyebrow { margin-bottom: 14px; }
+.hero h1 { line-height: 1.3; }
+.hero .subtitle { margin-top: 10px; }
+.hero .lede { margin-top: 12px; }
+.seg-txt { text-overflow: ellipsis; }
+@media (max-width: 620px) {
+  .hero { padding: 26px 16px 24px; }
+  .hero h1 { font-size: 23px; }
+  .hero .subtitle { font-size: 15px; }
+  .hero .lede { font-size: 14px; }
+  .hero-meta { gap: 6px 14px; font-size: 12px; }
+  .seg .seg-txt { display: none; }
+  .timeline-inner { padding: 0 10px; }
+}
+
+/* ── 잘림 방지 v3: 좁은 화면 가로 넘침 제거 ── */
+.tbl { display: block; overflow-x: auto; max-width: 100%; }
+.hero, .layout, .timeline-inner, main, section { min-width: 0; }
+@media (max-width: 620px) {
+  .timeline-label:last-child { display: none; }
+}
+
+/* ── 잘림 방지 v4: 인라인 코드 칩의 최소폭 강제 해제 ── */
+code.inline { white-space: normal; overflow-wrap: anywhere; }
+
+/* ── v5: 소개문/본문 전체 폭 사용 (가독성 캡 해제) ── */
+.hero .lede, .task-goal, p.body, .callout, .part-divider p, .wrapup .sub { max-width: none; }
+.hero .lede { text-wrap: wrap; }
+
+/* ── macOS 터미널 스타일: 신호등 3버튼 ── */
+.code-head { position: relative; padding-left: 76px; }
+.code-head::before {
+  content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 11px; height: 11px; border-radius: 50%; background: #FF5F57;
+  box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
+}
+</style>
+<style id="hol-theme">
+html[data-theme="light"]{
+  --bg:#F3F4F7; --bg-card:#FFFFFF; --bg-code:#EEF1F5; --bg-inline:#E4E9EF; --line:#D7DDE5;
+  --orange:#B45309; --orange-dim:rgba(180,83,9,.12);
+  --green:#1F883D; --green-dim:rgba(31,136,61,.12);
+  --text:#1B2430; --muted:#5B6472; --dim:#75808F;
+  background:#F3F4F7;
+}
+html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
+html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
+#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
+background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
+border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
+font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#themeToggle:hover{border-color:var(--orange,#FF9900)}
+html[data-theme="light"] .code-wrap code{color:#2A3542}
+html[data-theme="light"] .code-wrap.output code{color:#57606E}
+html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
+html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
+html[data-theme="light"] .k.s{background:#DCEEDC}
+html[data-theme="light"] .k.w{background:#E9E2F7}
+html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
+html[data-theme="light"] .code-wrap .hl{color:#B45309}
+html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
+html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
+html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
+html[data-theme="light"] .head .when{color:#FF9900}
+html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
+html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
+html[data-theme="light"] .part-divider{background:linear-gradient(135deg,#EDE6FA 0%,#FFFFFF 65%);border-color:#B79CEF}
+html[data-theme="light"] .part-divider h2{color:#1B2430}
+html[data-theme="light"] .part-divider .rules span{background:#EDE6FA;border-color:#B79CEF;color:#5B21C7}
+html[data-theme="light"] .tbl code{color:#B45309}
+html[data-theme="light"] .task.mission .task-num{color:#6b46c1}
+html[data-theme="light"] .checkpoint.dod .cp-title{color:#6b46c1}
+@media print{#themeToggle{display:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">CAPSTONE 5 / QUAKE WATCH / 120 MIN</span>
+  <h1>지구의 맥박, 실시간 지진 워치</h1>
+  <div class="subtitle">USGS 피드 → 멱등 이벤트 스토어 → 세계지도 SVG → AI 해설, 그리고 CloudFront 개장</div>
+  <p class="lede">
+    지금 이 순간에도 지구는 움직입니다. 전 세계 규모 2.5 이상의 지진을 <strong>실시간 피드로 수집해</strong>
+    세계지도 위에 펄스로 띄우고, Bedrock이 "지난 24시간, 지구는"을 해설합니다. 키 발급이 필요 없는
+    공공 데이터라 시작이 빠르고, 마감은 CloudFront → ALB → Fargate 실배포입니다. 120분, 배포까지 완결합니다.
+  </p>
+  <div class="hero-meta">
+    <span>소요 시간 <strong>120분</strong></span>
+    <span>미션 <strong>5개 + DoD</strong></span>
+    <span>산출물 <strong>공개 URL로 열리는 내 지진 워치</strong></span>
+    <span>Update <strong>2026.08</strong></span>
+  </div>
+</header>
+
+<nav class="timeline" aria-label="미션 타임라인">
+  <div class="timeline-inner">
+    <span class="timeline-label">진행 <strong id="progress-count">0/8</strong></span>
+    <div class="segments" id="segments">
+      <button class="seg" data-task="m0" style="flex:5" title="M0 사전 준비, 5분"><span class="fill"></span><span class="seg-txt">M0</span></button>
+      <button class="seg" data-task="m1" style="flex:15" title="M1 설계, 15분"><span class="fill"></span><span class="seg-txt">M1 설계</span></button>
+      <button class="seg" data-task="m2" style="flex:30" title="M2 수집기와 스토어, 30분"><span class="fill"></span><span class="seg-txt">M2 수집기</span></button>
+      <button class="seg" data-task="m3" style="flex:40" title="M3 세계지도, 40분"><span class="fill"></span><span class="seg-txt">M3 세계지도</span></button>
+      <button class="seg" data-task="m4" style="flex:30" title="M4 브리핑과 개장, 30분"><span class="fill"></span><span class="seg-txt">M4 개장</span></button>
+    </div>
+    <span class="timeline-label">120 min</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+<aside class="sidenav" aria-label="미션 목차">
+  <div class="nav-title">MISSIONS / 120분</div>
+  <a href="#brief" data-nav="brief"><span class="dot"></span>브리핑<span class="nav-time"></span></a>
+  <a href="#blueprint" data-nav="blueprint"><span class="dot"></span>구현 청사진<span class="nav-time">참고</span></a>
+  <a href="#m0" data-nav="m0"><span class="dot"></span>M0 사전 준비<span class="nav-time">5분</span></a>
+  <a href="#m1" data-nav="m1"><span class="dot"></span>M1 설계<span class="nav-time">15분</span></a>
+  <a href="#m2" data-nav="m2"><span class="dot"></span>M2 수집기와 스토어<span class="nav-time">30분</span></a>
+  <a href="#m3" data-nav="m3"><span class="dot"></span>M3 세계지도<span class="nav-time">40분</span></a>
+  <a href="#m4" data-nav="m4"><span class="dot"></span>M4 브리핑과 개장<span class="nav-time">30분</span></a>
+  <a href="#gq" data-nav="gq"><span class="dot"></span>BONUS 퀄리티 강화<span class="nav-time">+α</span></a>
+  <a href="#opt-h" data-nav="opt-h"><span class="dot"></span>OPT 하네스 엔지니어링<span class="nav-time">+15분</span></a>
+  <a href="#wrapup" data-nav="wrapup"><span class="dot"></span>마무리<span class="nav-time"></span></a>
+</aside>
+
+<main>
+
+<section class="task" id="brief">
+  <div class="task-head"><span class="task-num">MISSION BRIEFING</span><h2>지구를 모니터링하는 법</h2><span class="time-badge">숙지</span></div>
+  <p class="task-goal">
+    <strong>빈 폴더에서 superpowers 워크플로로</strong> 설계하고 Phase 단위로 빌드합니다.
+    2시간 트랙이라 키 발급이 없고(USGS는 공공 피드), 마감은 로컬이 아니라 <strong>CloudFront 실배포</strong>입니다.
+    데이터는 실제 지구의 기록이며, 수집 주기마다 바뀝니다.
+  </p>
+  <table class="tbl">
+    <tr><th>레이어</th><th>구성</th><th>핵심 원칙</th></tr>
+    <tr><td>수집</td><td>USGS 2.5_day.geojson을 60초 폴링</td><td>키 없음, 피드 하나가 전체 상류. 비정상 필드는 다듬고 계속</td></tr>
+    <tr><td>저장</td><td>이벤트 id 멱등 딕셔너리(최대 500건)</td><td>같은 지진은 한 번만, 신규 진입을 사이클마다 기록</td></tr>
+    <tr><td>화면</td><td>등장방형 세계지도 SVG + 필터 + 테이블</td><td>좌표 변환 두 줄이 지도의 전부, 라이브러리 없음</td></tr>
+    <tr><td>AI와 개장</td><td>REST 직접 브리핑, CDK로 CF → ALB → Fargate</td><td>Bearer는 Secrets로 기동 주입, 이미지에 비밀 없음</td></tr>
+  </table>
+
+  <p class="body"><strong>1. 워치 (메인 화면)</strong></p>
+  <table class="tbl">
+    <tr><th>기능</th><th>설명</th></tr>
+    <tr><td>세계지도</td><td>진앙을 원으로: <strong>반지름은 규모, 색은 깊이</strong>(얕음 주황 → 깊음 보라), 최근 1시간은 펄스</td></tr>
+    <tr><td>통계 바</td><td>24h 건수, 최대 규모, 활동 최다 지역, 마지막 수집 시각</td></tr>
+    <tr><td>이벤트 테이블</td><td>시각(KST), 규모, 지역, 깊이 - 최신순, 지도와 같은 데이터</td></tr>
+    <tr><td>필터</td><td>규모 슬라이더(2.5~6.0)와 시간 창(6h/24h), 듀얼 테마</td></tr>
+  </table>
+  <p class="body"><strong>2. 해설과 개장</strong></p>
+  <table class="tbl">
+    <tr><th>기능</th><th>설명</th></tr>
+    <tr><td>브리핑</td><td>"지난 24시간, 지구는" - 전체 흐름, 주목 이벤트 2~3개, 활동 급증 지역, 한국어</td></tr>
+    <tr><td>브리핑 캐시</td><td>같은 10분 버킷 동안 재사용, LLM 호출은 아껴 쓴다</td></tr>
+    <tr><td>실배포</td><td>CloudFront → prefix list SG + X-Origin-Verify → ALB → Fargate</td></tr>
+    <tr><td>피날레</td><td>CloudFront URL을 Slack에, 누구나 열리는 내 지진 워치</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">L</span>학습 목표, Level 200</div>
+  <p class="body">이 캡스톤을 마치면 다음 네 가지를 <strong>설명할 수 있고, 다시 만들 수 있습니다</strong>.</p>
+  <table class="tbl">
+    <tr><th>목표</th><th>검증되는 순간</th></tr>
+    <tr><td>이벤트 id 기반 멱등 수집을 설계하는 법</td><td>M2에서 같은 지진이 폴링마다 와도 스토어가 한 건만 유지할 때</td></tr>
+    <tr><td>지리 좌표를 화면 좌표로 바꾸는 최소 수학</td><td>M3에서 변환 두 줄로 진앙이 제자리에 찍힐 때</td></tr>
+    <tr><td>수치 데이터를 서사로 푸는 브리핑 프롬프트</td><td>M4에서 통계 요약이 읽고 싶은 해설로 돌아올 때</td></tr>
+    <tr><td>컨테이너 앱을 CF → ALB → Fargate로 개장하는 법</td><td>내 CloudFront URL이 다른 사람 브라우저에서 열릴 때</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">R</span>챕터 연결 지도, 배운 내용이 재등장하는 곳</div>
+  <table class="tbl">
+    <tr><th>챕터</th><th>이 캡스톤에서 재등장하는 곳</th></tr>
+    <tr><td><a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1 설치부터 Headless까지</a></td><td>M0~전체: 세션 운용, 지시 → 실행 → 검증 루프</td></tr>
+    <tr><td><a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2 Subagents</a></td><td>M2~M3: 수집기 리뷰를 code-reviewer에게, 지도와 테이블 병행</td></tr>
+    <tr><td><a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3 Admin Setup</a></td><td>M4: Bearer 자격과 Secrets 주입이 도는 통제선의 배경</td></tr>
+    <tr><td><a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4 Settings, 훅과 스킬</a></td><td>OPT: 하네스 성숙화, 훅과 스킬의 프로젝트 자산화</td></tr>
+    <tr><td><a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5 CLI Reference</a></td><td>확장 방향: 수집 상태 점검을 헤드리스 파이프라인으로</td></tr>
+    <tr><td><a href="ClaudeCode_Ch6_HandsOnLab.html" style="color:#c9a2ff">Ch6 Agent SDK</a></td><td>확장 방향: 큰 지진 감지 시 브리핑을 코드에서 부르는 알림 봇</td></tr>
+  </table>
+  <div class="callout tip">
+    <span class="co-title">규칙, 캡스톤 공통</span>
+    ① 코드와 파일 구성을 직접하지 않고, Claude에게 지시해서 만듭니다 ② 각 Phase의 DoD를 통과해야 다음으로
+    ③ 막히면 "막힐 때 열어보기"의 힌트를 씁니다. 다른 참가자와의 의존성은 없습니다.
+  </div>
+</section>
+
+<section class="task" id="blueprint">
+  <div class="task-head"><span class="task-num">BLUEPRINT</span><h2>구현 청사진</h2><span class="time-badge">참고</span></div>
+  <p class="task-goal">M1 설계가 이 구조로 수렴하도록 방향을 잡아 주는 <strong>구현 지도</strong>입니다. 계획이 이상하게 흐르면 여기로 돌아와 대조하세요.</p>
+
+  <div class="step-title"><span class="step-no">0</span>세 개의 경로 한 눈에</div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">수집 루프, 조회 경로, 출고 경로</span></div>
+    <pre><code>[수집 루프]  60초마다
+Scheduler ──> Collector: GET 2.5_day.geojson ──> 정규화(id, mag, place, time, lon/lat/depth)
+                                                      │
+                    Event Store <── 멱등 upsert(같은 id는 한 번만) ──+── 신규 진입 id 기록
+
+[조회 경로]  브라우저가 당길 때
+Browser ── fetch ──> FastAPI: /api/quakes?hours=&min_mag= ──> 필터 + 통계 + 목록
+   ^                                                              (USGS를 직접 치지 않는다)
+   +── 지도 원(반지름=규모, 색=깊이) + 테이블 ────────────────────────+
+
+[출고 경로]  개장
+docker build ──> ECR push ──> CDK: CloudFront ──> (prefix list SG + X-Origin-Verify) ALB ──> Fargate
+                                                    Secrets Manager ──(기동 주입)──> AWS_BEARER_TOKEN_BEDROCK</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">1</span>상류 계약 (USGS 피드 실물)</div>
+  <table class="tbl">
+    <tr><th>항목</th><th>내용</th></tr>
+    <tr><td>피드 URL</td><td>earthquake.usgs.gov/earthquakes/feed/v1.0/summary/<b>2.5_day.geojson</b> (규모 2.5+, 최근 24h)</td></tr>
+    <tr><td>이벤트 키</td><td>feature.id (예: us7000abcd) - 멱등의 기준, 같은 지진은 갱신만</td></tr>
+    <tr><td>핵심 필드</td><td>properties.mag / place / time(UTC 밀리초), geometry.coordinates = [경도, 위도, 깊이km]</td></tr>
+    <tr><td>좌표 변환</td><td>x = (경도+180)/360 × 지도폭, y = (90-위도)/180 × 지도높이 (등장방형)</td></tr>
+    <tr><td>폴링 예산</td><td>정적 피드라 사실상 한도 없음, 그래도 60초면 충분하고 캐시 친화적</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">2</span>기술 선택 4</div>
+  <table class="tbl">
+    <tr><th>선택</th><th>이유</th></tr>
+    <tr><td>이벤트 id 멱등 스토어</td><td>피드는 24h 창이라 매 폴링 대부분이 재등장, 키 기반 upsert가 시계열을 오염에서 지킨다</td></tr>
+    <tr><td>등장방형 투영</td><td>두 줄짜리 수학으로 충분히 정확한 세계지도, 라이브러리는 과잉</td></tr>
+    <tr><td>Bedrock REST 직접</td><td>SDK 없이 Authorization 헤더 + JSON, "LLM 호출은 결국 HTTP"</td></tr>
+    <tr><td>CF → ALB → Fargate 개장 형식</td><td>prefix list SG와 X-Origin-Verify 이중 방어를 갖춘, 공개 URL까지 가는 최단 경로</td></tr>
+  </table>
+</section>
+
+<section class="task" id="m0">
+  <div class="task-head"><span class="task-num">MISSION 00</span><h2>사전 준비</h2><span class="time-badge">5분</span></div>
+  <p class="task-goal">이 트랙은 <strong>외부 키 발급이 없습니다</strong>. Bedrock Bearer와 AWS 자격만 확인하면 출발입니다.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>mkdir -p ~/capstone/capstone-5 &amp;&amp; cd ~/capstone/capstone-5
+set -a; source ~/capstone/.env; set +a          # AWS_BEARER_TOKEN_BEDROCK 로드
+python3 -c "import os; print('Bearer:', 'OK' if os.environ.get('AWS_BEARER_TOKEN_BEDROCK') else 'MISSING')"
+aws sts get-caller-identity --query Account --output text   # 배포용 자격 확인</code></pre>
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m0"><span>Bearer OK와 AWS 계정 ID가 출력되었습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m1">
+  <div class="task-head"><span class="task-num">MISSION 01</span><h2>설계, 브레인스토밍</h2><span class="time-badge">15분</span></div>
+  <p class="task-goal">수집/저장/지도/브리핑/배포까지 <strong>요구 9조항</strong>으로 넘깁니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 세션 운용과 Capstone Setup의 superpowers 워크플로.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal (~/capstone/capstone-5)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>claude</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:brainstorming 다음 요구사항으로 "Quake Watch", 전 세계 실시간 지진 모니터를 설계하자.
+1) 구조: backend/(Python 3.11+ FastAPI, app/collector 수집, app/store 스냅샷, app/api 라우트,
+   app/llm 브리핑, config.py) + frontend/index.html(빌드 없는 정적 SPA 한 장). FastAPI가 정적 파일을
+   함께 서빙해 :8000 하나로 완결. 컨테이너는 Dockerfile 한 장
+2) 수집기: httpx로 USGS 피드 GET
+   https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson 을 60초 주기 폴링.
+   각 feature에서 id, properties.mag / place / time(UTC ms), geometry.coordinates[경도, 위도, 깊이km]만
+   정규화. 비정상 필드는 0 또는 "unknown"으로 다듬고 계속(부분 실패 격리)
+3) 스토어: 이벤트 id를 멱등 키로 하는 인메모리 딕셔너리(최대 500건, 오래된 것부터 제거).
+   같은 id는 갱신만 하고 중복 삽입하지 않는다. 신규 진입 id 목록을 사이클마다 기록
+4) API 계약: GET /healthz, GET /api/quakes?hours=24&amp;min_mag=2.5 (시간 창과 규모 필터,
+   최신순 목록 + 요약 통계: 건수, 최대 규모, 활동 최다 지역), POST /api/brief (아래 6)
+5) 화면(텍스트 스펙): 라이트/다크 듀얼 테마(토글 + localStorage). 상단 통계 바(24h 건수, 최대 규모,
+   최다 지역, 마지막 수집 시각). 중앙에 등장방형(equirectangular) 세계지도, 외부 라이브러리 없이
+   인라인 SVG: 대륙 윤곽은 간이 폴리라인이면 충분, 진앙은 원으로 - 반지름은 규모에 비례(mag*2.2px),
+   색은 깊이(얕음 주황 → 깊음 보라), 최근 1시간 이벤트는 펄스 애니메이션. 좌표 변환은
+   x=(경도+180)/360*폭, y=(90-위도)/180*높이. 하단에 최근 이벤트 테이블(시각 KST 변환, 규모, 지역, 깊이)과
+   규모 필터 슬라이더(2.5~6.0)
+6) 브리핑(LLM): Bedrock Converse를 SDK 없이 httpx 직접 REST로.
+   POST https://bedrock-runtime.ap-northeast-2.amazonaws.com/model/global.anthropic.claude-sonnet-4-6/converse
+   Authorization: Bearer(환경변수 AWS_BEARER_TOKEN_BEDROCK), maxTokens 700.
+   입력은 최근 24h 요약 통계와 상위 이벤트 목록, 출력은 한국어 "지난 24시간, 지구는" 브리핑:
+   전체 흐름 한 문단, 주목 이벤트 2~3개 해설, 활동 급증 지역. 같은 10분 버킷 동안 결과 캐시
+7) 키의 거처: AWS_BEARER_TOKEN_BEDROCK은 환경변수로만. USGS는 키가 없다, 화면은 우리 API만 본다
+8) 배포: CDK로 CloudFront → (prefix list SG + X-Origin-Verify) ALB → ECS Fargate 를 구성해 배포한다. Secrets Manager가 Bearer를 기동 시 주입, 이미지에 비밀 없음
+9) 구현 순서: Phase 1(수집기 + 스토어 + /api/quakes, curl 검증) → Phase 2(지도 SVG + 테이블 + 필터)
+   → Phase 3(브리핑 + 캐시) → Phase 4(cdk deploy와 CloudFront 개장). 시간 제약 2시간:
+   테스트 생략, curl과 브라우저로 검증. 결정이 필요하면 이 범위 안에서 최소한으로만 물어봐.</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">자동화 옵션, auto mode</span>
+    세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
+    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    시간이 빠듯할 때 유용합니다. 되돌리려면 <code class="inline">auto mode off</code>입니다.
+  </div>
+  <p class="body"><code class="inline">/superpowers:write-plan</code>으로 Phase 4개 계획을 승인하고, 위 <strong>구현 청사진</strong>과 대조하세요.</p>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m1"><span>Phase 4개 계획이 승인되었고 worktree가 열렸습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m2">
+  <div class="task-head"><span class="task-num">MISSION 02</span><h2>Phase 1, 수집기와 스토어</h2><span class="time-badge">30분</span></div>
+  <p class="task-goal">피드가 60초마다 돌고, 이벤트가 <strong>id 멱등으로</strong> 쌓이고, /api/quakes가 필터와 통계를 얹어 주면 끝입니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프. 여유가 있다면 <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 code-reviewer에게 수집기 리뷰를 맡겨 보세요.</p>
+
+  <div class="callout tip">
+    <span class="co-title">2시간의 열쇠, 인프라 선배포</span>
+    <code class="inline">cdk deploy</code>는 첫 회 12~15분이 걸립니다. <strong>Phase 1을 시작하자마자
+    별도 터미널에서 인프라 배포를 먼저 걸어 두세요</strong>(앱 이미지는 나중에 갱신). 빌드와 배포 대기가
+    겹치면 M4는 이미지 푸시와 서비스 갱신만 남아 10분 안에 개장합니다.
+  </div>  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal 2, 인프라 선배포 (백그라운드)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/capstone/capstone-5 &amp;&amp; npx aws-cdk@2 deploy --require-approval never   # Claude가 infra를 만든 직후 실행</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 1만 구현하고 멈춰줘. backend venv + requirements(fastapi, uvicorn, httpx, apscheduler), USGS 수집기(60초, 정규화, 부분 실패 격리), 이벤트 id 멱등 스토어(최대 500), /api/quakes(hours, min_mag 필터 + 통계)와 /healthz. Dockerfile과 infra(CDK: CloudFront + prefix list SG + X-Origin-Verify + ALB + Fargate + Secrets)까지 골격 생성. uvicorn 실행과 curl 검증 방법 포함.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 스모크</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd backend &amp;&amp; .venv/bin/uvicorn app.main:app --port 8000 &amp;
+sleep 5
+curl -s "localhost:8000/api/quakes?hours=24&amp;min_mag=2.5" | python3 -c "import sys,json; d=json.load(sys.stdin); print('건수:', d['stats']['count'], '| 최대:', d['stats']['max_mag'])"</code></pre>
+  </div>
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 창(window) 피드와 멱등 upsert</span>
+    이 피드는 "최근 24시간"이라는 <strong>창</strong>입니다. 매 폴링마다 대부분의 이벤트가 다시 오고,
+    이미 본 지진의 규모가 수정되어 오기도 합니다(USGS는 검토 후 값을 갱신합니다). 그래서 삽입이 아니라
+    <strong>id 기반 upsert</strong>여야 합니다 - 새 id는 추가, 아는 id는 갱신. 이 한 줄의 규율이
+    "신규 진입"이라는 정보를 만들고, 중복 펄스를 막습니다.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m2a"><span>quakes API가 실데이터 건수와 최대 규모를 반환합니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m2b"><span>두 번째 폴링 후에도 스토어 건수가 중복 없이 유지됩니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m3">
+  <div class="task-head"><span class="task-num">MISSION 03</span><h2>Phase 2, 세계지도</h2><span class="time-badge">40분</span></div>
+  <p class="task-goal"><strong>변환 두 줄로 진앙이 제자리에</strong> 찍히고, 규모 슬라이더와 테이블까지 살아나면 워치가 완성됩니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 지도를 그리는 동안 테이블과 필터를 서브에이전트로 병행할 수 있습니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 2를 구현해줘. frontend/index.html 정적 SPA 한 장: 요구 5의 화면 스펙(듀얼 테마, 통계 바, 등장방형 세계지도 SVG - 간이 대륙 윤곽 + 진앙 원(반지름=규모, 색=깊이) + 최근 1시간 펄스, KST 이벤트 테이블, 규모 슬라이더와 시간 창 토글). FastAPI 정적 서빙 mount까지. 외부 지도/차트 라이브러리 금지.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 미리보기</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code># 브라우저에서 /proxy/8000/ 열기, 슬라이더를 움직이면 지도와 테이블이 함께 걸러진다</code></pre>
+  </div>
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 투영은 함수다</span>
+    지도 라이브러리가 하는 일의 본질은 <strong>(경도, 위도) → (x, y) 함수</strong> 하나입니다. 등장방형이면
+    x = (lon+180)/360 × W, y = (90-lat)/180 × H, 끝. 고위도가 넓어 보이는 왜곡이 있지만 이벤트 점 찍기에는
+    충분합니다. 이 감각이 있으면 어떤 지리 데이터든 SVG 한 장에 올릴 수 있고, 정밀 지도가 필요해지는
+    순간이 곧 라이브러리를 들일 순간입니다.
+  </div>
+  <div class="callout warn">
+    <span class="co-title">이 미션의 3대 함정</span>
+    ① 점이 전부 왼쪽 위에 몰린다 = coordinates 순서를 [위도, 경도]로 읽은 것, GeoJSON은 <strong>[경도, 위도, 깊이]</strong>입니다.
+    ② 시간이 이상하다 = time은 <strong>UTC 밀리초</strong>, KST 변환(+9h)과 /1000을 확인하세요.
+    ③ 지진이 안 보인다 = 버그가 아닐 수 있습니다, 조용한 날엔 조용합니다. min_mag를 2.5로 내려 확인하세요.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m3a"><span>지도에 진앙 원이 위치, 규모, 깊이를 반영해 찍힙니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m3b"><span>규모 슬라이더와 시간 창이 지도, 테이블, 통계에 함께 반영됩니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m4">
+  <div class="task-head"><span class="task-num">MISSION 04</span><h2>Phase 3 + 4, 브리핑과 개장</h2><span class="time-badge">30분</span></div>
+  <p class="task-goal">숫자가 <strong>읽고 싶은 해설</strong>이 되고, 내 CloudFront URL이 열리면 미션 완료입니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3</a>에서 본 Bedrock 자격과 Secrets 주입의 배경, 그 위에서 도는 REST 계약.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 브리핑</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 3(브리핑)을 구현해줘. llm 모듈: httpx POST converse(Bearer, maxTokens 700, 타임아웃 504/파싱 502 매핑), POST /api/brief - 입력은 24h 통계와 상위 이벤트, 출력은 요구 6의 한국어 브리핑, 10분 버킷 캐시. 화면 브리핑 카드와 버튼까지.</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 개장</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 4(개장)를 진행해줘. 선배포한 인프라에 앱 이미지를 빌드/푸시하고 서비스 갱신, CloudFront 도메인 출력. X-Origin-Verify와 Secrets 주입이 살아 있는지 확인 절차 포함.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 개장 확인</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>DOMAIN=$(aws cloudformation describe-stacks --stack-name QuakeWatch --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDomain'].OutputValue" --output text)
+curl -s "https://$DOMAIN/healthz" &amp;&amp; echo " &lt;- 열렸습니다, 이 URL을 Slack에"</code></pre>
+  </div>
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 숫자를 서사로</span>
+    "24시간 동안 M2.5+ 지진 143건, 최대 5.8" - 정확하지만 아무도 안 읽습니다. 브리핑 프롬프트의 요령은
+    <strong>역할(지구과학 해설가), 재료(통계 + 상위 이벤트), 형식(문단 구성), 금지(과장, 예측)</strong>를
+    명시하는 것입니다. 특히 지진은 <strong>공포를 팔지 않는 절제</strong>가 품질입니다 - "불안 조성 금지,
+    사실 기반"을 프롬프트에 못 박으세요. 같은 데이터라도 프롬프트 계약이 결과물의 품격을 정합니다.
+  </div>
+  <div class="callout warn">
+    <span class="co-title">개장이 막힐 때</span>
+    ① ALB 직접 접근이 403 = 정상입니다, X-Origin-Verify 이중 방어가 일하는 중(CloudFront로만 오세요).
+    ② 502 = 컨테이너 헬스체크 경로(/healthz)와 포트 매핑을 확인. ③ 브리핑만 실패 = Secrets의 Bearer가
+    태스크에 주입되는지 (aws ecs describe-task-definition에서 secrets 블록) 확인하세요.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m4a"><span>브리핑이 절제된 한국어 해설로 도착합니다 (Bearer 인증, 10분 캐시)</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m4b"><span>내 CloudFront URL을 Slack에 공유했습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="gq">
+  <div class="task-head"><span class="task-num">BONUS</span><h2>워치 퀄리티 강화 라운드, 감각을 올려라</h2><span class="time-badge">+α 자유</span></div>
+  <p class="task-goal">
+    워치가 열렸다면 이제 <strong>워치를 내 것으로 만드는 시간</strong>입니다. 강화 카드 중 끌리는 것을 골라
+    하나씩 주문하세요. 요령은 같습니다: 한 번에 하나, 화면으로 확인하고, 마음에 들면 커밋과 재배포.
+  </p>
+
+  <div class="step-title"><span class="step-no">A</span>강화 카드 1, 지역 프리셋</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>지역 프리셋을 추가하자. 헤더에 전체 / 환태평양 / 일본 주변 / 한반도 주변 버튼:
+각 프리셋은 경위도 바운딩 박스로 필터하고, 지도는 그 영역을 확대(viewBox 전환)한다.
+프리셋 선택은 통계 바와 테이블에도 함께 반영, localStorage에 기억.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">B</span>강화 카드 2, 판 경계 오버레이</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>지각판 경계를 지도에 겹치자. 판 경계의 간이 폴리라인 데이터를 plates.js에 상수로 내장하고
+(정밀할 필요 없음, 주요 경계 윤곽이면 충분) 얇은 점선 레이어로 그린다.
+토글 버튼으로 켜고 끄기. 진앙이 경계를 따라 늘어서는 그림이 이 카드의 보상이다.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">C</span>강화 카드 3, 신규 이벤트 라이브 배지</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>새로고침 사이의 변화를 보여주자. /api/quakes 응답에 신규 진입 id 목록(new_ids)을 포함하고,
+화면은 직전 응답과 비교해 새 이벤트에 NEW 배지와 3초 하이라이트를 준다.
+헤더에 "이번 사이클 신규 N건" 카운터. 지구가 방금 움직였다는 감각을 화면에.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">D</span>강화 카드 4, 깊이 단면 뷰</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>깊이 단면을 추가하자. 지도 아래에 가로축 = 경도, 세로축 = 깊이(0~700km 로그 스케일)인
+산점 SVG를 하나 더: 같은 데이터를 다른 축으로 보면 섭입대의 경사가 드러난다.
+지도의 필터와 완전히 연동, 점 호버 시 규모와 지역 툴팁.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">E</span>강화 카드 5, 나만의 워치로</div>
+  <p class="body">여기부터는 정해진 카드가 없습니다. <strong>당신이 관측소장입니다</strong>. 지도를 보며 궁금했던 것
+  하나를 골라, 위 카드들처럼 직접 요구사항을 써서 주문하세요. 아이디어가 필요하면: 시간대별 히스토그램,
+  규모-빈도 분포(구텐베르크-리히터), 최근 7일 창 전환(2.5_week.geojson), 진앙 클릭 → USGS 상세 링크, 소리 알림, DynamoDB로 스토어 승격(TTL 24시간이면 "창" 개념이 테이블 차원에서 재현되고, 재배포와 다중 태스크에도 상태가 유지됩니다).</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 빈칸을 내 아이디어로</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>내 워치에 [내가 원하는 기능]을 추가하자. 규칙:
+1) 데이터: [필요한 필드와 출처, 피드가 달라지면 URL 명시]
+2) 화면: [어디에 어떻게 보이는지]
+3) 계약: 화면은 우리 API만 본다, 멱등 스토어 원칙은 깨지 않는다
+4) 배포: 완성되면 재배포까지
+구현 전에 이 규칙을 네 계획으로 다시 말해주고, 승인하면 진행해.</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">강화 라운드의 요령</span>
+    ① 카드 하나 = 커밋 하나, 되돌아갈 지점을 만들며 갑니다. ② 화면으로 확인하고 <strong>다른 점을 말로</strong> 다듬으세요.
+    ③ 마지막엔 재배포로 Slack의 내 URL을 최신으로.
+  </div>
+  <div class="checkpoint dod">
+    <div class="cp-title">BONUS DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="gq1"><span>강화 카드 하나 이상을 적용해 화면으로 확인하고 커밋했습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="opt-h">
+  <div class="task-head"><span class="task-num">OPTION</span><h2>하네스 엔지니어링</h2><span class="time-badge">+15분</span></div>
+  <p class="task-goal">완주한 프로젝트를 <strong>표준 하네스</strong>로 성숙시킵니다 (project-init으로 구조를 잡고 harness-eval로 6개 차원 등급을 받습니다).</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4</a>의 훅과 스킬을 팀 자산으로 승격하는 감각, 그리고 <a href="ClaudeCode_Reference3_Plugins.html" style="color:#c9a2ff">Reference 3</a>의 플러그인 생태계.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/project-init:init-project .</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 이어서</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/harness-eval:quick</code></pre>
+  </div>
+  <p class="body">등급표에서 낮은 차원 하나를 골라 <code class="inline">/add-adr</code> 또는 <code class="inline">/add-runbook</code>으로 보강하고 재평가해 보세요.</p>
+  <div class="checkpoint dod">
+    <div class="cp-title">OPTION DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="opt1"><span>project-init으로 표준 구조가 생성되었습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="opt2"><span>harness-eval 등급표를 받고 한 차원을 보강했습니다</span></label>
+  </div>
+</section>
+
+<section class="wrapup" id="wrapup">
+  <h2>미션 종료</h2>
+  <p class="sub">피드는 창으로, 저장은 멱등하게, 좌표는 함수로, 숫자는 서사로. 그리고 개장은 CloudFront로.</p>
+  <table class="tbl">
+    <tr><th>가져가는 것</th><th>내용</th></tr>
+    <tr><td>창 피드의 멱등 upsert</td><td>재등장과 값 갱신이 기본인 상류에서 id 규율이 데이터를 지킨다</td></tr>
+    <tr><td>투영의 최소 수학</td><td>지도 = (lon, lat) → (x, y) 함수, 두 줄이면 세계가 SVG에 실린다</td></tr>
+    <tr><td>절제된 브리핑</td><td>재료, 형식, 금지를 계약한 프롬프트가 품격 있는 해설을 만든다</td></tr>
+  </table>
+  <div class="next-box">
+    <div>
+      <div class="nx-label">NEXT</div>
+      <h3>포털로</h3>
+      <p><a href="index.html" style="color:#c9a2ff">워크샵 포털</a>에서 다음 미션을 고르세요.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<footer>
+  <div class="who">Claude Code Deep Dive Workshop, Capstone 5</div>
+  <div>기준: Claude Code 2.1.x + FastAPI + Bedrock REST, Sonnet 4.6, 2026.08</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".code-wrap").querySelector("pre");
+      var text = pre.textContent.replace(/\n{3,}/g, "\n\n").trim();
+      function done() {
+        var old = btn.textContent;
+        btn.textContent = "복사됨 ✓";
+        btn.classList.add("copied");
+        setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () { fallback(); });
+      } else { fallback(); }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+  var taskGroups = { m0:["m0"], m1:["m1"], m2:["m2a","m2b"], m3:["m3a","m3b"], m4:["m4a","m4b"] };
+  /* 챕터형 예: { t0:["t0"], t1:["t1a","t1b"], ... } 진행 라벨 "0/5"
+     캡스톤형 예: { m0:["m0a","m0b"], m1:["m1"], ... m5:["m5"] } 진행 라벨 "0/6" */
+  var state = {};
+  function refresh() {
+    var doneCount = 0;
+    Object.keys(taskGroups).forEach(function (task) {
+      var allDone = taskGroups[task].every(function (cp) { return state[cp]; });
+      if (allDone) doneCount++;
+      var seg = document.querySelector('.seg[data-task="' + task + '"]');
+      if (seg) seg.classList.toggle("done", allDone);
+      var nav = document.querySelector('.sidenav a[data-nav="' + task + '"]');
+      if (nav) nav.classList.toggle("done", allDone);
+    });
+    var pc = document.getElementById("progress-count");
+    if (pc) pc.textContent = doneCount + "/8";
+  }
+  document.querySelectorAll('.cp-item input[type="checkbox"]').forEach(function (cb) {
+    cb.addEventListener("change", function () { state[cb.dataset.cp] = cb.checked; refresh(); });
+  });
+  document.querySelectorAll(".seg").forEach(function (seg) {
+    seg.addEventListener("click", function () {
+      var el = document.getElementById(seg.dataset.task);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidenav a[data-nav]");
+  var segs = document.querySelectorAll(".seg[data-task]");
+  if ("IntersectionObserver" in window) {
+    var current = null;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) current = entry.target.id; });
+      if (!current) return;
+      navLinks.forEach(function (a) { a.classList.toggle("active", a.dataset.nav === current); });
+      segs.forEach(function (s) { s.classList.toggle("active", s.dataset.task === current); });
+    }, { rootMargin: "-20% 0px -65% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
+<script>
+(function(){
+  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
+  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
+  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
+  if(saved==='light'){ root.setAttribute('data-theme','light'); }
+  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
+  label();
+  btn.addEventListener('click',function(){
+    var light = root.getAttribute('data-theme')==='light';
+    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
+    label();
+  });
+})();
+</script>
+</body>
+</html>

@@ -102,9 +102,11 @@ claude-code-workshop/
 ├── ccw-hands-on-lab/                          # Hands-on lab guides (HTML)
 │   ├── index.html                             # Lab portal entry page
 │   ├── ClaudeCode_Ch{1..6}_HandsOnLab.html    # Chapter labs (Ch1–Ch6)
-│   ├── ClaudeCode_Capstone*_HandsOnLab.html   # Capstone missions 1–6 and legacy labs (A–D)
+│   ├── ClaudeCode_Capstone*_HandsOnLab.html   # Capstone missions 1–6
 │   ├── ClaudeCode_Reference{1..3}_*.html      # Reference pages (directory, commands, plugins)
-│   └── ClaudeCode_*_{Setup,Check}.html, eDM   # Capstone setup, preflight check, session intro
+│   ├── ClaudeCode_*_{Setup,Check}.html, eDM   # Capstone setup, preflight check, session intro
+│   ├── assets/                                # Shared reader CSS/JS, fonts, per-page legacy CSS
+│   └── v1/                                    # Previous standalone build (incl. legacy labs A–D)
 ├── tech_doc/                                  # Supplementary technical documents
 │   ├── ClaudeCode-Architecture.pdf            # Claude Code architecture deep dive
 │   └── Claude_Cost_Efficiency.pdf             # Claude cost efficiency guide
@@ -243,9 +245,11 @@ claude-code-workshop/
 ├── ccw-hands-on-lab/                          # 핸즈온랩 가이드 (HTML)
 │   ├── index.html                             # 랩 포털 진입 페이지
 │   ├── ClaudeCode_Ch{1..6}_HandsOnLab.html    # 챕터별 랩 (Ch1–Ch6)
-│   ├── ClaudeCode_Capstone*_HandsOnLab.html   # 캡스톤 미션 1–6 및 레거시 랩 (A–D)
+│   ├── ClaudeCode_Capstone*_HandsOnLab.html   # 캡스톤 미션 1–6
 │   ├── ClaudeCode_Reference{1..3}_*.html      # 참조 문서 (디렉토리, 커맨드, 플러그인)
-│   └── ClaudeCode_*_{Setup,Check}.html, eDM   # 캡스톤 설치, 사전 점검, 세션 소개
+│   ├── ClaudeCode_*_{Setup,Check}.html, eDM   # 캡스톤 설치, 사전 점검, 세션 소개
+│   ├── assets/                                # 공용 리더 CSS/JS, 폰트, 페이지별 legacy CSS
+│   └── v1/                                    # 이전 독립 실행형 빌드 (레거시 랩 A–D 포함)
 ├── tech_doc/                                  # 보조 기술 문서
 │   ├── ClaudeCode-Architecture.pdf            # Claude Code 아키텍처 심층 문서
 │   └── Claude_Cost_Efficiency.pdf             # Claude 비용 효율화 가이드

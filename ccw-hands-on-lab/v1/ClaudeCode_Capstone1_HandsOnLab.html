@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+<title>Capstone 1, Press Start - Claude Code Deep Dive Workshop</title>
+<style>
+:root {
+  --bg: #12181F;
+  --bg-card: #1B242E;
+  --bg-code: #0C1117;
+  --bg-inline: #232E3A;
+  --line: #2A3542;
+  --orange: #FF9900;
+  --orange-dim: rgba(255, 153, 0, 0.14);
+  --crimson: #B6002E;
+  --green: #3FB950;
+  --green-dim: rgba(63, 185, 80, 0.12);
+  --text: #E2E4EC;
+  --muted: #A6ABBE;
+  --dim: #7B8198;
+  --font-body: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-code: "D2Coding", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(255, 153, 0, 0.3); }
+a { color: var(--orange); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+/* ============ Hero ============ */
+.hero {
+  position: relative;
+  padding: 64px 32px 44px;
+  max-width: 1160px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -140px; right: -180px;
+  width: 460px; height: 460px;
+  background: radial-gradient(closest-side, rgba(182, 0, 46, 0.28), rgba(255, 153, 0, 0.10) 55%, transparent 75%);
+  pointer-events: none;
+}
+.eyebrow {
+  display: inline-block;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.hero h1 {
+  font-size: clamp(28px, 4.4vw, 42px);
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  max-width: 780px;
+}
+.hero .subtitle {
+  margin-top: 14px;
+  color: var(--orange);
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 700;
+}
+.hero .lede {
+  margin-top: 18px;
+  color: var(--muted);
+  max-width: 720px;
+  font-size: 15.5px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin-top: 26px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.hero-meta strong { color: var(--text); font-weight: 700; }
+
+/* ============ Sticky timeline ============ */
+.timeline {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(12, 17, 23, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.timeline-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.timeline-label {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.timeline-label strong { color: var(--orange); font-size: 13px; }
+.segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  height: 26px;
+}
+.seg {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg-card);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  padding: 0;
+  font-family: var(--font-body);
+}
+.seg:hover { border-color: var(--orange); }
+.seg .fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 153, 0, 0.85), rgba(255, 153, 0, 0.65));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.seg.done .fill { transform: scaleX(1); }
+.seg .seg-txt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.seg.done .seg-txt { color: #12181F; }
+.seg.active { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
+
+/* ============ Layout ============ */
+.layout {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 44px 32px 80px;
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 52px;
+  align-items: start;
+}
+.sidenav {
+  position: sticky;
+  top: 66px;
+  font-size: 13.5px;
+}
+.sidenav .nav-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  margin-bottom: 14px;
+}
+.sidenav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 7px 10px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+.sidenav a:hover { color: var(--text); background: var(--bg-card); text-decoration: none; }
+.sidenav a.active { color: var(--orange); border-left-color: var(--orange); background: var(--bg-card); }
+.sidenav .dot {
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dim);
+}
+.sidenav a.done .dot { background: var(--green); border-color: var(--green); }
+.sidenav .nav-time { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+/* ============ Task sections ============ */
+.task { margin-bottom: 72px; }
+.task-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.task-num {
+  font-family: var(--font-code);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 0.1em;
+}
+.task-head h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.time-badge {
+  margin-left: auto;
+  flex: none;
+  background: var(--orange-dim);
+  color: var(--orange);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.task-goal {
+  color: var(--muted);
+  margin-bottom: 24px;
+  max-width: 760px;
+}
+.task-goal strong { color: var(--text); }
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16.5px;
+  font-weight: 800;
+  margin: 34px 0 12px;
+}
+.step-title .step-no {
+  flex: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #12181F;
+  font-size: 12.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+p.body { color: var(--muted); margin: 10px 0 14px; max-width: 760px; }
+p.body strong, li strong { color: var(--text); }
+code.inline {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  background: var(--bg-inline);
+  color: #FFC466;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+kbd {
+  font-family: var(--font-code);
+  font-size: 0.82em;
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: var(--text);
+}
+
+/* ============ Code blocks ============ */
+.code-wrap {
+  background: var(--bg-code);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 14px 0 20px;
+  overflow: hidden;
+}
+.code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+.code-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.copy-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--bg-inline);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.code-wrap pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.code-wrap code { font-family: inherit; color: #D8DEE9; }
+.code-wrap.output pre { color: var(--dim); }
+.code-wrap .cmt { color: #5E6B7E; }
+.code-wrap .hl { color: #FFC466; }
+.code-wrap .ok { color: var(--green); }
+
+/* ============ Callouts ============ */
+.callout {
+  border-radius: 8px;
+  background: var(--bg-card);
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14.5px;
+  color: var(--muted);
+  max-width: 760px;
+}
+.callout strong { color: var(--text); }
+.callout.tip .co-title { color: var(--orange); }
+
+.callout .co-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 5px;
+}
+
+.callout.warn .co-title { color: #FF5C85; }
+
+/* ============ Checkpoint ============ */
+.checkpoint {
+  background: var(--green-dim);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 28px;
+}
+.checkpoint .cp-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+.cp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+.cp-item input {
+  flex: none;
+  margin-top: 5px;
+  width: 15px; height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+.cp-item input:checked + span { color: var(--text); }
+
+/* ============ Tabs ============ */
+.tabs { margin: 18px 0 6px; }
+.tab-btns {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dim);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 9px 16px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+.tab-pane { display: none; padding-top: 16px; }
+.tab-pane.active { display: block; }
+
+/* ============ Tables ============ */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 14px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tbl th, .tbl td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid #FFFFFF14;
+}
+.tbl th {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+  background: rgba(255, 255, 255, 0.03);
+}
+.tbl td { color: var(--muted); vertical-align: middle; }
+.tbl td:first-child { color: var(--text); font-weight: 700; white-space: nowrap; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl code { font-family: var(--font-code); font-size: 0.9em; color: #FFC466; }
+
+/* ============ Wrap-up ============ */
+.wrapup {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 32px 34px;
+  margin-bottom: 56px;
+}
+.wrapup h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.wrapup .sub { color: var(--muted); font-size: 14.5px; margin-bottom: 18px; }
+.next-box {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(182, 0, 46, 0.16), rgba(255, 153, 0, 0.08));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 26px;
+}
+.next-box .nx-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--orange);
+}
+.next-box h3 { font-size: 19px; font-weight: 800; }
+.next-box p { color: var(--muted); font-size: 14px; }
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 30px 32px 46px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.9;
+}
+footer .who { color: var(--muted); font-weight: 700; }
+footer .mail { color: var(--orange); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 20px 64px; }
+  .sidenav { display: none; }
+  .hero { padding: 44px 20px 32px; }
+  .timeline-inner { padding: 10px 20px; }
+  .seg .seg-txt { font-size: 9px; }
+  .task-head h2 { font-size: 20px; }
+}
+
+/* ===== Chapter 4 additions: Super Lab ===== */
+.part-divider { margin: 72px 0 12px; padding: 30px 34px; border-radius: 14px;
+  background: linear-gradient(135deg, #1d1433 0%, #12181F 65%); border: 1px solid #45306b; }
+.part-divider .pd-eyebrow { display: inline-block; background: #7a3ff2; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: .14em; padding: 4px 12px; border-radius: 4px; }
+.part-divider h2 { margin: 14px 0 8px; font-size: 26px; color: var(--text); }
+.part-divider p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.75; max-width: 860px; }
+.part-divider .rules { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+.part-divider .rules span { background: #241a3d; border: 1px solid #45306b; color: #d9c9ff;
+  font-size: 12.5px; padding: 6px 12px; border-radius: 999px; }
+.task.mission .task-num { color: #c9a2ff; }
+.task.mission { border-color: #3a2a57; }
+.checkpoint.dod { border-color: #7a3ff2; background: rgba(122, 63, 242, .06); }
+.checkpoint.dod .cp-title { color: #c9a2ff; }
+details.solution { margin: 18px 0; border: 1px dashed #FF9900; border-radius: 10px; background: rgba(255,153,0,.04); }
+details.solution summary { cursor: pointer; padding: 12px 16px; color: var(--accent); font-weight: 700; font-size: 13.5px; list-style: none; }
+details.solution summary::before { content: "▸ "; }
+details.solution[open] summary::before { content: "▾ "; }
+details.solution .sol-body { padding: 0 16px 14px; }
+
+/* ── Korean typography fix: 단어 단위 줄바꿈, 히어로 정돈 ── */
+body { word-break: keep-all; overflow-wrap: break-word; }
+.hero h1 { max-width: 980px; font-size: clamp(26px, 4vw, 38px); text-wrap: balance; }
+.hero .subtitle, .hero .lede, .task-goal, .wrapup .sub { text-wrap: pretty; }
+
+/* ── 잘림 방지 v2: 히어로 압축 + 좁은 화면 대응 ── */
+.hero { padding: 44px 28px 34px; }
+.eyebrow { margin-bottom: 14px; }
+.hero h1 { line-height: 1.3; }
+.hero .subtitle { margin-top: 10px; }
+.hero .lede { margin-top: 12px; }
+.seg-txt { text-overflow: ellipsis; }
+@media (max-width: 620px) {
+  .hero { padding: 26px 16px 24px; }
+  .hero h1 { font-size: 23px; }
+  .hero .subtitle { font-size: 15px; }
+  .hero .lede { font-size: 14px; }
+  .hero-meta { gap: 6px 14px; font-size: 12px; }
+  .seg .seg-txt { display: none; }
+  .timeline-inner { padding: 0 10px; }
+}
+
+/* ── 잘림 방지 v3: 좁은 화면 가로 넘침 제거 ── */
+.tbl { display: block; overflow-x: auto; max-width: 100%; }
+.hero, .layout, .timeline-inner, main, section { min-width: 0; }
+@media (max-width: 620px) {
+  .timeline-label:last-child { display: none; }
+}
+
+/* ── 잘림 방지 v4: 인라인 코드 칩의 최소폭 강제 해제 ── */
+code.inline { white-space: normal; overflow-wrap: anywhere; }
+
+/* ── v5: 소개문/본문 전체 폭 사용 (가독성 캡 해제) ── */
+.hero .lede, .task-goal, p.body, .callout, .part-divider p, .wrapup .sub { max-width: none; }
+.hero .lede { text-wrap: wrap; }
+
+/* ── macOS 터미널 스타일: 신호등 3버튼 ── */
+.code-head { position: relative; padding-left: 76px; }
+.code-head::before {
+  content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 11px; height: 11px; border-radius: 50%; background: #FF5F57;
+  box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
+}
+</style>
+<style id="hol-theme">
+html[data-theme="light"]{
+  --bg:#F3F4F7; --bg-card:#FFFFFF; --bg-code:#EEF1F5; --bg-inline:#E4E9EF; --line:#D7DDE5;
+  --orange:#B45309; --orange-dim:rgba(180,83,9,.12);
+  --green:#1F883D; --green-dim:rgba(31,136,61,.12);
+  --text:#1B2430; --muted:#5B6472; --dim:#75808F;
+  background:#F3F4F7;
+}
+html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
+html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
+#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
+background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
+border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
+font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#themeToggle:hover{border-color:var(--orange,#FF9900)}
+html[data-theme="light"] .code-wrap code{color:#2A3542}
+html[data-theme="light"] .code-wrap.output code{color:#57606E}
+html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
+html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
+html[data-theme="light"] .k.s{background:#DCEEDC}
+html[data-theme="light"] .k.w{background:#E9E2F7}
+html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
+html[data-theme="light"] .code-wrap .hl{color:#B45309}
+html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
+html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
+html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
+html[data-theme="light"] .head .when{color:#FF9900}
+html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
+html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
+html[data-theme="light"] .part-divider{background:linear-gradient(135deg,#EDE6FA 0%,#FFFFFF 65%);border-color:#B79CEF}
+html[data-theme="light"] .part-divider h2{color:#1B2430}
+html[data-theme="light"] .part-divider .rules span{background:#EDE6FA;border-color:#B79CEF;color:#5B21C7}
+html[data-theme="light"] .tbl code{color:#B45309}
+html[data-theme="light"] .task.mission .task-num{color:#6b46c1}
+html[data-theme="light"] .checkpoint.dod .cp-title{color:#6b46c1}
+@media print{#themeToggle{display:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">CAPSTONE 1 / PRESS START / 135 MIN</span>
+  <h1>Clawd Jump, 에이전틱 게임 개발</h1>
+  <div class="subtitle">Claude Code 캐릭터로 만드는 슈퍼마리오풍 플랫포머</div>
+  <p class="lede">
+    요구사항이 <strong>눈에 보이는</strong> 프로젝트만큼 에이전틱 코딩 훈련에 좋은 것이 없습니다.
+    점프가 뜨는지, 충돌이 새는지, 화면이 즉시 답을 줍니다. superpowers 워크플로로
+    게임 엔진부터 레벨, 배포까지 밀어붙이고, 마지막에 CloudFront URL을 Slack에 올려 서로 플레이합니다.
+    이 캡스톤은 <strong>Bedrock을 쓰지 않으므로 API 키가 필요 없습니다</strong>.
+  </p>
+  <div class="hero-meta">
+    <span>소요 시간 <strong>135분</strong></span>
+    <span>미션 <strong>5개 + DoD</strong></span>
+    <span>산출물 <strong>플레이 가능한 URL</strong></span>
+    <span>Update <strong>2026.07</strong></span>
+  </div>
+</header>
+
+<nav class="timeline" aria-label="미션 타임라인">
+  <div class="timeline-inner">
+    <span class="timeline-label">진행 <strong id="progress-count">0/9</strong></span>
+    <div class="segments" id="segments">
+      <button class="seg" data-task="m0" style="flex:10" title="M0 사전 준비, 10분"><span class="fill"></span><span class="seg-txt">M0 준비</span></button>
+      <button class="seg" data-task="m1" style="flex:15" title="M1 설계, 15분"><span class="fill"></span><span class="seg-txt">M1 설계</span></button>
+      <button class="seg" data-task="m2" style="flex:30" title="M2 엔진, 30분"><span class="fill"></span><span class="seg-txt">M2 엔진</span></button>
+      <button class="seg" data-task="m3" style="flex:50" title="M3 게임플레이, 50분"><span class="fill"></span><span class="seg-txt">M3 게임플레이</span></button>
+      <button class="seg" data-task="m4" style="flex:30" title="M4 배포, 30분"><span class="fill"></span><span class="seg-txt">M4 배포</span></button>
+    </div>
+    <span class="timeline-label">135 min</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+<aside class="sidenav" aria-label="미션 목차">
+  <div class="nav-title">MISSIONS / 135분</div>
+  <a href="#brief" data-nav="brief"><span class="dot"></span>브리핑<span class="nav-time"></span></a>
+  <a href="#blueprint" data-nav="blueprint"><span class="dot"></span>구현 청사진<span class="nav-time">참고</span></a>
+  <a href="#m0" data-nav="m0"><span class="dot"></span>M0 사전 준비<span class="nav-time">10분</span></a>
+  <a href="#m1" data-nav="m1"><span class="dot"></span>M1 설계<span class="nav-time">15분</span></a>
+  <a href="#m2" data-nav="m2"><span class="dot"></span>M2 엔진<span class="nav-time">30분</span></a>
+  <a href="#m3" data-nav="m3"><span class="dot"></span>M3 게임플레이<span class="nav-time">50분</span></a>
+  <a href="#m4" data-nav="m4"><span class="dot"></span>M4 배포와 개장<span class="nav-time">30분</span></a>
+  <a href="#gq" data-nav="gq"><span class="dot"></span>BONUS 퀄리티 강화<span class="nav-time">+α</span></a>
+  <a href="#opt-h" data-nav="opt-h"><span class="dot"></span>OPT 하네스 엔지니어링<span class="nav-time">+15분</span></a>
+  <a href="#wrapup" data-nav="wrapup"><span class="dot"></span>마무리<span class="nav-time"></span></a>
+</aside>
+
+<main>
+
+<section class="task" id="brief">
+  <div class="task-head"><span class="task-num">MISSION BRIEFING</span><h2>주인공은 Clawd</h2><span class="time-badge">숙지</span></div>
+  <p class="task-goal">
+    Claude Code의 마스코트 <strong>Clawd</strong>가 코인을 모으고 가시를 피해 깃발까지 갑니다.
+    엔진도 레벨도 손으로 짜지 않습니다, <strong>superpowers 워크플로로 Claude에게 시켜서</strong> 만듭니다.
+  </p>
+  <div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin:6px 0 14px;">
+    <svg width="96" height="64" viewBox="0 0 96 64" xmlns="http://www.w3.org/2000/svg" aria-label="Clawd" style="image-rendering:pixelated"><rect x="8" y="0" width="8" height="8" fill="#D97757"/><rect x="16" y="0" width="8" height="8" fill="#D97757"/><rect x="24" y="0" width="8" height="8" fill="#D97757"/><rect x="32" y="0" width="8" height="8" fill="#D97757"/><rect x="40" y="0" width="8" height="8" fill="#D97757"/><rect x="48" y="0" width="8" height="8" fill="#D97757"/><rect x="56" y="0" width="8" height="8" fill="#D97757"/><rect x="64" y="0" width="8" height="8" fill="#D97757"/><rect x="72" y="0" width="8" height="8" fill="#D97757"/><rect x="80" y="0" width="8" height="8" fill="#D97757"/><rect x="8" y="8" width="8" height="8" fill="#D97757"/><rect x="16" y="8" width="8" height="8" fill="#D97757"/><rect x="24" y="8" width="8" height="8" fill="#D97757"/><rect x="32" y="8" width="8" height="8" fill="#D97757"/><rect x="40" y="8" width="8" height="8" fill="#D97757"/><rect x="48" y="8" width="8" height="8" fill="#D97757"/><rect x="56" y="8" width="8" height="8" fill="#D97757"/><rect x="64" y="8" width="8" height="8" fill="#D97757"/><rect x="72" y="8" width="8" height="8" fill="#D97757"/><rect x="80" y="8" width="8" height="8" fill="#D97757"/><rect x="8" y="16" width="8" height="8" fill="#D97757"/><rect x="16" y="16" width="8" height="8" fill="#D97757"/><rect x="24" y="16" width="8" height="8" fill="#14130F"/><rect x="32" y="16" width="8" height="8" fill="#D97757"/><rect x="40" y="16" width="8" height="8" fill="#D97757"/><rect x="48" y="16" width="8" height="8" fill="#D97757"/><rect x="56" y="16" width="8" height="8" fill="#D97757"/><rect x="64" y="16" width="8" height="8" fill="#14130F"/><rect x="72" y="16" width="8" height="8" fill="#D97757"/><rect x="80" y="16" width="8" height="8" fill="#D97757"/><rect x="0" y="24" width="8" height="8" fill="#D97757"/><rect x="8" y="24" width="8" height="8" fill="#D97757"/><rect x="16" y="24" width="8" height="8" fill="#D97757"/><rect x="24" y="24" width="8" height="8" fill="#D97757"/><rect x="32" y="24" width="8" height="8" fill="#D97757"/><rect x="40" y="24" width="8" height="8" fill="#D97757"/><rect x="48" y="24" width="8" height="8" fill="#D97757"/><rect x="56" y="24" width="8" height="8" fill="#D97757"/><rect x="64" y="24" width="8" height="8" fill="#D97757"/><rect x="72" y="24" width="8" height="8" fill="#D97757"/><rect x="80" y="24" width="8" height="8" fill="#D97757"/><rect x="88" y="24" width="8" height="8" fill="#D97757"/><rect x="0" y="32" width="8" height="8" fill="#D97757"/><rect x="8" y="32" width="8" height="8" fill="#D97757"/><rect x="16" y="32" width="8" height="8" fill="#D97757"/><rect x="24" y="32" width="8" height="8" fill="#D97757"/><rect x="32" y="32" width="8" height="8" fill="#D97757"/><rect x="40" y="32" width="8" height="8" fill="#D97757"/><rect x="48" y="32" width="8" height="8" fill="#D97757"/><rect x="56" y="32" width="8" height="8" fill="#D97757"/><rect x="64" y="32" width="8" height="8" fill="#D97757"/><rect x="72" y="32" width="8" height="8" fill="#D97757"/><rect x="80" y="32" width="8" height="8" fill="#D97757"/><rect x="88" y="32" width="8" height="8" fill="#D97757"/><rect x="8" y="40" width="8" height="8" fill="#D97757"/><rect x="16" y="40" width="8" height="8" fill="#D97757"/><rect x="24" y="40" width="8" height="8" fill="#D97757"/><rect x="32" y="40" width="8" height="8" fill="#D97757"/><rect x="40" y="40" width="8" height="8" fill="#D97757"/><rect x="48" y="40" width="8" height="8" fill="#D97757"/><rect x="56" y="40" width="8" height="8" fill="#D97757"/><rect x="64" y="40" width="8" height="8" fill="#D97757"/><rect x="72" y="40" width="8" height="8" fill="#D97757"/><rect x="80" y="40" width="8" height="8" fill="#D97757"/><rect x="16" y="48" width="8" height="8" fill="#D97757"/><rect x="32" y="48" width="8" height="8" fill="#D97757"/><rect x="56" y="48" width="8" height="8" fill="#D97757"/><rect x="72" y="48" width="8" height="8" fill="#D97757"/><rect x="16" y="56" width="8" height="8" fill="#D97757"/><rect x="32" y="56" width="8" height="8" fill="#D97757"/><rect x="56" y="56" width="8" height="8" fill="#D97757"/><rect x="72" y="56" width="8" height="8" fill="#D97757"/></svg>
+    <p class="body" style="margin:0; flex:1; min-width:240px;">이 도트가 공식 캐릭터 데이터입니다.
+    12x8 그리드, 오렌지 <code class="inline">#D97757</code>와 잉크 <code class="inline">#14130F</code> 두 색.
+    설계 프롬프트에 픽셀 배열로 포함되어 있으니 그대로 쓰면 됩니다.</p>
+  </div>
+  
+  <table class="tbl">
+    <tr><th>레이어</th><th>구성</th><th>핵심 원칙</th></tr>
+    <tr><td>게임</td><td>바닐라 JS + Canvas 단일 index.html, 엔진/물리/레벨/렌더</td><td>라이브러리 금지, 손맛은 상수 세 개(G, JUMP_V, 코요테)에서 나온다</td></tr>
+    <tr><td>캐릭터</td><td>12x8 도트 배열 두 색(#D97757, #14130F), Clawd</td><td>그림 파일 없이 배열이 곧 스프라이트</td></tr>
+    <tr><td>레벨</td><td>타일 배열, 코인과 가시, 골 깃발</td><td>데이터가 곧 레벨, 배열을 고치면 지형이 바뀐다</td></tr>
+    <tr><td>배포</td><td>CDK: S3(비공개) + CloudFront(OAC) + BucketDeployment</td><td>정적 배포의 표준 패턴, URL이 피날레</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">L</span>학습 목표, Level 200</div>
+  <p class="body">이 캡스톤을 마치면 다음 네 가지를 <strong>설명할 수 있고, 다시 만들 수 있습니다</strong>.</p>
+  <table class="tbl">
+    <tr><th>목표</th><th>검증되는 순간</th></tr>
+    <tr><td>superpowers Phase 리듬으로 그린필드를 조립하는 법</td><td>M1의 계획이 M2~M4에서 그대로 소화될 때</td></tr>
+    <tr><td>게임 루프(입력 → 물리 → 충돌 → 렌더)를 계약으로 설계하는 법</td><td>M2에서 점프가 "말로 지시한 대로" 자연스러워질 때</td></tr>
+    <tr><td>정적 자산의 표준 배포 패턴(S3 + CloudFront + OAC)</td><td>M4에서 비공개 버킷인데 URL이 200으로 열릴 때</td></tr>
+    <tr><td>느낌(손맛)을 상수와 언어로 번역해 지시하는 법</td><td>강화 라운드에서 "높이 뜨되 시원하게"가 코드가 될 때</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">R</span>챕터 연결 지도, 배운 내용이 재등장하는 곳</div>
+  <p class="body">이 캡스톤은 새 기술을 가르치지 않습니다. <strong>Ch1~6에서 배운 것을 실전 배치</strong>합니다.</p>
+  <table class="tbl">
+    <tr><th>챕터</th><th>이 캡스톤에서 재등장하는 곳</th></tr>
+    <tr><td><a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1 설치부터 Headless까지</a></td><td>M0~전체: 세션 운용, 지시 → 실행 → 검증 루프</td></tr>
+    <tr><td><a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2 Subagents</a></td><td>M2~M3: code-reviewer 서브에이전트로 물리/충돌 코드 리뷰, 레벨 설계 병행</td></tr>
+    <tr><td><a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3 Admin Setup</a></td><td>배치 결정의 배경: 이 캡스톤은 Bedrock을 쓰지 않아 모델 통제선 밖에서도 완주됩니다, "AI가 필요 없는 곳엔 안 쓴다"도 설계입니다</td></tr>
+    <tr><td><a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4 Settings, 훅과 스킬</a></td><td>OPT: 하네스 성숙화, 훅과 스킬을 프로젝트 자산으로 승격하는 마무리 의식</td></tr>
+    <tr><td><a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5 CLI Reference</a></td><td>확장 방향: 헤드리스 패턴으로 배포 후 URL 스모크를 파이프라인화</td></tr>
+    <tr><td><a href="ClaudeCode_Ch6_HandsOnLab.html" style="color:#c9a2ff">Ch6 Agent SDK</a></td><td>확장 방향: 레벨 생성기를 코드에서 부르는 다음 단계, query 한 번이면 새 스테이지가 배열로</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <span class="co-title">규칙, 캡스톤 공통</span>
+    ① 파일을 손으로 짜지 말고 Claude에게 시켜서 만든다 ② 각 Phase의 DoD를 통과해야 다음으로
+    ③ 막히면 "막힐 때 열어보기"의 힌트를 쓴다. 구현 경로는 자유입니다.
+  </div>
+</section>
+<section class="task" id="blueprint">
+  <div class="task-head"><span class="task-num">BLUEPRINT</span><h2>구현 청사진, 게임의 뼈대</h2><span class="time-badge">참고</span></div>
+  <p class="task-goal">
+    M1 설계가 이 구조로 수렴하도록 방향을 잡아 주는 <strong>구현 지도</strong>입니다. 계획이 이상하게 흐르면
+    여기로 돌아와 대조하세요.
+  </p>
+
+  <div class="step-title"><span class="step-no">0</span>게임 루프 한 눈에</div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">두 개의 경로, 매 프레임과 단 한 번</span></div>
+    <pre><code>[게임 루프]  requestAnimationFrame, 매 프레임 (dt 기반)
+Input(키 상태) ──> Update: 물리(G, JUMP_V, 코요테/버퍼) ──> 충돌(타일 AABB, X축 → Y축 순서)
+                        │                                        │
+Render(카메라 추적, 도트 스프라이트, HUD) <──────────────────────+
+
+[배포 경로]  단 한 번, cdk deploy
+index.html ──> S3(비공개 버킷) <── OAC ── CloudFront ──> 세상의 브라우저</code></pre>
+  </div>
+  <p class="body">Level 200의 핵심 구분입니다: 게임은 <strong>매 프레임 도는 루프</strong>이고 배포는
+  <strong>한 번 굳히는 파이프라인</strong>입니다. 루프 안에서는 dt(프레임 간격)로 물리를 계산해야
+  화면 주사율이 달라도 같은 손맛이 납니다.</p>
+
+  <div class="step-title"><span class="step-no">1</span>구조 지도</div>
+  <table class="tbl">
+    <tr><th>구성</th><th>내용</th><th>핵심 계약</th></tr>
+    <tr><td>엔진</td><td>rAF 루프, dt 계산, 키 입력 상태 머신</td><td>물리는 항상 dt를 곱한다, 프레임 독립</td></tr>
+    <tr><td>물리 상수</td><td>G = 1500, JUMP_V = -420, MOVE = 160 (px/s), 코요테 타임 0.1초, 점프 버퍼 0.1초</td><td>손맛의 전부, 강화 라운드의 튜닝 대상</td></tr>
+    <tr><td>충돌</td><td>타일 그리드 AABB, X 이동 해소 → Y 이동 해소</td><td>축 분리 순서가 벽 끼임과 모서리 떨림을 막는다</td></tr>
+    <tr><td>스프라이트</td><td>12x8 배열 두 색(#D97757 몸통, #14130F 라인)</td><td>배열이 곧 그림, 파일 없이 즉시 수정</td></tr>
+    <tr><td>레벨</td><td>타일 문자를 담은 배열(바닥, 발판, 코인, 가시, 깃발)</td><td>데이터가 곧 지형, 스테이지 추가 = 배열 추가</td></tr>
+    <tr><td>인프라</td><td>CDK 스택: S3 비공개 + CloudFront OAC + BucketDeployment</td><td>버킷은 절대 공개하지 않는다, 접근은 CloudFront로만</td></tr>
+  </table>
+
+  <div class="step-title"><span class="step-no">2</span>기술 선택 4</div>
+  <table class="tbl">
+    <tr><th>선택</th><th>이유</th></tr>
+    <tr><td>바닐라 JS + Canvas</td><td>엔진 라이브러리를 쓰면 손맛이 어디서 오는지 배울 수 없다, 상수가 눈앞에 있어야 튜닝이 된다</td></tr>
+    <tr><td>dt 기반 물리</td><td>60Hz든 120Hz든 같은 점프 높이, 프레임 독립은 게임 루프의 기본 계약</td></tr>
+    <tr><td>타일 + AABB</td><td>플랫포머 충돌의 표준, 축 분리 해소가 단순하고 예측 가능하다</td></tr>
+    <tr><td>BucketDeployment</td><td>빌드 산출물 업로드 + 캐시 무효화를 cdk deploy 한 번에</td></tr>
+  </table>
+</section>
+
+
+<section class="task" id="m0">
+  <div class="task-head"><span class="task-num">MISSION 00</span><h2>사전 준비</h2><span class="time-badge">10분</span></div>
+  <p class="task-goal">프로젝트 폴더와 배포용 CDK 뼈대, 그리고 <strong>로컬 미리보기 방법</strong>을 준비합니다. Bedrock 키는 필요 없습니다.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>aws sts get-caller-identity --query Account --output text
+node -v &amp;&amp; jq --version &amp;&amp; npx cdk --version
+
+mkdir -p ~/capstone/clawd-jump &amp;&amp; cd ~/capstone/clawd-jump
+[ -f cdk.json ] || npx cdk init app --language typescript
+(npx cdk bootstrap &gt; /tmp/bootstrap.log 2&gt;&amp;1 &amp;)
+git config user.name "capstone" &amp;&amp; git config user.email "capstone@lab.local"
+mkdir -p frontend
+git add -A &amp;&amp; git commit -m "chore: scaffold" 2&gt;/dev/null || true</code></pre>
+  </div>
+  <div class="step-title"><span class="step-no">1</span>로컬 미리보기 통로 확인</div>
+  <p class="body">게임은 Phase마다 브라우저로 확인합니다. code-server 환경에서는 정적 서버를 띄우고
+  <strong>프록시 경로</strong>로 접근하는 방식이 가장 간단합니다.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 미리보기 서버</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/capstone/clawd-jump/frontend &amp;&amp; python3 -m http.server 8000</code></pre>
+  </div>
+  <p class="body">브라우저 주소창의 code-server URL 끝에 <code class="inline">/proxy/8000/</code>을 붙여 접속합니다.
+  아직 index.html이 없으니 빈 목록만 보이면 성공입니다.</p>
+  <div class="callout warn">
+    <span class="co-title">프록시가 안 열린다면</span>
+    끝의 슬래시(<code class="inline">/proxy/8000/</code>)를 빠뜨리지 않았는지, 서버가 frontend 폴더에서 떠 있는지 확인하세요.
+    그래도 막히면 미리보기 없이 진행하고 Phase 4 배포 후 CloudFront URL로 한 번에 확인해도 됩니다.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m0"><span>스캐폴드가 완료되었고, 프록시 통로(또는 대안)를 확보했습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m1">
+  <div class="task-head"><span class="task-num">MISSION 01</span><h2>설계, 브레인스토밍</h2><span class="time-badge">15분</span></div>
+  <p class="task-goal">게임 스펙 7개 조항을 superpowers에 넘겨 <strong>설계와 Phase 계획</strong>을 뽑습니다. Clawd 픽셀 배열이 프롬프트에 들어 있습니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 세션 운용과 Capstone Setup의 superpowers 워크플로.</p>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal (~/capstone/clawd-jump)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd ~/capstone/clawd-jump &amp;&amp; claude</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:brainstorming 다음 요구사항으로 "Clawd Jump"를 설계하자.
+1) 순수 HTML5 Canvas + vanilla JS 단일 파일 게임: frontend/index.html 하나, 외부 라이브러리 금지,
+   640x360 논리 해상도(픽셀아트, image-rendering: pixelated), requestAnimationFrame 60fps
+2) 주인공은 Clawd, 아래 12x8 픽셀 배열을 그대로 렌더한다(셀 크기 3px, 좌우 반전 지원):
+   const CLAWD = [
+     ".AAAAAAAAAA.",
+     ".AAAAAAAAAA.",
+     ".AABAAAABAA.",
+     "AAAAAAAAAAAA",
+     "AAAAAAAAAAAA",
+     ".AAAAAAAAAA.",
+     "..A.A..A.A..",
+     "..A.A..A.A.."
+   ];
+   const PALETTE = { A: "#D97757", B: "#14130F" };
+3) 조작: ArrowLeft/Right 이동, Space 점프. 중력과 AABB 충돌, 코요테 타임 0.1초, 점프 버퍼 0.1초
+4) 레벨은 타일 문자열 맵(타일 16px): X=지형, C=코인, ^=가시, F=깃발(골), 화면보다 넓게 만들고 카메라가 Clawd를 따라간다
+5) 게임플레이: 코인 카운트 HUD, 가시에 닿으면 시작점 리스폰, 깃발 도달 시 CLEAR 화면과 재시작(R)
+6) 구현 순서는 Phase 1(엔진: 루프, 입력, 물리, Clawd 렌더) → Phase 2(레벨, 충돌, 카메라) → Phase 3(코인, 가시, 깃발, HUD) → Phase 4(CDK로 S3 + CloudFront 배포)
+7) 시간 제약 2시간: 단위 테스트 생략, 각 Phase는 브라우저 수동 플레이로 검증을 갈음한다. 이 게임은 Bedrock을 쓰지 않는다
+결정이 필요하면 이 범위 안에서 최소한으로만 물어봐.</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="co-title">자동화 옵션, auto mode</span>
+    세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
+    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    시간이 빠듯할 때 유용합니다. 단계마다 직접 검토하려면 기본(수동)을 유지하고, 되돌리려면
+    <code class="inline">auto mode off</code>입니다.
+  </div>
+  <p class="body">브레인스토밍 후 <code class="inline">/superpowers:write-plan</code>으로 계획을 만들고,
+  Phase 4개 구성을 확인해 승인하세요. worktree로 이동해 작업이 시작됩니다.</p>
+  <div class="checkpoint">
+    <div class="cp-title">CHECKPOINT</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m1"><span>Phase 4개 계획이 승인되었고 worktree가 열렸습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m2">
+  <div class="task-head"><span class="task-num">MISSION 02</span><h2>Phase 1, 엔진</h2><span class="time-badge">30분</span></div>
+  <p class="task-goal">게임 루프, 입력, 중력과 점프, 그리고 <strong>Clawd가 화면에 서 있는 것</strong>까지가 이 Phase의 전부입니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프. 여유가 있다면 <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 code-reviewer 서브에이전트에게 물리/충돌 코드 리뷰를 맡겨 보세요.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 1(엔진)만 구현하고 멈춰줘. 640x360 캔버스, 게임 루프, 좌우 이동과 점프(코요테 타임 0.1초, 점프 버퍼 0.1초), 임시 바닥 하나, 그리고 요구사항 2)의 CLAWD 픽셀 배열 렌더(정지 시 2프레임 다리 애니메이션이면 더 좋다). 끝나면 실행 방법을 알려줘.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 미리보기</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>cd frontend &amp;&amp; python3 -m http.server 8000</code></pre>
+  </div>
+  <div class="callout tip">
+    <span class="co-title">관찰 포인트</span>
+    점프의 손맛은 상수 셋의 균형입니다: 중력(초당 가속), 점프 초속도, 코요테 타임.
+    붕 뜬다 싶으면 중력을 키우고, 발이 미끄러지면 마찰을 넣어 달라고 말로 주문하세요.
+    수치를 직접 고치는 게 아니라 <strong>느낌을 말하면 Claude가 수치를 찾는 것</strong>, 그게 이 랩의 연습입니다.
+  </div>
+  
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), dt와 손맛의 물리</span>
+    점프 높이는 대략 <code class="inline">JUMP_V² / (2G)</code>에서 나옵니다. JUMP_V만 키우면 붕 뜨고,
+    G를 함께 키우면 "높이 뜨되 시원하게 떨어지는" 손맛이 됩니다. 그리고 모든 이동에 dt를 곱하는 이유:
+    120Hz 모니터에서도 60Hz와 같은 점프가 나와야 하기 때문입니다. 코요테 타임(발판을 떠난 직후 0.1초의 관용)과
+    점프 버퍼(착지 직전 입력의 예약)는 "억울한 죽음"을 줄이는 플랫포머의 표준 배려입니다.
+  </div>
+  <details class="solution">
+    <summary>막힐 때 열어보기, 물리 핵심 힌트</summary>
+    <div class="sol-body">
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">물리 상수와 점프 (참고 조각)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>const G = 1500, JUMP_V = -420, MOVE = 160;   // px/s 기준
+let coyote = 0, jumpBuf = 0;
+function step(dt) {
+  coyote = onGround ? 0.1 : Math.max(0, coyote - dt);
+  jumpBuf = keys.jump ? 0.1 : Math.max(0, jumpBuf - dt);
+  if (jumpBuf &gt; 0 &amp;&amp; coyote &gt; 0) { vy = JUMP_V; coyote = 0; jumpBuf = 0; }
+  vy += G * dt;
+  x += vx * dt;  y += vy * dt;   // 이후 AABB 충돌 해소
+}</code></pre>
+  </div>
+    </div>
+  </details>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m2a"><span>브라우저에서 Clawd가 좌우로 움직이고 점프가 자연스럽습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m2b"><span>캐릭터가 첨부 도트(12x8, 두 색)와 같은 모습입니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m3">
+  <div class="task-head"><span class="task-num">MISSION 03</span><h2>Phase 2 + 3, 레벨과 게임플레이</h2><span class="time-badge">50분</span></div>
+  <p class="task-goal">타일 맵과 카메라, 그리고 코인/가시/깃발까지. <strong>게임이 게임이 되는</strong> 구간입니다.</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 레벨 배열을 설계하는 동안 코인/가시 로직 보강을 서브에이전트로 병행할 수 있습니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 2</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 2(레벨과 카메라)만 구현해줘. 요구사항 4)의 타일 문자열 맵(16px)과 AABB 타일 충돌, 화면 2~3배 폭 레벨, Clawd를 따라가는 카메라(레벨 경계 클램프)까지.</code></pre>
+  </div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 3</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 3(게임플레이)을 구현해줘. C 코인(먹으면 카운트, HUD 좌상단), ^ 가시(닿으면 시작점 리스폰), F 깃발(닿으면 CLEAR 오버레이와 R 재시작), 코인 전부 먹고 깃발이면 PERFECT 표기.</code></pre>
+  </div>
+  <p class="body">레벨을 직접 그리고 싶다면 이런 문자열 아트를 프롬프트에 붙이세요. 한 글자가 타일 하나입니다.</p>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">레벨 맵 예시 (원하면 수정해서 전달)</span></div>
+    <pre><code>....................................................
+..........C.C..............C.C.....................
+.....XXX........XX..^^..XXXX....C...........F......
+X.........C..........................XX....XXX.....
+XXXX...XXXXX...XXXXXXXXXXXXXX...XXXXXXXX..XXXXXXXXXX</code></pre>
+  </div>
+  
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 타일 충돌의 축 분리</span>
+    충돌 해소를 X축 이동 후 한 번, Y축 이동 후 한 번, <strong>따로</strong> 하는 이유가 있습니다.
+    한 번에 대각선으로 밀어 넣고 해소하면 벽 모서리에서 어느 축으로 밀어낼지 애매해져 끼임과 떨림이 생깁니다.
+    "X로 걷다 벽에 막히고, Y로 떨어지다 바닥에 선다"를 분리하면 각 축의 답이 자명해집니다.
+    레벨이 타일 그리드인 것도 같은 이유, 충돌 후보를 내 주변 몇 칸으로 즉시 좁힐 수 있습니다.
+  </div>
+  <div class="callout warn">
+    <span class="co-title">이 미션의 3대 함정</span>
+    ① 키를 눌러도 반응이 없다 = 캔버스 밖 포커스이거나 스크롤에 먹힌 것, keydown을 window에 걸고
+    Space의 기본 스크롤은 preventDefault. ② 벽에 끼거나 모서리에서 떨림 = 충돌 해소를 축별로(X 먼저, Y 다음) 분리.
+    ③ 코인이 안 먹힌다 = 타일 좌표와 픽셀 좌표 혼동, 충돌은 픽셀 AABB로 통일.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m3a"><span>카메라가 따라오는 넓은 레벨을 끝까지 달릴 수 있습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m3b"><span>코인 카운트가 오르고 가시 리스폰이 동작합니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m3c"><span>깃발에서 CLEAR가 뜨고 R로 재시작됩니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="m4">
+  <div class="task-head"><span class="task-num">MISSION 04</span><h2>Phase 4, 배포와 개장</h2><span class="time-badge">30분</span></div>
+  <p class="task-goal">S3 + CloudFront로 세상에 공개합니다. 이 캡스톤의 deploy는 <strong>.env 로드가 필요 없습니다</strong>(Bedrock 미사용).</p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 검증 루프가 배포 스모크(curl 200)로 확장됩니다. 자동화가 궁금하면 <a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5</a>의 헤드리스 패턴이 다음입니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/superpowers:execute-plan Phase 4(배포)를 구현해줘. CDK 단일 스택: S3 버킷(비공개) + CloudFront(OAC) + BucketDeployment로 frontend/를 서빙, 리전 ap-northeast-2, RemovalPolicy DESTROY, 출력에 CloudFront URL.</code></pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 배포와 스모크</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
+URL=$(jq -r '.[] | to_entries[] | select(.key|test("Url|Domain";"i")) | .value' cdk-outputs.json | head -1)
+echo "$URL" &amp;&amp; curl -s -o /dev/null -w "%{http_code}\n" "$URL"</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">출력 예시</span></div>
+    <pre><code>https://d1a2b3c4d5e6f7.cloudfront.net
+200</code></pre>
+  </div>
+  <p class="body">브라우저로 URL을 열어 한 판 클리어하고, <strong>Slack 채널에 URL을 공유</strong>하세요.
+  서로의 레벨을 플레이해 보는 것까지가 개장입니다.</p>
+  
+  <div class="callout tip">
+    <span class="co-title">개념 짚기 (Level 200), 비공개 버킷과 OAC</span>
+    버킷을 공개(public)로 여는 순간 URL을 아는 누구나 S3에 직접 붙습니다. 표준은 반대입니다:
+    <strong>버킷은 잠그고</strong>, CloudFront에만 OAC(Origin Access Control)로 열쇠를 줍니다.
+    사용자는 CloudFront URL로만 들어오고, 캐시/압축/TLS가 공짜로 따라옵니다.
+    M4의 스모크가 CloudFront URL로 200을 확인하는 것이 바로 이 계약의 검증입니다.
+  </div>
+  <div class="checkpoint">
+    <div class="cp-title">DEFINITION OF DONE</div>
+    <label class="cp-item"><input type="checkbox" data-cp="m4a"><span>CloudFront URL에서 게임이 플레이됩니다 (curl 200)</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="m4b"><span>Slack에 URL을 공유했습니다</span></label>
+  </div>
+</section>
+
+
+
+
+<section class="task" id="gq">
+  <div class="task-head"><span class="task-num">BONUS</span><h2>게임 퀄리티 강화 라운드, 재미를 올려라</h2><span class="time-badge">+α 자유</span></div>
+  <p class="task-goal">
+    개장까지 마쳤다면 이제 <strong>게임을 내 것으로 만드는 시간</strong>입니다. 아래 강화 카드 중 끌리는 것을 골라
+    하나씩 주문하세요, 전부 해도 좋고 하나만 해도 좋습니다. 요령은 같습니다: 한 번에 하나, 플레이해 보고, 마음에 들면 커밋.
+  </p>
+
+  <div class="step-title"><span class="step-no">A</span>강화 카드 1, 점프의 손맛</div>
+  <p class="body">점프를 더 높게, 혹은 더 경쾌하게. 물리 상수 세 개가 손맛의 전부입니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>점프 손맛을 튜닝하자. JUMP_V를 지금보다 20% 강하게, 대신 G(중력)도 함께 올려서
+"높이 뜨지만 떨어질 땐 시원하게"를 만들어줘. 최고점 근처에서 잠깐 머무는 느낌(정점 감속)도 살짝.
+코요테 타임과 점프 버퍼는 유지. 바꾼 상수는 표로 before/after를 보여줘.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">B</span>강화 카드 2, 주인공 교체</div>
+  <p class="body">Clawd 대신 내 캐릭터로. 도트 배열만 갈면 주인공이 바뀝니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>주인공을 교체하자. 지금의 12x8 두 색 도트 배열 방식을 유지하되,
+새 캐릭터(예: 주황 몸통에 초록 모자를 쓴 고양이)를 3색 팔레트로 디자인해서 바꿔줘.
+걷기 2프레임과 점프 1프레임 포즈도 배열로 추가하고, 프레임 전환은 이동 중에만.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">C</span>강화 카드 3, 스테이지 추가</div>
+  <p class="body">깃발이 끝이 아니게. 2탄, 3탄으로 이어지는 레벨 진행을 붙입니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>스테이지 2를 추가하자. 레벨을 배열의 배열로 일반화하고, 깃발에 닿으면
+"STAGE CLEAR → 다음 스테이지" 흐름으로 이어줘. 2탄은 1탄보다 발판 간격이 넓고
+가시가 많은 구성으로 새로 설계하고, 마지막 스테이지의 깃발에서만 ALL CLEAR를 띄워줘.
+상단 HUD에 현재 스테이지 표시(1-1, 1-2)도 추가.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">D</span>강화 카드 4, 악당 등장</div>
+  <p class="body">긴장감은 적에게서 나옵니다. 순찰형 몬스터 하나면 게임이 달라집니다.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>순찰형 악당을 추가하자. 발판 위를 좌우로 오가는 몬스터(가장자리에서 방향 전환),
+옆으로 닿으면 리스폰, 위에서 밟으면 처치되고 살짝 튕겨 오르게(밟기 반동).
+도트는 주인공과 같은 방식의 작은 배열로 디자인하고, 스테이지마다 2~3마리 배치.
+처치 수를 HUD의 코인 옆에 표시해줘.</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">E</span>강화 카드 5, 나만의 게임으로</div>
+  <p class="body">여기부터는 정해진 카드가 없습니다. <strong>당신이 게임 디자이너입니다</strong>. 플레이하며 아쉬웠던 것,
+  어릴 때 좋아했던 게임에서 훔치고 싶은 것 하나를 골라, 위 카드들처럼 직접 요구사항을 써서 주문하세요.
+  아이디어가 필요하면: 이동 발판, 대시(더블 탭), 배경 패럴랙스, 점프/코인 효과음, 타임어택 모드, 부서지는 블록,
+  숨겨진 보너스 방, 보스 스테이지.</p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력, 빈칸을 내 아이디어로</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>내 게임에 [내가 원하는 기능]을 추가하자. 규칙:
+1) 동작: [언제, 어떻게 발동하고 무엇이 일어나는지 한두 문장]
+2) 손맛: [속도/높이/타이밍처럼 느낌을 좌우하는 요소와 원하는 감각]
+3) 화면: [플레이어에게 어떻게 보이는지, HUD/이펙트/도트]
+4) 기존 조작과 물리(코요테 타임, 점프 버퍼)는 깨지 않는다
+구현 전에 이 규칙을 네 계획으로 다시 말해주고, 승인하면 진행해.</code></pre>
+  </div>
+  <p class="body">요구사항을 <strong>내 언어로 쓰는 것</strong>이 이 카드의 진짜 미션입니다. 동작/손맛/화면 세 칸을 채우는 순간,
+  당신은 바이브가 아니라 설계로 게임을 키우고 있는 겁니다.</p>
+
+  <div class="callout tip">
+    <span class="co-title">강화 라운드의 요령</span>
+    ① 카드 하나 = 커밋 하나, 되돌아갈 지점을 만들며 갑니다. ② 플레이 후 <strong>다른 점을 말로</strong> 다듬으세요,
+    "밟기 반동이 너무 약하다"처럼. ③ 욕심나는 아이디어(이동 발판, 대시, 배경 패럴랙스, 사운드)는 같은 리듬으로
+    직접 카드를 만들어 보세요. 마지막엔 <code class="inline">cdk deploy</code>로 재배포해 Slack의 내 URL을 최신으로.
+  </div>
+  <div class="checkpoint dod">
+    <div class="cp-title">BONUS DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="gq1"><span>강화 카드 하나 이상을 적용해 플레이하고 커밋했습니다</span></label>
+  </div>
+</section>
+
+<section class="task" id="opt-h">
+  <div class="task-head">
+    <span class="task-num">OPTION</span>
+    <h2>하네스 엔지니어링, 작품을 성숙시키고 등급을 받다</h2>
+    <span class="time-badge">+15분 옵션</span>
+  </div>
+  <p class="task-goal">
+    지금까지 만든 것은 <strong>결과물</strong>입니다. 이 옵션은 그 결과물을 만든 <strong>작업 환경, 즉 하네스</strong>
+    (CLAUDE.md, hooks, skills, commands, agents)를 표준 구조로 성숙시키고(project-init),
+    그 품질을 6개 차원(정확성, 안전성, 완전성, 실행 가능성, 일관성, 검증 가능성)에서
+    채점받는(harness-eval) 단계입니다. superpowers의 3단(brainstorm, write-plan, execute-plan) 뒤에
+    <strong>4단 성숙화와 5단 평가</strong>를 붙이는 셈입니다. 캡스톤 공통의 마무리 의식입니다.
+  </p>
+  <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4</a>의 훅과 스킬을 팀 자산으로 승격하는 감각, 그리고 <a href="ClaudeCode_Reference3_Plugins.html" style="color:#c9a2ff">Reference 3</a>의 플러그인 생태계.</p>
+
+  <div class="step-title"><span class="step-no">1</span>플러그인 2종 설치</div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-label">Terminal, 전체 복사</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>claude plugin marketplace add https://github.com/whchoi98/project-init
+claude plugin install project-init@project-init
+claude plugin marketplace add https://github.com/whchoi98/harness-eval
+claude plugin install harness-eval@harness-eval
+claude plugin list</code></pre>
+  </div>
+  <p class="body">설치 후 새 Claude 세션을 시작하세요, superpowers 때와 같은 규칙입니다.</p>
+
+  <div class="step-title"><span class="step-no">2</span>성숙화, /project-init:init-project와 /project-init:sync-docs</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력 (새 세션, worktree에서)</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/project-init:init-project .</code></pre>
+  </div>
+  <p class="body">
+    게임 프로젝트의 하네스는 아직 얇습니다(단일 index.html과 CDK 스택). 기존 프로젝트 감지 모드가
+    있는 것은 보존하고, 없는 것(문서 스캐폴딩, 시크릿 스캔 훅, /review 커맨드, 테스트 골격 등)만 채웁니다.
+    CLAUDE.md가 이미 있으면 덮어쓰기 전에 물어봅니다. 끝나면 이어서:
+  </p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/project-init:sync-docs</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">출력 예시 (요약)</span></div>
+    <pre><code>## Sync Report
+### Quality Scores (Before -&gt; After)
+| ./CLAUDE.md           | D (48) | B (82) | +34 |
+| ./frontend/CLAUDE.md  | F (10) | C (61) | +51 |
+### Changes Made
+- Files created: 4 / Files updated: 2 / Runbooks missing: 1</code></pre>
+  </div>
+
+  <div class="step-title"><span class="step-no">3</span>평가, /harness-eval로 등급 받기</div>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/harness-eval:quick</code></pre>
+  </div>
+  <div class="code-wrap output">
+    <div class="code-head"><span class="code-label">출력 예시</span></div>
+    <pre><code>{"mode": "quick", "scores": {"overall": 7.0, "grade": "B"}, "checklist": {"pass": 12, "warn": 3, "fail": 1}}</code></pre>
+  </div>
+  <p class="body">
+    이 캡스톤의 비자명한 지식은 <strong>점프의 손맛</strong>입니다. "왜 G=1500이고 코요테 타임이 0.1초인가"를
+    CLAUDE.md의 패턴으로 기록해 두면 sync-docs 점수가 오르고, 다음에 이 저장소를 여는 Claude가
+    같은 감각으로 튜닝합니다. 여유가 있다면 결정을 기록으로 남기세요:
+  </p>
+  <div class="code-wrap prompt">
+    <div class="code-head"><span class="code-label">Claude 세션 입력</span><button class="copy-btn" type="button">복사</button></div>
+    <pre><code>/add-adr jump-feel-tuning
+/add-runbook clawd-jump-deploy</code></pre>
+  </div>
+  <div class="callout warn">
+    <span class="co-title">시간과 신뢰 가드</span>
+    잔여 시간이 빠듯하면 설치와 /harness-eval:quick(30초 체크리스트)만으로 충분합니다,
+    /project-init:init-project는 17단계라 수 분이 걸립니다. /harness-eval:standard의 동적 분석은
+    <strong>대상 프로젝트의 훅과 테스트를 실제로 실행</strong>합니다. 방금 본인이 만든 프로젝트라 안전하지만,
+    남의 저장소를 평가할 때는 --static-only 플래그가 예의이자 안전입니다.
+  </div>
+
+  <div class="checkpoint dod">
+    <div class="cp-title">OPTION DONE, 진행률 미집계</div>
+    <label class="cp-item"><input type="checkbox" data-cp="opt1"><span>/project-init:sync-docs의 Before/After 품질 점수를 확인했습니다</span></label>
+    <label class="cp-item"><input type="checkbox" data-cp="opt2"><span>/harness-eval:quick 등급을 받았습니다</span></label>
+  </div>
+</section>
+
+<section class="wrapup" id="wrapup">
+  <h2>미션 종료</h2>
+  <p class="sub">게임은 에이전틱 코딩의 최고 훈련장입니다. 요구가 눈에 보이고, 피드백이 즉각적이니까요.</p>
+  <table class="tbl">
+    <tr><th>가져가는 것</th><th>내용</th></tr>
+    <tr><td>느낌을 말로 주문하기</td><td>"점프가 붕 뜬다"를 수치 튜닝으로 번역하는 것은 Claude의 일, 판정은 사람의 일</td></tr>
+    <tr><td>Phase 단위 검증 루프</td><td>브라우저 수동 플레이도 훌륭한 검증, 핵심은 Phase마다 멈추고 확인하는 리듬</td></tr>
+    <tr><td>같은 배포 패턴</td><td>S3 + CloudFront + BucketDeployment는 정적 배포의 표준 패턴, 이제 눈 감고도</td></tr>
+  </table>
+  <div class="callout tip">
+    <span class="co-title">OPTION, Bedrock 레벨 생성기 (선택, API 키 필요)</span>
+    CapstoneA의 <code class="inline">~/capstone/.env</code> 방식으로 Bearer 키를 로드했다면,
+    Converse 호출로 "난이도 상승 곡선을 가진 60타일 폭 레벨 문자열"을 생성해 맵으로 붙여 넣는 확장을 시도해 보세요.
+    프롬프트에 타일 규칙(X, C, ^, F)과 폭을 명시하는 것이 요령입니다.
+  </div>
+  <div class="next-box">
+    <div>
+      <div class="nx-label">NEXT</div>
+      <h3>포털로</h3>
+      <p>Capstone 2(Market Desk on Web, 웹 시황 대시보드)도 같은 리듬입니다. <a href="index.html" style="color:#c9a2ff">워크샵 포털</a>에서 다음 미션을 고르세요.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<footer>
+  <div class="who">Claude Code Deep Dive Workshop, Capstone 1</div>
+  <div>기준: Claude Code 2.1.x + CDK v2, Sonnet 4.6, 2026.07</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".code-wrap").querySelector("pre");
+      var text = pre.textContent.replace(/\n{3,}/g, "\n\n").trim();
+      function done() {
+        var old = btn.textContent;
+        btn.textContent = "복사됨 ✓";
+        btn.classList.add("copied");
+        setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () { fallback(); });
+      } else { fallback(); }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+  var taskGroups = { m0:["m0"], m1:["m1"], m2:["m2a","m2b"], m3:["m3a","m3b","m3c"], m4:["m4a","m4b"] };
+  /* 챕터형 예: { t0:["t0"], t1:["t1a","t1b"], ... } 진행 라벨 "0/5"
+     캡스톤형 예: { m0:["m0a","m0b"], m1:["m1"], ... m5:["m5"] } 진행 라벨 "0/6" */
+  var state = {};
+  function refresh() {
+    var doneCount = 0;
+    Object.keys(taskGroups).forEach(function (task) {
+      var allDone = taskGroups[task].every(function (cp) { return state[cp]; });
+      if (allDone) doneCount++;
+      var seg = document.querySelector('.seg[data-task="' + task + '"]');
+      if (seg) seg.classList.toggle("done", allDone);
+      var nav = document.querySelector('.sidenav a[data-nav="' + task + '"]');
+      if (nav) nav.classList.toggle("done", allDone);
+    });
+    var pc = document.getElementById("progress-count");
+    if (pc) pc.textContent = doneCount + "/9";
+  }
+  document.querySelectorAll('.cp-item input[type="checkbox"]').forEach(function (cb) {
+    cb.addEventListener("change", function () { state[cb.dataset.cp] = cb.checked; refresh(); });
+  });
+  document.querySelectorAll(".seg").forEach(function (seg) {
+    seg.addEventListener("click", function () {
+      var el = document.getElementById(seg.dataset.task);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+  var sections = document.querySelectorAll("section[id]");
+  var navLinks = document.querySelectorAll(".sidenav a[data-nav]");
+  var segs = document.querySelectorAll(".seg[data-task]");
+  if ("IntersectionObserver" in window) {
+    var current = null;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) current = entry.target.id; });
+      if (!current) return;
+      navLinks.forEach(function (a) { a.classList.toggle("active", a.dataset.nav === current); });
+      segs.forEach(function (s) { s.classList.toggle("active", s.dataset.task === current); });
+    }, { rootMargin: "-20% 0px -65% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
+<script>
+(function(){
+  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
+  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
+  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
+  if(saved==='light'){ root.setAttribute('data-theme','light'); }
+  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
+  label();
+  btn.addEventListener('click',function(){
+    var light = root.getAttribute('data-theme')==='light';
+    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
+    label();
+  });
+})();
+</script>
+</body>
+</html>

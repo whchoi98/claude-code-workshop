@@ -14,6 +14,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Add a "실제 결과 샘플" section and TOC entry at the bottom of every capstone lab page (Capstone 1–6) linking the deployed result samples: clawd-game, stock-monitoring, youtube-trend, quake-watch, and newslens on `whchoi.net`; pages 1, 2, 4, 5, and 6 also highlight their own sample.
+- Rebuild `ccw-hands-on-lab/` from the 2026-09-19 "My Workshop" reader build: every lab page now shares a common left-hand table of contents, title search, dark mode, print view, copy buttons, and per-browser reading history, served from a shared `assets/` directory (reader/workshop CSS and JS, per-page legacy CSS, NanumSquare fonts, highlight.js). HTML files must stay alongside `assets/`.
+- Move the previous standalone lab build, including legacy capstone labs A–D and the old `theme.css`/`theme.js`, into `ccw-hands-on-lab/v1/`; the new top level ships chapter labs Ch1–Ch6, capstone missions 1–6 with the setup guide, reference pages 1–3, the preflight check, the session intro, and the portal.
+- Update the session-intro page: remove the special guest session and extend the Day 2 capstone block to 13:45–16:50; reflect the Day 2 Ch5 lecture and lab, lunch, and break times in the schedule.
+- Update `CLAUDE.md` and `README.md` to describe the shared `assets/` directory, the `v1/` archive, and the new theme-file locations.
+
+### Fixed
+
+- Fix the Chapter 2 lab JSON post-processing (Task 05, step 2): `--output-format json` returns the agent's text in `result` alongside run metadata (`session_id`, `num_turns`, `total_cost_usd`, `usage`), so the step now extracts `.result` and the metadata instead of the non-existent `.summary` and `.issues` keys, with a callout explaining the real structure, the `--json-schema` / `structured_output` route for field-level data, and the `.result | fromjson` fallback.
+- Fix the same fabricated JSON structure in the snippet archive: slide 179 (Ch1 Pattern 7) and slide 56 (Ch2 headless invocation) now show the real result envelope plus the `--json-schema` route, slide 195 (Ch1 Lab 5) pipes to `jq -r '.result'`, and slide 79 (Ch2 pre-commit hook) counts critical issues from `structured_output` instead of a non-existent top-level `issues` array that made the hook fail open.
+
 ## [1.1.0] - 2026-09-06
 
 ### Added
@@ -88,6 +101,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 이 문서는 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)를 기반으로 하며, [Semantic Versioning](https://semver.org/spec/v2.0.0.html)을 따릅니다.
 
 ## [Unreleased]
+
+### Changed
+
+- 모든 캡스톤 랩 페이지(Capstone 1–6) 하단에 실제 배포 결과 샘플(`whchoi.net`의 clawd-game, stock-monitoring, youtube-trend, quake-watch, newslens)을 연결하는 "실제 결과 샘플" 섹션과 목차 항목 추가; 1, 2, 4, 5, 6 페이지는 자기 미션의 샘플을 별도 강조.
+- `ccw-hands-on-lab/`를 2026-09-19 "My Workshop" 리더 빌드로 재구성: 모든 랩 페이지가 공통 좌측 목차, 제목 검색, 다크 모드, 인쇄 보기, 복사 버튼, 브라우저별 읽기 기록을 공유하며 공용 `assets/` 디렉토리(reader/workshop CSS·JS, 페이지별 legacy CSS, NanumSquare 폰트, highlight.js)에서 로드. HTML 파일은 `assets/`와 같은 폴더에 유지 필요.
+- 이전 독립 실행형 랩 빌드(레거시 캡스톤 랩 A–D, 기존 `theme.css`/`theme.js` 포함)를 `ccw-hands-on-lab/v1/`로 이동; 새 최상위에는 챕터 랩 Ch1–Ch6, 캡스톤 미션 1–6과 설치 가이드, 참조 문서 1–3, 사전 점검, 세션 소개, 포털 포함.
+- 세션 소개 페이지 갱신: 특별 초청 세션 제거, Day 2 캡스톤 블록을 13:45–16:50으로 확대, Day 2 Ch5 강의·랩과 점심·휴식 시간을 일정에 반영.
+- `CLAUDE.md`와 `README.md`에 공용 `assets/` 디렉토리, `v1/` 아카이브, 새 테마 파일 위치 반영.
+
+### Fixed
+
+- Chapter 2 랩 JSON 후처리(Task 05, 2단계) 수정: `--output-format json`은 에이전트 본문을 `result`에, 실행 메타데이터(`session_id`, `num_turns`, `total_cost_usd`, `usage`)를 최상위에 반환하므로, 존재하지 않는 `.summary`·`.issues` 대신 `.result`와 메타데이터를 추출하도록 변경하고 실제 구조, 필드 단위 추출을 위한 `--json-schema` / `structured_output` 경로, `.result | fromjson` 대안을 설명하는 콜아웃 추가.
+- 스니펫 아카이브의 동일한 가상 JSON 구조 수정: 슬라이드 179(Ch1 Pattern 7)와 56(Ch2 헤드리스 호출)은 실제 result 봉투 구조와 `--json-schema` 경로로, 슬라이드 195(Ch1 Lab 5)는 `jq -r '.result'`로, 슬라이드 79(Ch2 pre-commit hook)는 존재하지 않는 최상위 `issues` 배열 대신 `structured_output`에서 critical 이슈를 집계하도록 변경(기존 코드는 훅이 항상 통과하는 fail-open 상태).
 
 ## [1.1.0] - 2026-09-06
 

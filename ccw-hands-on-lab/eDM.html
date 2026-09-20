@@ -1,540 +1,361 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Claude Code Deep Dive Workshop - 세션 소개</title>
-<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHkAAABOCAYAAAAEhblcAAABcklEQVR42u3cPUrDUADA8ZfSuZPURXHQSezkIKgn8AAOrt28gIujKN3FI3TwAJ5ABQehEOkuFlHrYrCDi/EE/SAxTa2/3xoeIe+fj+HxEoUpOD1bSFfXvsNnUgnN5nsUmKpcE368t50eNJYyjb1/fAubK/V/NNVp5ulux71wcnWbuVXFfT7/RBYZkREZkREZkREZkUVGZERGZKauWtaJnz4G4e76Yejxw92NPzeZFyOuZ2u5XtrSammRn5NBOL/pzlXkUdcTdkJpkb2ufZMRGZERGZERGZERWWRERmRERmR+X5Rn+2me7ZhMLn5NQmOxlmlsO+55kr2uERmRERmRERmREVlkREZkREZkClDt9JMQ4l6mwY16LfMSGJN7GXyFOGOjTj8p71fITM6vkBEZkUVGZERGZERGZERGZJERGZGZPYXuO+0e7afDjo1bPssztijjllbXW5dREWM9yYiMyCIjMiIjMiIjMiIjssiIjMjMnh/r21dNDgflUAAAAABJRU5ErkJggg==">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
-<style>
-  :root {
-    --page: #080706; --mail: #12181F; --card: #1B242E; --code: #0C1117; --line: #262F3B;
-    --text: #E8ECF1; --muted: #8B96A5; --charcoal: #C7CDD6;
-    --orange: #FF9900; --crimson: #B6002E; --lavender: #c9a2ff; --green: #3FB950;
-  }
-  * { box-sizing: border-box; margin: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--page); color: var(--text); padding: 26px 14px 44px;
-    font-family: "NanumSquareOTF", "나눔스퀘어OTF", "NanumSquare", "나눔스퀘어",
-                 "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
-    font-size: 16px; line-height: 1.75; word-break: keep-all; overflow-wrap: break-word;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: inherit; text-decoration: none; }
-  code.inline {
-    font-family: "D2Coding", "JetBrains Mono", ui-monospace, monospace; font-size: .86em;
-    background: #232D38; color: #FFC466; padding: 2px 6px; border-radius: 4px; overflow-wrap: anywhere;
-  }
+<title>Claude Code Deep Dive Workshop - 세션 소개 · My Workshop</title>
 
-  /* ── 메일 컨테이너 ── */
-  .mail {
-    max-width: 940px; margin: 0 auto; background: var(--mail);
-    border: 1px solid var(--line); border-radius: 16px; overflow: hidden;
-  }
 
-  /* ── 헤더 ── */
-  .head {
-    position: relative; padding: 38px 46px 34px; text-align: center; overflow: hidden;
-    background:
-      radial-gradient(120% 90% at 88% -18%, rgba(182,0,46,.42), transparent 62%),
-      radial-gradient(90% 80% at 6% 108%, rgba(122,63,242,.26), transparent 66%),
-      #0F151C;
-    border-bottom: 1px solid var(--line);
-  }
-  .brandbar { display: flex; align-items: center; justify-content: center; gap: 13px; margin-bottom: 20px; }
-  .brandbar img.logo { height: 24px; width: auto; display: block; }
-  .brandbar .wordmark { color: var(--text); font-size: 15.5px; font-weight: 800; letter-spacing: .18em; }
-  .brandbar .x { color: var(--muted); font-size: 15.5px; }
-  .eyebrow {
-    display: inline-block; background: var(--crimson); color: #fff; font-size: 12px; font-weight: 800;
-    letter-spacing: .16em; padding: 6px 13px; border-radius: 4px; margin-bottom: 15px;
-  }
-  .head h1 {
-    display: flex; align-items: center; justify-content: center; gap: 11px; flex-wrap: wrap;
-    font-size: clamp(26px, 5.6vw, 36px); line-height: 1.3; text-wrap: balance;
-  }
-  .titlemark {
-    flex: none; height: 34px; width: auto; display: block;
-    image-rendering: pixelated; image-rendering: crisp-edges;
-  }
-  .head .when { color: var(--orange); font-weight: 700; font-size: 16.5px; margin-top: 14px; }
-  .head .where { color: var(--charcoal); font-size: 15px; margin-top: 5px; }
-  .head .facts {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 18px;
-  }
-  .head .facts span {
-    font-size: 12.8px; font-weight: 700; color: var(--charcoal);
-    background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 20px; padding: 4px 11px;
-  }
 
-  /* ── 섹션 공통 ── */
-  .sec { padding: 32px 46px; border-bottom: 1px solid var(--line); }
-  .sec:last-of-type { border-bottom: 0; }
-  .sec-label {
-    color: var(--orange); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-align: center;
-  }
-  .sec h2 { font-size: 22px; text-align: center; margin-top: 7px; }
-  .sec .meta { color: var(--muted); font-size: 14px; text-align: center; margin-top: 5px; }
-  .sec .intro { color: var(--charcoal); font-size: 15.8px; margin-top: 16px; }
-  .sec .intro + .intro { margin-top: 10px; }
-  .sec .intro strong { color: var(--text); }
-  .rule { height: 1px; background: var(--line); margin: 20px 0 0; }
 
-  /* ── CTA ── */
-  .cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; margin-top: 20px; }
-  .btn {
-    font-size: 14.5px; font-weight: 700; border-radius: 24px; padding: 11px 22px;
-    border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--charcoal);
-  }
-  .btn:hover { border-color: var(--orange); color: var(--text); }
-  .btn.primary { background: var(--orange); border-color: var(--orange); color: #16110A; }
+<link href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHkAAABOCAYAAAAEhblcAAABcklEQVR42u3cPUrDUADA8ZfSuZPURXHQSezkIKgn8AAOrt28gIujKN3FI3TwAJ5ABQehEOkuFlHrYrCDi/EE/SAxTa2/3xoeIe+fj+HxEoUpOD1bSFfXvsNnUgnN5nsUmKpcE368t50eNJYyjb1/fAubK/V/NNVp5ulux71wcnWbuVXFfT7/RBYZkREZkREZkREZkUVGZERGZKauWtaJnz4G4e76Yejxw92NPzeZFyOuZ2u5XtrSammRn5NBOL/pzlXkUdcTdkJpkb2ufZMRGZERGZERGZERWWRERmRERmR+X5Rn+2me7ZhMLn5NQmOxlmlsO+55kr2uERmRERmRERmREVlkREZkREZkClDt9JMQ4l6mwY16LfMSGJN7GXyFOGOjTj8p71fITM6vkBEZkUVGZERGZERGZERGZJERGZGZPYXuO+0e7afDjo1bPssztijjllbXW5dREWM9yYiMyCIjMiIjMiIjMiIjssiIjMjMnh/r21dNDgflUAAAAABJRU5ErkJggg==" rel="icon" type="image/png"/>
 
-  /* ── 교육 환경 ── */
-  .env { display: grid; gap: 7px; margin-top: 16px; }
-  .envrow {
-    display: grid; grid-template-columns: 30px 190px 1fr; gap: 16px; align-items: center;
-    background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 17px;
-  }
-  .envrow .n { color: var(--orange); font-weight: 800; font-size: 14px; padding-top: 1px; }
-  .envrow .k { color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .14em; }
-  .envrow .v { color: var(--orange); font-weight: 800; font-size: 16.5px; margin-top: 3px; }
-  .envrow .desc p { color: var(--charcoal); font-size: 15.2px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-  .chips span {
-    font-size: 12.8px; font-weight: 700; background: var(--code); border: 1px solid var(--line);
-    color: var(--charcoal); border-radius: 20px; padding: 4px 11px;
-  }
 
-  /* ── 아젠다 ── */
-  .tl { display: grid; gap: 7px; margin-top: 16px; }
-  .slot {
-    display: grid; grid-template-columns: 110px 1fr; gap: 14px; align-items: center;
-    border: 1px dashed var(--line); border-radius: 10px; padding: 11px 17px;
-  }
-  .slot .time { color: var(--charcoal); font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
-  .slot .title { color: var(--muted); font-size: 15px; font-weight: 700; }
-  .slot .title small { display: block; color: var(--muted); font-weight: 400; font-size: 13.8px; margin-top: 3px; }
-  .slot.ops { border-style: solid; background: var(--card); }
-  .slot.ops .title { color: var(--text); }
 
-  .session { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 17px 19px; }
-  .session .top { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 10px; }
-  .session .time { color: var(--text); font-weight: 700; font-size: 14.5px; font-variant-numeric: tabular-nums; }
-  .badge {
-    font-size: 12px; font-weight: 800; letter-spacing: .08em; border-radius: 20px; padding: 4px 12px;
-  }
-  .badge.lec { background: rgba(255,153,0,.14); color: var(--orange); border: 1px solid rgba(255,153,0,.35); }
-  .badge.lab { background: rgba(122,63,242,.16); color: var(--lavender); border: 1px solid rgba(122,63,242,.45); }
-  .session .dur { color: var(--muted); font-size: 13px; font-weight: 700; }
-  .session h3 { font-size: 17.5px; line-height: 1.45; margin-top: 10px; }
-  .session h3 .chip { color: var(--orange); font-size: 13.5px; font-weight: 800; letter-spacing: .06em; margin-right: 8px; }
-  .session .steps { color: var(--muted); font-size: 14px; margin-top: 6px; }
-  .session .steps b { color: var(--charcoal); font-weight: 700; }
-  .session .syn { color: var(--charcoal); font-size: 15.2px; margin-top: 10px; }
-  .session .out { color: var(--muted); font-size: 14.2px; margin-top: 9px; }
-  .session .out b { color: var(--orange); font-weight: 800; letter-spacing: .06em; margin-right: 7px; font-size: 12.4px; }
-  .session .links { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line); }
-  .session .links a {
-    font-size: 13.4px; font-weight: 700; border-radius: 20px; padding: 7px 14px;
-    background: var(--code); border: 1px solid var(--line); color: var(--charcoal);
-  }
-  .session .links a.lab { color: var(--orange); }
-  .session .links a:hover { border-color: var(--orange); color: var(--text); }
-  .session.capstone h3 .chip, .session.capstone .out b { color: var(--lavender); }
-  .session.capstone .links a { color: var(--lavender); }
-  .session.capstone .links a:hover { border-color: var(--lavender); }
 
-  /* ── 자료 목록 ── */
-  .refs { display: grid; gap: 7px; margin-top: 16px; }
-  a.ref {
-    display: grid; grid-template-columns: 58px 1fr auto; gap: 12px; align-items: center;
-    background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 15px;
-  }
-  a.ref:hover { border-color: var(--orange); }
-  .ref .tag {
-    font-size: 12.2px; font-weight: 800; letter-spacing: .06em; color: var(--lavender);
-    background: var(--code); border: 1px solid var(--line); border-radius: 7px; text-align: center; padding: 7px 0;
-  }
-  .ref h3 { font-size: 16.2px; }
-  .ref p { color: var(--muted); font-size: 13.8px; margin-top: 3px; }
-  .ref .go { color: var(--orange); font-size: 13.4px; font-weight: 700; white-space: nowrap; }
-
-  /* ── 포털 배너 ── */
-  .banner {
-    text-align: center; padding: 32px 46px;
-    background: radial-gradient(90% 120% at 50% 0%, rgba(122,63,242,.16), transparent 70%), var(--code);
-    border-bottom: 1px solid var(--line);
-  }
-  .banner h3 { font-size: 19px; }
-  .banner p { color: var(--charcoal); font-size: 15px; margin-top: 7px; }
-
-  /* ── 푸터 ── */
-  .foot { background: var(--code); padding: 28px 46px 32px; text-align: center; color: var(--muted); font-size: 13.4px; line-height: 1.9; }
-  .foot .who { color: var(--charcoal); font-weight: 700; font-size: 14.5px; }
-  .foot a { color: var(--orange); }
-  .sign { text-align: center; color: #4A535F; font-size: 12.2px; margin-top: 18px; }
-
-  @media (max-width: 820px) {
-    .head, .sec, .banner, .foot { padding-left: 28px; padding-right: 28px; }
-    .envrow { grid-template-columns: 28px 1fr; row-gap: 6px; align-items: start; }
-    .envrow .desc { grid-column: 2; }
-  }
-  @media (max-width: 560px) {
-    body { padding: 14px 10px 30px; }
-    .head, .sec, .banner, .foot { padding-left: 18px; padding-right: 18px; }
-    .slot { grid-template-columns: 1fr; gap: 4px; }
-    a.ref { grid-template-columns: 52px 1fr; }
-    .ref .go { grid-column: 2; }
-  }
-</style>
-<style id="hol-theme">
-html[data-theme="light"]{
-  --page:#E9EBEF; --mail:#FFFFFF; --card:#F7F8FA; --code:#EEF1F5; --line:#D7DDE5;
-  --text:#1B2430; --muted:#5B6472; --charcoal:#3A4453;
-  --orange:#B45309; --lavender:#6b46c1; --green:#1F883D;
-  background:#E9EBEF;
-}
-html[data-theme="light"] [style*="#c9a2ff"]{color:#6b46c1 !important}
-html[data-theme="light"] [style*="#A6ABBE"]{color:#5B6472 !important}
-#themeToggle{position:fixed;right:16px;bottom:16px;z-index:9999;
-background:var(--bg-card,var(--card,#1B242E));color:var(--orange,#FF9900);
-border:1px solid var(--line,#2A3542);border-radius:999px;padding:9px 16px;
-font:600 13px/1 sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-#themeToggle:hover{border-color:var(--orange,#FF9900)}
-html[data-theme="light"] .code-wrap code{color:#2A3542}
-html[data-theme="light"] .code-wrap.output code{color:#57606E}
-html[data-theme="light"] code{color:#B45309;background:#E4E9EF}
-html[data-theme="light"] .code-wrap code, html[data-theme="light"] pre code{background:transparent}
-html[data-theme="light"] .k.s{background:#DCEEDC}
-html[data-theme="light"] .k.w{background:#E9E2F7}
-html[data-theme="light"] code.inline, html[data-theme="light"] .inline{color:#B45309;background:#E4E9EF;border-color:#D7DDE5}
-html[data-theme="light"] .code-wrap .hl{color:#B45309}
-html[data-theme="light"] .code-wrap .cmt{color:#6E7B8C}
-html[data-theme="light"] .head{--text:#E8ECF1;--muted:#8B96A5;--charcoal:#C7CDD6;--orange:#FF9900;--lavender:#c9a2ff;--line:#262F3B}
-html[data-theme="light"] .head, html[data-theme="light"] .head h1{color:#F2F4F8}
-html[data-theme="light"] .head .when{color:#FF9900}
-html[data-theme="light"] .head .where, html[data-theme="light"] .head .facts span{color:#C7CDD6}
-html[data-theme="light"] .step-title .step-no, html[data-theme="light"] .btn.primary, html[data-theme="light"] .badge.ch{color:#FFFFFF}
-@media print{#themeToggle{display:none}}
-</style>
+<link rel="stylesheet" href="assets/reader.css">
+<link rel="stylesheet" href="assets/legacy/eDM.css">
+<link rel="stylesheet" href="assets/workshop.css">
+<script src="assets/theme.js"></script>
 </head>
-<body>
-<div class="mail">
+<body data-course-key="6fd7cd9eb237" data-page="eDM.html" data-current-chapter="eDM">
+<a class="skip-link" href="#workshop-main">실습 본문으로 건너뛰기</a>
 
-  <header class="head">
-    <div class="brandbar">
-      <img class="logo" src="anthropic_logo_white.png" alt="Anthropic"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
-      <span class="wordmark" style="display:none">ANTHROPIC</span>
-      <span class="x">×</span>
-      <img class="logo" alt="AWS" src="data:image/png;base64,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">
+<aside id="course-nav" class="sidebar" aria-label="워크샵 과정 목차">
+  <div class="sidebar-brand">
+    <a class="brand" href="index.html">
+      <img class="brand-aws-logo" src="assets/aws-logo.png" alt="AWS" width="48" height="29">
+      <span><strong>Claude Code</strong><span>DEEP DIVE WORKSHOP</span></span>
+    </a>
+    <button class="icon-button mobile-only js-only" type="button" data-nav-close aria-label="목차 닫기"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="sidebar-caption"><span class="eyebrow-dot"></span> HANDS-ON LAB HANDBOOK</div>
+  <label class="nav-search js-only" for="chapter-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+    <input id="chapter-search" type="search" placeholder="실습 제목 검색" autocomplete="off" aria-label="실습 제목 검색"><kbd>/</kbd>
+  </label>
+  <nav class="chapter-navigation" id="chapter-navigation" aria-label="전체 과정">
+    <a class="overview-link" href="index.html">워크샵 전체 보기 <span>HOME</span></a>
+    <section class="nav-group" data-nav-group><h2><span>시작하기</span><span>2개</span></h2><ol><li data-nav-entry data-search="시작하기 INFO 교육 안내와 일정 Claude Code Deep Dive Workshop"><a class="chapter-link" href="eDM.html" data-chapter-link="eDM" data-core-chapter="false" title="Claude Code Deep Dive Workshop" aria-current="page"><span class="nav-number">INFO</span><span class="nav-title">교육 안내와 일정</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="시작하기 PRE 실습 전 환경 점검 핸즈온 랩 시작 전 확인"><a class="chapter-link" href="ClaudeCode_Preflight_Check.html" data-chapter-link="ClaudeCode_Preflight_Check" data-core-chapter="false" title="핸즈온 랩 시작 전 확인"><span class="nav-number">PRE</span><span class="nav-title">실습 전 환경 점검</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>기본 실습</span><span>6개</span></h2><ol><li data-nav-entry data-search="기본 실습 01 설치부터 Headless 자동화까지 Claude Code, 설치부터 Headless 자동화까지"><a class="chapter-link" href="ClaudeCode_Ch1_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch1_HandsOnLab" data-core-chapter="true" title="Claude Code, 설치부터 Headless 자동화까지"><span class="nav-number">01</span><span class="nav-title">설치부터 Headless 자동화까지</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 02 Subagents · 전문 에이전트 Subagents, 전문 에이전트를 만들고 지휘하기"><a class="chapter-link" href="ClaudeCode_Ch2_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch2_HandsOnLab" data-core-chapter="true" title="Subagents, 전문 에이전트를 만들고 지휘하기"><span class="nav-number">02</span><span class="nav-title">Subagents · 전문 에이전트</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 03 Admin Setup · 기업 환경 Admin Setup, 통제 가능한 Enterprise 배포"><a class="chapter-link" href="ClaudeCode_Ch3_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch3_HandsOnLab" data-core-chapter="true" title="Admin Setup, 통제 가능한 Enterprise 배포"><span class="nav-number">03</span><span class="nav-title">Admin Setup · 기업 환경</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 04 Settings · 팀의 플랫폼 Settings, 나의 Claude Code를 팀의 플랫폼으로"><a class="chapter-link" href="ClaudeCode_Ch4_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch4_HandsOnLab" data-core-chapter="true" title="Settings, 나의 Claude Code를 팀의 플랫폼으로"><span class="nav-number">04</span><span class="nav-title">Settings · 팀의 플랫폼</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 05 CLI Reference · 자동화 CLI Reference, Claude Code를 파이프라인의 부품으로"><a class="chapter-link" href="ClaudeCode_Ch5_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch5_HandsOnLab" data-core-chapter="true" title="CLI Reference, Claude Code를 파이프라인의 부품으로"><span class="nav-number">05</span><span class="nav-title">CLI Reference · 자동화</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="기본 실습 06 Agent SDK · 자율 실습 Agent SDK, Claude Code를 코드에서 부른다"><a class="chapter-link" href="ClaudeCode_Ch6_HandsOnLab.html" data-chapter-link="ClaudeCode_Ch6_HandsOnLab" data-core-chapter="false" title="Agent SDK, Claude Code를 코드에서 부른다"><span class="nav-number">06</span><span class="nav-title">Agent SDK · 자율 실습</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>캡스톤 준비</span><span>1개</span></h2><ol><li data-nav-entry data-search="캡스톤 준비 SET 도구와 플러그인 준비 Capstone 시작 전, 설치하면 좋은 것들"><a class="chapter-link" href="ClaudeCode_Capstone_Setup.html" data-chapter-link="ClaudeCode_Capstone_Setup" data-core-chapter="false" title="Capstone 시작 전, 설치하면 좋은 것들"><span class="nav-number">SET</span><span class="nav-title">도구와 플러그인 준비</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>캡스톤 · 프로젝트 선택</span><span>6개</span></h2><ol><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M1 Clawd Jump · 게임 개발 Clawd Jump, 에이전틱 게임 개발"><a class="chapter-link" href="ClaudeCode_Capstone1_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone1_HandsOnLab" data-core-chapter="false" title="Clawd Jump, 에이전틱 게임 개발"><span class="nav-number">M1</span><span class="nav-title">Clawd Jump · 게임 개발</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M2 Market Desk · 시황 대시보드 웹 시황 대시보드"><a class="chapter-link" href="ClaudeCode_Capstone2_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone2_HandsOnLab" data-core-chapter="false" title="웹 시황 대시보드"><span class="nav-number">M2</span><span class="nav-title">Market Desk · 시황 대시보드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M3 Generative Hours · 미디어 아트 Generative Hours, 코드로 그린 전시를 배포하라"><a class="chapter-link" href="ClaudeCode_Capstone3_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone3_HandsOnLab" data-core-chapter="false" title="Generative Hours, 코드로 그린 전시를 배포하라"><span class="nav-number">M3</span><span class="nav-title">Generative Hours · 미디어 아트</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M4 Trend Radar · 유튜브 트렌드 유튜브 급상승 30, 트렌드 레이더"><a class="chapter-link" href="ClaudeCode_Capstone4_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone4_HandsOnLab" data-core-chapter="false" title="유튜브 급상승 30, 트렌드 레이더"><span class="nav-number">M4</span><span class="nav-title">Trend Radar · 유튜브 트렌드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M5 Quake Watch · 지진 모니터링 지구의 맥박, 실시간 지진 워치"><a class="chapter-link" href="ClaudeCode_Capstone5_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone5_HandsOnLab" data-core-chapter="false" title="지구의 맥박, 실시간 지진 워치"><span class="nav-number">M5</span><span class="nav-title">Quake Watch · 지진 모니터링</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="캡스톤 · 프로젝트 선택 M6 Newsroom Lens · 뉴스 비교 뉴스룸 렌즈, 4개 매체 관점 비교"><a class="chapter-link" href="ClaudeCode_Capstone6_HandsOnLab.html" data-chapter-link="ClaudeCode_Capstone6_HandsOnLab" data-core-chapter="false" title="뉴스룸 렌즈, 4개 매체 관점 비교"><span class="nav-number">M6</span><span class="nav-title">Newsroom Lens · 뉴스 비교</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section><section class="nav-group" data-nav-group><h2><span>참고 자료</span><span>3개</span></h2><ol><li data-nav-entry data-search="참고 자료 R1 디렉토리 구조 디렉토리 구조, 무엇이 어디에 있는가"><a class="chapter-link" href="ClaudeCode_Reference1_Directory.html" data-chapter-link="ClaudeCode_Reference1_Directory" data-core-chapter="false" title="디렉토리 구조, 무엇이 어디에 있는가"><span class="nav-number">R1</span><span class="nav-title">디렉토리 구조</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="참고 자료 R2 슬래시 커맨드 슬래시 커맨드, 세션을 조종하는 레버들"><a class="chapter-link" href="ClaudeCode_Reference2_Commands.html" data-chapter-link="ClaudeCode_Reference2_Commands" data-core-chapter="false" title="슬래시 커맨드, 세션을 조종하는 레버들"><span class="nav-number">R2</span><span class="nav-title">슬래시 커맨드</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li><li data-nav-entry data-search="참고 자료 R3 플러그인 플러그인, 팀의 하네스를 배포하는 단위"><a class="chapter-link" href="ClaudeCode_Reference3_Plugins.html" data-chapter-link="ClaudeCode_Reference3_Plugins" data-core-chapter="false" title="플러그인, 팀의 하네스를 배포하는 단위"><span class="nav-number">R3</span><span class="nav-title">플러그인</span><span class="read-indicator"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></a></li></ol></section>
+    <p class="search-empty" data-search-empty hidden>검색 결과가 없습니다.</p>
+    <span class="sr-only" role="status" data-search-result></span>
+  </nav>
+  <div class="reading-progress">
+    <div class="progress-label"><span>정규 챕터 읽기</span><strong data-progress-count>0 / 5 읽음</strong></div>
+    <progress max="5" value="0" data-reading-progress aria-label="정규 챕터 읽기 진행률"></progress>
+    <p data-storage-note>읽기 기록은 이 브라우저에 저장됩니다.</p>
+    <button class="text-button js-only" type="button" data-reset-progress hidden>읽기 기록 초기화</button>
+  </div>
+</aside>
+<button class="nav-backdrop" type="button" data-nav-backdrop aria-label="목차 닫기" hidden></button>
+<div class="workspace" data-workspace>
+  <header class="topbar">
+    <div class="topbar-leading">
+      <button class="toolbar-button mobile-only js-only" type="button" data-nav-toggle aria-controls="course-nav" aria-expanded="false" aria-label="과정 목차 열기"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <nav class="breadcrumb" aria-label="현재 위치"><a href="index.html">Claude Code Workshop</a><span aria-hidden="true">/</span><span>시작하기 · INFO</span></nav>
     </div>
-
-    <span class="eyebrow">CLAUDE CODE DEEP DIVE WORKSHOP</span>
-    <h1>
-      <img class="titlemark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHkAAABOCAYAAAAEhblcAAABcklEQVR42u3cPUrDUADA8ZfSuZPURXHQSezkIKgn8AAOrt28gIujKN3FI3TwAJ5ABQehEOkuFlHrYrCDi/EE/SAxTa2/3xoeIe+fj+HxEoUpOD1bSFfXvsNnUgnN5nsUmKpcE368t50eNJYyjb1/fAubK/V/NNVp5ulux71wcnWbuVXFfT7/RBYZkREZkREZkREZkUVGZERGZKauWtaJnz4G4e76Yejxw92NPzeZFyOuZ2u5XtrSammRn5NBOL/pzlXkUdcTdkJpkb2ufZMRGZERGZERGZERWWRERmRERmR+X5Rn+2me7ZhMLn5NQmOxlmlsO+55kr2uERmRERmRERmREVlkREZkREZkClDt9JMQ4l6mwY16LfMSGJN7GXyFOGOjTj8p71fITM6vkBEZkUVGZERGZERGZERGZJERGZGZPYXuO+0e7afDjo1bPssztijjllbXW5dREWM9yYiMyCIjMiIjMiIjMiIjssiIjMjMnh/r21dNDgflUAAAAABJRU5ErkJggg==" alt="">
-      <span>Claude Code Deep Dive Workshop</span>
-    </h1>
-    <div class="when">2026.08.10(월) - 11(화) / 10:00 - 18:00</div>
-    <div class="where">센터필드 East 18층 300~301호</div>
-    <div class="facts">
-      <span>Anthropic × AWS</span><span>이론 + 핸즈온 + 캡스톤</span><span>5 Chapters + Capstone</span>
+    <div class="toolbar js-only">
+      <button class="toolbar-button" type="button" data-theme-toggle aria-label="어두운 화면으로 전환" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A9 9 0 0 1 9.5 3.5a9 9 0 1 0 11 11Z"/></svg><span data-theme-label>다크</span></button>
+      <button class="toolbar-button" type="button" data-print aria-label="이 페이지 인쇄"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6Z"/></svg><span>인쇄</span></button>
     </div>
   </header>
+  <main id="workshop-main" tabindex="-1">
+    <noscript><p class="noscript-note">본문과 목차는 그대로 읽을 수 있습니다. 복사·테마·읽기 기록 기능에는 JavaScript가 필요합니다.</p></noscript>
+    <div class="article-layout">
+      <article class="lesson"><div class="legacy-content" id="workshop-content">
+<div class="mail">
+<header class="head">
+<div class="brandbar">
 
-  <section class="sec">
-    <p class="intro" style="margin-top:0">
-      Claude Code는 개인의 생산성 도구에서 팀의 개발 프로세스를 구성하는 요소로 자리를 옮기고 있습니다.
-      이 단계의 논의는 기능보다 운영에 가깝습니다.
-      <strong>어디까지 권한을 허용할지, 사용량과 비용을 어떤 지표로 파악할지, 검증된 방식을 어떻게 팀에 배포할지</strong>를
-      이틀에 걸쳐 순서대로 다룹니다.
-    </p>
-    <p class="intro">
-      <strong>Day 1은 개인 역량으로 첫 완결까지 가는 흐름입니다.</strong>
-      아키텍처 소개와 설치, 헤드리스 실행(Chapter 1)에서 시작해 역할별 서브에이전트(Chapter 2)를 익히고,
-      managed-settings 기반의 정책 통제와 관측은 브리핑(Chapter 3)으로 지도를 잡습니다.
-      오후에는 캡스톤 라운드 1에서 게임, 미술관, 지진 워치 세 트랙 중 하나를 골라, 설계부터 개장과 공유까지 첫 완결을 경험합니다.
-    </p>
-    <p class="intro">
-      <strong>Day 2는 팀 플랫폼화와 AI 통합에 집중합니다.</strong>
-      훅과 스킬을 팀 자산으로 승격하고(Chapter 4), Claude Code를 파이프라인 구성 요소로 전환한 뒤(Chapter 5),
-      Anthropic 장동진 박사의 '동료가 된 AI와 일하는 법' 세션에 이어 캡스톤 라운드 2에서
-      Bedrock 분석이 살아 있는 서비스(증시, 유튜브, 뉴스룸 렌즈 중 택 1)를 하네스 엔지니어링까지 얹어 완주합니다.
-      방금 쓴 토큰을 소재로 모델 라우팅과 메터링을 정리하며 이틀을 닫습니다.
-      <strong>이론과 실습을 같은 비중으로 배치했으며, 전 과정은 참가 조직의 환경과 과제에 맞추어 구성한 맞춤형 워크샵입니다.</strong>
-    </p>
-    <div class="cta">
-      <a class="btn primary" href="#day1">Day 1 아젠다</a>
-      <a class="btn" href="#day2">Day 2 아젠다</a>
-      <a class="btn" href="index.html">Hands-on Lab 포털</a>
-    </div>
-  </section>
 
-  <section class="sec">
-    <div class="sec-label">ENVIRONMENT</div>
-    <h2>교육 환경</h2>
-    <div class="meta">EC2 + code-server / 브라우저 접속</div>
-    <p class="intro">
+
+<img alt="AWS" class="logo" src="data:image/png;base64,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"/>
+</div>
+<span class="eyebrow">CLAUDE CODE DEEP DIVE WORKSHOP</span>
+<h1>
+<img alt="" class="titlemark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHkAAABOCAYAAAAEhblcAAABcklEQVR42u3cPUrDUADA8ZfSuZPURXHQSezkIKgn8AAOrt28gIujKN3FI3TwAJ5ABQehEOkuFlHrYrCDi/EE/SAxTa2/3xoeIe+fj+HxEoUpOD1bSFfXvsNnUgnN5nsUmKpcE368t50eNJYyjb1/fAubK/V/NNVp5ulux71wcnWbuVXFfT7/RBYZkREZkREZkREZkUVGZERGZKauWtaJnz4G4e76Yejxw92NPzeZFyOuZ2u5XtrSammRn5NBOL/pzlXkUdcTdkJpkb2ufZMRGZERGZERGZERWWRERmRERmR+X5Rn+2me7ZhMLn5NQmOxlmlsO+55kr2uERmRERmRERmREVlkREZkREZkClDt9JMQ4l6mwY16LfMSGJN7GXyFOGOjTj8p71fITM6vkBEZkUVGZERGZERGZERGZJERGZGZPYXuO+0e7afDjo1bPssztijjllbXW5dREWM9yYiMyCIjMiIjMiIjMiIjssiIjMjMnh/r21dNDgflUAAAAABJRU5ErkJggg=="/>
+<span>Claude Code Deep Dive Workshop</span>
+</h1>
+
+
+<div class="facts">
+<span>AWS</span><span>이론 + 핸즈온 + 캡스톤</span><span>5 Chapters + Capstone</span>
+</div>
+</header>
+<section class="sec">
+<p class="intro" style="margin-top:0">
+      Claude Code는 개인의 생산성 도구를 넘어, 팀의 개발 프로세스를 구성하는 핵심 요소로 진화하고 있습니다.
+      이 단계에서 요구되는 것은 기능의 나열이 아니라 운영의 설계입니다.
+      본 워크샵은 <strong>권한을 어디까지 허용할 것인가, 사용량과 비용을 어떤 지표로 관측할 것인가,
+      검증된 방식을 어떻게 팀 전체에 배포할 것인가</strong>라는 세 가지 질문을 이틀에 걸쳐 순서대로 다룹니다.
+    </p>
+<p class="intro">
+<strong>Day 1은 개인 역량으로 첫 완결에 도달하는 여정입니다.</strong>
+      아키텍처 소개와 설치, 헤드리스 실행(Chapter 1)으로 기초를 다지고, 역할별 서브에이전트(Chapter 2)로 작업을 병렬화하며,
+      managed-settings 기반의 정책 통제와 관측(Chapter 3)으로 운영의 인사이트를 확보합니다.
+      오후의 캡스톤 라운드 1에서는 게임, 미술관, 지진 워치 세 트랙 중 하나를 선택해,
+      설계부터 배포과 공유까지 완결의 전 과정을 직접 경험합니다.
+    </p>
+<p class="intro">
+<strong>Day 2는 팀 플랫폼화와 AI 통합에 집중합니다.</strong>
+      훅과 스킬을 팀의 공용 자산으로 승격하고(Chapter 4), Claude Code를 파이프라인의 구성 요소로 전환합니다(Chapter 5).
+      캡스톤 라운드 2에서
+      Bedrock 분석이 결합된 서비스(증시, 유튜브, 뉴스룸 렌즈 중 택 1)를 하네스 엔지니어링까지 더해 완주합니다.
+      마지막으로 실습에서 사용한 토큰을 소재 삼아 모델 라우팅과 메터링을 정리하며 이틀의 과정을 마무리합니다.
+      <strong>이론과 실습을 균형 있게 배치하였으며, 전 과정은 참가 조직의 환경과 과제에 맞추어 설계된 맞춤형 워크샵입니다.</strong>
+</p>
+<div class="cta">
+<a class="btn primary" href="#day1">Day 1 아젠다</a>
+<a class="btn" href="#day2">Day 2 아젠다</a>
+<a class="btn" href="index.html">Hands-on Lab 포털</a>
+</div>
+</section>
+<section class="sec">
+<div class="sec-label">ENVIRONMENT</div>
+<h2 id="section-01">교육 환경</h2>
+<div class="meta">EC2 + code-server / 브라우저 접속</div>
+<p class="intro">
       개인 노트북 설정 차이로 실습이 막히지 않도록, 모든 참가자에게 동일한 EC2 인스턴스를 제공합니다.
       별도 설치나 SSH 없이 브라우저로 code-server에 접속하면 사전에 설치된 Claude Code가 바로 준비되어 있습니다.
     </p>
-    <div class="env">
-      <div class="envrow">
-        <div class="n">01</div>
-        <div class="left"><div class="k">사전 준비물</div><div class="v">노트북 + 브라우저</div></div>
-        <div class="desc"><p>최신 브라우저만 있으면 충분합니다. 로컬에 아무것도 설치하지 않아도 되며, 접속 주소와 계정 정보는 현장에서 배부합니다.</p></div>
-      </div>
-      <div class="envrow">
-        <div class="n">02</div>
-        <div class="left"><div class="k">접속 방식</div><div class="v">브라우저 → code-server</div></div>
-        <div class="desc"><p>1인 1인스턴스의 EC2에 브라우저로 접속합니다. VS Code와 같은 화면에서 편집기와 통합 터미널을 함께 쓰므로, 코드와 <code class="inline">claude</code> 세션을 나란히 두고 진행할 수 있습니다.</p></div>
-      </div>
-      <div class="envrow">
-        <div class="n">03</div>
-        <div class="left"><div class="k">Claude Code</div><div class="v">사전 설치 완료</div></div>
-        <div class="desc"><p>CLI와 플러그인이 미리 준비된 상태로 제공됩니다. 통합 터미널에서 <code class="inline">claude</code>를 실행하고 원하는 인증 경로만 고르면 첫 세션이 시작됩니다.</p></div>
-      </div>
-      <div class="envrow">
-        <div class="n">04</div>
-        <div class="left"><div class="k">모델 접근</div><div class="v">Enterprise / Bedrock 선택</div></div>
-        <div class="desc"><p>Anthropic Claude Enterprise 기반과 Amazon Bedrock 기반 중 원하는 경로를 골라 접속합니다. Chapter 1에서 두 경로를 나란히 비교하고, 조직 단위 통제와 비용 관측은 Chapter 3에서 다룹니다.</p>
-          <div class="chips"><span>Claude Enterprise</span><span>Amazon Bedrock</span></div></div>
-      </div>
-      <div class="envrow">
-        <div class="n">05</div>
-        <div class="left"><div class="k">사용 모델</div><div class="v">Fable 5 / Opus 5 / Sonnet 5</div></div>
-        <div class="desc"><p>워크샵 환경에 <b>Claude Fable 5, Claude Opus 5, Claude Sonnet 5</b> 세 모델이 제공됩니다. 과제 성격에 맞춰 바꿔 쓰며 차이를 직접 체감합니다.</p>
-          <div class="chips"><span>Claude Fable 5</span><span>Claude Opus 5</span><span>Claude Sonnet 5</span></div></div>
-      </div>
-      <div class="envrow">
-        <div class="n">06</div>
-        <div class="left"><div class="k">질의응답 채널</div><div class="v">Slack, 교육 중 실시간</div></div>
-        <div class="desc"><p>실습 중 질문과 트러블슈팅은 Slack에서 실시간으로 받습니다. 미리 참여해 두면 당일이 편합니다.</p>
-          <p style="margin-top:6px"><a href="https://claudecode-workshop.slack.com/archives/C0BLKF34NPK" style="color:var(--orange); font-weight:700; text-decoration:none">워크샵 Slack 채널 바로가기 →</a></p></div>
-      </div>
-      <div class="envrow">
-        <div class="n">07</div>
-        <div class="left"><div class="k">무선 네트워크</div><div class="v">현장 Wi-Fi</div></div>
-        <div class="desc"><p>행사장 무선 접속 정보입니다. 대소문자와 특수문자를 그대로 입력하세요.</p>
-          <div class="chips"><span>SSID: Guest</span><span>Password: BrokenWires@@2019</span></div></div>
-      </div>
-    </div>
-  </section>
+<div class="env">
+<div class="envrow">
+<div class="n">01</div>
+<div class="left"><div class="k">사전 준비물</div><div class="v">노트북 + 브라우저</div></div>
+<div class="desc"><p>최신 브라우저만 있으면 충분합니다. 로컬에 아무것도 설치하지 않아도 되며, 접속 주소와 계정 정보는 현장에서 배부합니다.</p></div>
+</div>
+<div class="envrow">
+<div class="n">02</div>
+<div class="left"><div class="k">접속 방식</div><div class="v">브라우저 → code-server</div></div>
+<div class="desc"><p>1인 1인스턴스의 EC2에 브라우저로 접속합니다. VS Code와 같은 화면에서 편집기와 통합 터미널을 함께 쓰므로, 코드와 <code class="inline">claude</code> 세션을 나란히 두고 진행할 수 있습니다.</p></div>
+</div>
+<div class="envrow">
+<div class="n">03</div>
+<div class="left"><div class="k">Claude Code</div><div class="v">사전 설치 완료</div></div>
+<div class="desc"><p>CLI와 플러그인이 미리 준비된 상태로 제공됩니다. 통합 터미널에서 <code class="inline">claude</code>를 실행하고 원하는 인증 경로만 고르면 첫 세션이 시작됩니다.</p></div>
+</div>
+<div class="envrow">
+<div class="n">04</div>
+<div class="left"><div class="k">모델 접근</div><div class="v">Enterprise / Bedrock 선택</div></div>
+<div class="desc"><p>Claude Enterprise 기반과 Amazon Bedrock 기반 중 원하는 경로를 골라 접속합니다. Chapter 1에서 두 경로를 나란히 비교하고, 조직 단위 통제와 비용 관측은 Chapter 3에서 다룹니다.</p>
+<div class="chips"><span>Claude Enterprise</span><span>Amazon Bedrock</span></div></div>
+</div>
+<div class="envrow">
+<div class="n">05</div>
+<div class="left"><div class="k">사용 모델</div><div class="v">Fable 5 / Opus 5 / Sonnet 5</div></div>
+<div class="desc"><p>워크샵 환경에 <b>Claude Fable 5, Claude Opus 5, Claude Sonnet 5</b> 세 모델이 제공됩니다. 과제 성격에 맞춰 바꿔 쓰며 차이를 직접 체감합니다.</p>
+<div class="chips"><span>Claude Fable 5</span><span>Claude Opus 5</span><span>Claude Sonnet 5</span></div></div>
+</div>
+<div class="envrow">
+<div class="n">06</div>
+<div class="left"><div class="k">질의응답 채널</div><div class="v">Slack, 교육 중 실시간</div></div>
+<div class="desc"><p>실습 중 질문과 트러블슈팅은 Slack에서 실시간으로 받습니다. 미리 참여해 두면 당일이 편합니다.</p>
+<p style="margin-top:6px"><a href="https://claudecode-workshop.slack.com/archives/C0BLKF34NPK" style="color:var(--orange); font-weight:700; text-decoration:none">워크샵 Slack 채널 바로가기 →</a></p></div>
+</div>
+<div class="envrow">
+<div class="n">07</div>
+<div class="left"><div class="k">무선 네트워크</div><div class="v">현장 Wi-Fi</div></div>
+<div class="desc"><p>행사장 무선 접속 정보입니다. 대소문자와 특수문자를 그대로 입력하세요.</p>
+<div class="chips"><span>SSID: Guest</span><span>Password: BrokenWires@@2019</span></div></div>
+</div>
+</div>
+</section>
+<section class="sec" id="day1">
+<div class="sec-label">DAY 1 - 8/10(월)</div>
+<h2 id="section-02">개인 역량으로 첫 완결</h2>
+<div class="meta">10:00 - 18:00 / 이론 + 핸즈온 + 캡스톤 라운드 1</div>
+<div class="tl">
+<div class="session">
+<div class="top"><span class="time">10:00 - 10:30</span><span class="badge lec">강의</span><span class="dur">30분</span></div>
+<h3><span class="chip">INTRO</span>Claude Code 아키텍처 소개</h3>
+<p class="steps"><b>인사와 오리엔테이션</b> → <b>에이전트 루프 아키텍처</b> → <b>오늘의 지도</b></p>
+<p class="syn">간단한 인사와 함께 구조부터 봅니다. 에이전트 루프가 맥락을 읽고 도구를 고르고 결과를 다시 판단하는 아키텍처를 이해하면, 이후의 모든 설정과 통제가 "어디에 손을 대는 것인지"로 읽힙니다. 이 지도를 손에 들고 이틀을 시작합니다.</p>
+<div class="links"><a href="https://github.com/whchoi98/claude-code-workshop/blob/main/tech_doc/ClaudeCode-Architecture.pdf">강의자료 PDF</a></div>
+</div>
+<div class="session">
+<div class="top"><span class="time">10:30 - 11:15</span><span class="badge lec">강의</span><span class="dur">45분</span></div>
+<h3><span class="chip">CH 01</span>Claude Code, 설치부터 Headless 자동화까지</h3>
+<p class="steps"><b>설치와 인증 경로</b> → <b>CLAUDE.md와 도구 시스템</b> → <b>Plan 모드와 헤드리스</b></p>
+<p class="syn">Claude Enterprise와 Bedrock 인증 경로를 비교하고, CLAUDE.md에 프로젝트의 맥락을 심으면 같은 질문의 답이 달라지는 이유를 봅니다. 실제 버그를 Plan 모드로 잡는 흐름과 같은 작업을 헤드리스 한 줄로 재현하는 패턴까지, 바로 이어지는 설치 랩에서 손으로 확인할 것들을 지도로 잡습니다.</p>
+<div class="links"><a class="lab" href="ClaudeCode_Ch1_HandsOnLab.html">Hands-on Lab</a><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
+</div>
+<div class="session">
+<div class="top"><span class="time">11:15 - 11:45</span><span class="badge lab">LAB</span><span class="dur">30분</span></div>
+<h3><span class="chip">LAB 1</span>기본 환경 구성</h3>
+<p class="steps"><b>설치와 인증</b> → <b>첫 세션과 CLAUDE.md</b> → <b>헤드리스 한 줄 재현</b></p>
+<p class="syn">방금 본 것을 그대로 손으로 만듭니다. 설치와 인증을 마치고 첫 세션을 열어 CLAUDE.md의 효과를 확인한 뒤, 대화 없이 실행되는 헤드리스 호출 한 줄까지. 여기서 굳힌 환경이 이틀 내내, 특히 오후 캡스톤 라운드 1의 발판이 됩니다.</p>
+<div class="links"><a class="lab" href="ClaudeCode_Ch1_HandsOnLab.html">Hands-on Lab</a></div>
+</div>
+<div class="slot">
+<div class="time">11:45 - 13:00</div>
+<div class="title">점심 식사</div>
+</div>
+<div class="session">
+<div class="top"><span class="time">13:00 - 14:25</span><span class="badge lec">강의 + LAB</span><span class="dur">85분</span></div>
+<h3><span class="chip">CH 02</span>Subagents, 전문 에이전트를 만들고 지휘하기 (LAB 1, 2)</h3>
+<p class="steps"><b>개념과 격리 모델</b> → <b>정의 파일과 디스패치</b> → <b>실전 봇 5종</b> → <b>Lab 2</b> 커스텀 Subagent 작성과 실행</p>
+<p class="syn">하나의 세션에 모든 일을 맡기면 맥락이 뒤섞입니다. Subagent는 역할별로 창을 나누고 도구 권한까지 격리하는 장치입니다. frontmatter 몇 줄로 code-reviewer, test-writer, docs-writer를 정의해 보고, 읽기만 허용된 에이전트가 파일을 고치려다 멈추는 순간을 직접 봅니다. 자동 위임과 @멘션 지목, 병렬 디스패치 세 패턴을 비교한 뒤 실전 봇 5종을 훑습니다. 정의 파일은 곧 커밋 가능한 자산이라, 여기서 만든 에이전트가 오후 캡스톤에서 그대로 일합니다.</p>
+<div class="links"><a class="lab" href="ClaudeCode_Ch2_HandsOnLab.html">Hands-on Lab</a><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
+</div>
+<div class="slot">
+<div class="time">14:25 - 14:40</div>
+<div class="title">Break<small>간단한 다과와 함께 잠시 숨 고르기</small></div>
+</div>
+<div class="session">
+<div class="top"><span class="time">14:40 - 15:10</span><span class="badge lec">브리핑</span><span class="dur">30분</span></div>
+<h3><span class="chip">CH 03</span>Admin Setup 브리핑, 통제 가능한 Enterprise 배포</h3>
+<p class="steps"><b>배포와 자격증명</b> → <b>managed 정책과 관측</b> → <b>오후 캡스톤의 Bearer 키가 도는 자리</b></p>
+<p class="syn">도입을 막는 질문은 대개 기능이 아니라 통제입니다. 1차 피드백을 반영해 이 챕터는 30분 브리핑으로 압축했습니다: 플릿 배포와 버전 통제, Bedrock IAM/SSO 자격증명, managed-settings 정책선과 OpenTelemetry 관측의 핵심 지도를 잡고, 상세 구축은 전체 자료와 후속 거버넌스 상담으로 안내합니다. 오후 캡스톤에서 쓰는 Bearer 키가 어느 통제선 안에서 도는지, 그 배경이 여기 있습니다.</p>
+<div class="links"><a class="lab" href="ClaudeCode_Ch3_HandsOnLab.html">Hands-on Lab</a><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
+</div>
+<div class="slot">
+<div class="time">15:10 - 15:20</div>
+<div class="title">Break</div>
+</div>
+<div class="session">
+<div class="top"><span class="time">15:20 - 17:35</span><span class="badge lab">CAPSTONE R1</span><span class="dur">135분</span></div>
+<h3><span class="chip">LAB</span>캡스톤 라운드 1, 오늘 배운 것으로 첫 완결 (Capstone 1, 3, 5)</h3>
+<p class="steps"><b>①</b> superpowers로 설계와 계획 → <b>②</b> Phase 단위 빌드와 검증 → <b>③</b> 배포과 Slack 공유, 여유가 있다면 퀄리티 강화 라운드</p>
+<p class="syn">Day 1의 마지막은 강의가 아니라 완결입니다. 세 갈래 중 하나를 골라 브레인스토밍에서 배포까지 달립니다: <b>게임</b>(Clawd Jump 플랫포머, 로컬 완결), <b>미술관</b>(제너러티브 아트 전시, 로컬 완결), <b>지진 워치</b>(전 세계 실시간 지진 지도, Bedrock 브리핑과 CloudFront 실배포). 코딩 경험이 적다면 미술관 트랙을 권합니다, 어느 쪽이든 계획 → 실행 → 커밋의 완결 리듬은 같습니다. 마치면 내 작품의 URL과 스크린샷을 Slack에 공유합니다.</p>
+<div class="links"><a class="lab" href="ClaudeCode_Capstone1_HandsOnLab.html">Mission 1 게임</a><a class="lab" href="ClaudeCode_Capstone3_HandsOnLab.html">Mission 3 미술관</a><a class="lab" href="ClaudeCode_Capstone5_HandsOnLab.html">Mission 5 지진</a></div>
+</div>
+<div class="slot ops">
+<div class="time">17:35 - 17:50</div>
+<div class="title">쇼케이스 1<small>Slack 공유작 하이라이트와 내일의 과제 정의 워크시트 배포</small></div>
+</div>
+<div class="slot ops">
+<div class="time">17:50 - 18:00</div>
+<div class="title">Day 1 랩업</div>
+</div>
+</div>
+</section>
+<section class="sec" id="day2">
+<div class="sec-label">DAY 2 - 8/11(화)</div>
+<h2 id="section-03">AI 통합으로 두 번째 완결</h2>
+<div class="meta">10:00 - 18:00 / 이론 + 실습 + 캡스톤 라운드 2</div>
+<div class="tl">
+<div class="slot ops">
+<div class="time">10:00 - 10:10</div>
+<div class="title">환영인사 / 리캡<small>전날의 워크플로와 에이전트, 첫 완결을 짧게 되짚고 출발점을 맞춥니다.</small></div>
+</div>
+<div class="session">
+<div class="top"><span class="time">10:10 - 11:20</span><span class="badge lec">강의 + LAB</span><span class="dur">70분</span></div>
+<h3><span class="chip">CH 04</span>Settings, 나의 Claude Code를 팀의 플랫폼으로</h3>
+<p class="steps"><b>설정 스코프와 권한 규칙</b> → <b>Hooks와 MCP</b> → <b>슈퍼랩</b> 훅과 스킬을 팀 자산으로</p>
+<p class="syn">개인의 설정을 팀의 플랫폼으로 승격시키는 시간입니다. 설정 계층과 권한 규칙을 정리하고, Hooks로 세션에 규율을 심고, 스킬과 MCP를 프로젝트 자산으로 만드는 슈퍼랩을 진행합니다. 여기서 만든 훅과 스킬이 오후 캡스톤 라운드 2의 하네스로 그대로 들어갑니다.</p>
+<div class="links"><a class="lab" href="ClaudeCode_Ch4_HandsOnLab.html">Hands-on Lab</a><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
+</div>
+<div class="session">
+<div class="top"><span class="time">11:20 - 12:00</span><span class="badge lec">강의</span><span class="dur">40분</span></div>
+<h3><span class="chip">CH 05</span>CLI Reference 핵심, Claude Code를 파이프라인 부품으로</h3>
+<p class="steps"><b>-p 와 구조화 출력</b> → <b>데모</b> CI 통합(GitHub Actions, OIDC)</p>
+<p class="syn">사람이 앉아 있어야 하는 도구는 자동화가 아닙니다. 1차 피드백을 반영해 핵심만 남겼습니다: -p와 --json-schema로 출력을 기계가 읽는 형태로 고정하고, 커밋 범위를 인자로 받는 리뷰 봇 하나를 끝까지 만듭니다. CI 통합과 세션 자동화의 확장은 데모와 자율 실습 자료로 제공하고, 팀 단위 심화는 후속 Advanced 워크샵에서 다룹니다.</p>
+<div class="links"><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
+</div>
+<div class="slot">
+<div class="time">12:00 - 13:00</div>
+<div class="title">점심 식사</div>
+</div><div class="session">
+<div class="top"><span class="time">13:00 - 13:30</span><span class="badge lab">실습</span><span class="dur">30분</span></div>
+<h3><span class="chip">LAB 5</span>CH5 랩, 헤드리스 리뷰 봇 만들기</h3>
+<p class="steps"><b>-p와 --json-schema</b> → <b>커밋 범위 지정</b> → <b>리뷰 봇 실행</b></p>
+<p class="syn">Chapter 5 실습 문서에 따라 커밋 범위를 인자로 받는 헤드리스 리뷰 봇을 만들고, 구조화된 출력 결과를 확인합니다.</p>
+<div class="links"><a class="lab" href="ClaudeCode_Ch5_HandsOnLab.html">Hands-on Lab</a></div>
+</div><div class="slot"><span class="time">13:30 - 13:45</span><span class="title">Break<small>간단한 다과와 함께 잠시 숨 고르기</small></span></div>
 
-  <section class="sec" id="day1">
-    <div class="sec-label">DAY 1 - 8/10(월)</div>
-    <h2>개인 역량으로 첫 완결</h2>
-    <div class="meta">10:00 - 18:00 / 이론 + 핸즈온 + 캡스톤 라운드 1</div>
-        <div class="tl">
-      <div class="session">
-        <div class="top"><span class="time">10:00 - 10:30</span><span class="badge lec">강의</span><span class="dur">30분</span></div>
-        <h3><span class="chip">INTRO</span>Claude Code 아키텍처 소개</h3>
-        <p class="steps"><b>인사와 오리엔테이션</b> → <b>에이전트 루프 아키텍처</b> → <b>오늘의 지도</b></p>
-        <p class="syn">간단한 인사와 함께 구조부터 봅니다. 에이전트 루프가 맥락을 읽고 도구를 고르고 결과를 다시 판단하는 아키텍처를 이해하면, 이후의 모든 설정과 통제가 "어디에 손을 대는 것인지"로 읽힙니다. 이 지도를 손에 들고 이틀을 시작합니다.</p>
-        <div class="links"><a href="https://github.com/whchoi98/claude-code-workshop/blob/main/tech_doc/ClaudeCode-Architecture.pdf">강의자료 PDF</a></div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">10:30 - 11:15</span><span class="badge lec">강의</span><span class="dur">45분</span></div>
-        <h3><span class="chip">CH 01</span>Claude Code, 설치부터 Headless 자동화까지</h3>
-        <p class="steps"><b>설치와 인증 경로</b> → <b>CLAUDE.md와 도구 시스템</b> → <b>Plan 모드와 헤드리스</b></p>
-        <p class="syn">Claude Enterprise와 Bedrock 인증 경로를 비교하고, CLAUDE.md에 프로젝트의 맥락을 심으면 같은 질문의 답이 달라지는 이유를 봅니다. 실제 버그를 Plan 모드로 잡는 흐름과 같은 작업을 헤드리스 한 줄로 재현하는 패턴까지, 바로 이어지는 설치 랩에서 손으로 확인할 것들을 지도로 잡습니다.</p>
-        <div class="links"><a class="lab" href="ClaudeCode_Ch1_HandsOnLab.html">Hands-on Lab</a><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">11:15 - 11:45</span><span class="badge lab">LAB</span><span class="dur">30분</span></div>
-        <h3><span class="chip">LAB 1</span>기본 환경 구성</h3>
-        <p class="steps"><b>설치와 인증</b> → <b>첫 세션과 CLAUDE.md</b> → <b>헤드리스 한 줄 재현</b></p>
-        <p class="syn">방금 본 것을 그대로 손으로 만듭니다. 설치와 인증을 마치고 첫 세션을 열어 CLAUDE.md의 효과를 확인한 뒤, 대화 없이 실행되는 헤드리스 호출 한 줄까지. 여기서 굳힌 환경이 이틀 내내, 특히 오후 캡스톤 라운드 1의 발판이 됩니다.</p>
-        <div class="links"><a class="lab" href="ClaudeCode_Ch1_HandsOnLab.html">Hands-on Lab</a></div>
-      </div>
-      <div class="slot">
-        <div class="time">11:45 - 13:00</div>
-        <div class="title">점심 식사</div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">13:00 - 14:25</span><span class="badge lec">강의 + LAB</span><span class="dur">85분</span></div>
-        <h3><span class="chip">CH 02</span>Subagents, 전문 에이전트를 만들고 지휘하기 (LAB 1, 2)</h3>
-        <p class="steps"><b>개념과 격리 모델</b> → <b>정의 파일과 디스패치</b> → <b>실전 봇 5종</b> → <b>Lab 2</b> 커스텀 Subagent 작성과 실행</p>
-        <p class="syn">하나의 세션에 모든 일을 맡기면 맥락이 뒤섞입니다. Subagent는 역할별로 창을 나누고 도구 권한까지 격리하는 장치입니다. frontmatter 몇 줄로 code-reviewer, test-writer, docs-writer를 정의해 보고, 읽기만 허용된 에이전트가 파일을 고치려다 멈추는 순간을 직접 봅니다. 자동 위임과 @멘션 지목, 병렬 디스패치 세 패턴을 비교한 뒤 실전 봇 5종을 훑습니다. 정의 파일은 곧 커밋 가능한 자산이라, 여기서 만든 에이전트가 오후 캡스톤에서 그대로 일합니다.</p>
-        <div class="links"><a class="lab" href="ClaudeCode_Ch2_HandsOnLab.html">Hands-on Lab</a><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
-      </div>
-      <div class="slot">
-        <div class="time">14:25 - 14:40</div>
-        <div class="title">Break<small>간단한 다과와 함께 잠시 숨 고르기</small></div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">14:40 - 15:10</span><span class="badge lec">브리핑</span><span class="dur">30분</span></div>
-        <h3><span class="chip">CH 03</span>Admin Setup 브리핑, 통제 가능한 Enterprise 배포</h3>
-        <p class="steps"><b>배포와 자격증명</b> → <b>managed 정책과 관측</b> → <b>오후 캡스톤의 Bearer 키가 도는 자리</b></p>
-        <p class="syn">도입을 막는 질문은 대개 기능이 아니라 통제입니다. 1차 피드백을 반영해 이 챕터는 30분 브리핑으로 압축했습니다: 플릿 배포와 버전 통제, Bedrock IAM/SSO 자격증명, managed-settings 정책선과 OpenTelemetry 관측의 핵심 지도를 잡고, 상세 구축은 전체 자료와 후속 거버넌스 상담으로 안내합니다. 오후 캡스톤에서 쓰는 Bearer 키가 어느 통제선 안에서 도는지, 그 배경이 여기 있습니다.</p>
-        <div class="links"><a class="lab" href="ClaudeCode_Ch3_HandsOnLab.html">Hands-on Lab</a><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
-      </div>
-      <div class="slot">
-        <div class="time">15:10 - 15:20</div>
-        <div class="title">Break</div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">15:20 - 17:35</span><span class="badge lab">CAPSTONE R1</span><span class="dur">135분</span></div>
-        <h3><span class="chip">LAB</span>캡스톤 라운드 1, 오늘 배운 것으로 첫 완결 (Capstone 1, 3, 5)</h3>
-        <p class="steps"><b>①</b> superpowers로 설계와 계획 → <b>②</b> Phase 단위 빌드와 검증 → <b>③</b> 개장과 Slack 공유, 여유가 있다면 퀄리티 강화 라운드</p>
-        <p class="syn">Day 1의 마지막은 강의가 아니라 완결입니다. 세 갈래 중 하나를 골라 브레인스토밍에서 개장까지 달립니다: <b>게임</b>(Clawd Jump 플랫포머, 로컬 완결), <b>미술관</b>(제너러티브 아트 전시, 로컬 완결), <b>지진 워치</b>(전 세계 실시간 지진 지도, Bedrock 브리핑과 CloudFront 실배포). 코딩 경험이 적다면 미술관 트랙을 권합니다, 어느 쪽이든 계획 → 실행 → 커밋의 완결 리듬은 같습니다. 마치면 내 작품의 URL과 스크린샷을 Slack에 공유합니다.</p>
-        <div class="links"><a class="lab" href="ClaudeCode_Capstone1_HandsOnLab.html">Mission 1 게임</a><a class="lab" href="ClaudeCode_Capstone3_HandsOnLab.html">Mission 3 미술관</a><a class="lab" href="ClaudeCode_Capstone5_HandsOnLab.html">Mission 5 지진</a></div>
-      </div>
-      <div class="slot ops">
-        <div class="time">17:35 - 17:50</div>
-        <div class="title">쇼케이스 1<small>Slack 공유작 하이라이트와 내일의 과제 정의 워크시트 배포</small></div>
-      </div>
-      <div class="slot ops">
-        <div class="time">17:50 - 18:00</div>
-        <div class="title">Day 1 랩업</div>
-      </div>
-    </div>
-  </section>
 
-  <section class="sec" id="day2">
-    <div class="sec-label">DAY 2 - 8/11(화)</div>
-    <h2>AI 통합으로 두 번째 완결</h2>
-    <div class="meta">10:00 - 18:00 / 이론 + 초청 세션 + 캡스톤 라운드 2</div>
-        <div class="tl">
-      <div class="slot ops">
-        <div class="time">10:00 - 10:10</div>
-        <div class="title">환영인사 / 리캡<small>전날의 워크플로와 에이전트, 첫 완결을 짧게 되짚고 출발점을 맞춥니다.</small></div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">10:10 - 11:20</span><span class="badge lec">강의 + LAB</span><span class="dur">70분</span></div>
-        <h3><span class="chip">CH 04</span>Settings, 나의 Claude Code를 팀의 플랫폼으로</h3>
-        <p class="steps"><b>설정 스코프와 권한 규칙</b> → <b>Hooks와 MCP</b> → <b>슈퍼랩</b> 훅과 스킬을 팀 자산으로</p>
-        <p class="syn">개인의 설정을 팀의 플랫폼으로 승격시키는 시간입니다. 설정 계층과 권한 규칙을 정리하고, Hooks로 세션에 규율을 심고, 스킬과 MCP를 프로젝트 자산으로 만드는 슈퍼랩을 진행합니다. 여기서 만든 훅과 스킬이 오후 캡스톤 라운드 2의 하네스로 그대로 들어갑니다.</p>
-        <div class="links"><a class="lab" href="ClaudeCode_Ch4_HandsOnLab.html">Hands-on Lab</a><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">11:20 - 12:10</span><span class="badge lec">강의 + LAB</span><span class="dur">50분</span></div>
-        <h3><span class="chip">CH 05</span>CLI Reference 핵심, Claude Code를 파이프라인 부품으로</h3>
-        <p class="steps"><b>-p 와 구조화 출력</b> → <b>Lab</b> 헤드리스 리뷰 봇 한 개 완주 → <b>데모</b> CI 통합(GitHub Actions, OIDC)</p>
-        <p class="syn">사람이 앉아 있어야 하는 도구는 자동화가 아닙니다. 1차 피드백을 반영해 핵심만 남겼습니다: -p와 --json-schema로 출력을 기계가 읽는 형태로 고정하고, 커밋 범위를 인자로 받는 리뷰 봇 하나를 끝까지 만듭니다. CI 통합과 세션 자동화의 확장은 데모와 자율 실습 자료로 제공하고, 팀 단위 심화는 후속 Advanced 워크샵에서 다룹니다.</p>
-        <div class="links"><a class="lab" href="ClaudeCode_Ch5_HandsOnLab.html">Hands-on Lab</a><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a></div>
-      </div>
-      <div class="slot">
-        <div class="time">12:10 - 13:10</div>
-        <div class="title">점심 식사</div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">13:10 - 13:50</span><span class="badge lec">초청 세션</span><span class="dur">40분</span></div>
-        <h3><span class="chip">SPECIAL</span>동료가 된 AI와 일하는 법 - AI, 할 수 있는 만큼, 다 쓰고 계신가요?</h3>
-        <p class="steps"><b>4D AI Fluency Framework</b> → <b>나만의 기준을 AI에게 전달하는 실전</b> → <b>세 가지 실천 과제</b></p>
-        <p class="syn">AI 역량은 123일마다 두 배로 성장하고 있지만, 실제 업무 활용은 어느 직군에서도 40%를 넘지 못하고 있습니다. 이 세션은 바로 그 간극을 기회로 바꾸는 방법을 다룹니다. Anthropic의 Applied AI Architect <b>장동진 박사</b>가 모델이 바뀌어도 유효한 <b>4D AI Fluency Framework</b>(Delegation, Description, Discernment, Diligence)를 소개하고, 나만의 기준과 노하우를 AI에게 전달해 원하는 결과를 얻는 실전 방법을 보여드립니다. 단순한 프롬프트 팁이 아니라 AI를 진짜 동료로 만드는 일하는 방식의 변화, 그리고 툴 배포를 넘어 조직 전체의 활용 역량을 끌어올리는 방법까지 담았습니다. 오늘부터 바로 적용할 수 있는 세 가지 실천 과제로 마무리합니다.</p>
-      </div>
-      <div class="slot">
-        <div class="time">13:50 - 14:00</div>
-        <div class="title">Break</div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">14:00 - 16:50</span><span class="badge lab">CAPSTONE R2</span><span class="dur">170분</span></div>
-        <h3><span class="chip">LAB</span>캡스톤 라운드 2, AI를 품은 두 번째 완결 (Capstone 2, 4, 6)</h3>
-        <p class="steps"><b>①</b> superpowers로 설계와 계획 → <b>②</b> Phase 단위 빌드와 검증 → <b>③</b> 개장과 Slack 공유, 여유가 있다면 퀄리티 강화 라운드</p>
-        <p class="syn">이틀의 학습을 전부 소환하는 라운드입니다. 세 갈래 중 하나를 골라 완주합니다: 풀 트랙 <b>증시</b>(SSE 스트리밍 대시보드), <b>유튜브</b>(트렌드 레이더) 또는 2시간 트랙 <b>뉴스룸 렌즈</b>(키 발급 없음, CloudFront 실배포로 개장). 계획 → 실행 → 커밋을 반복해 완결하고, 결과 화면 또는 공개 URL을 Slack에 공유합니다.</p>
-        <div class="links"><a class="lab" href="ClaudeCode_Capstone2_HandsOnLab.html">Mission 2 증시</a><a class="lab" href="ClaudeCode_Capstone4_HandsOnLab.html">Mission 4 유튜브</a><a class="lab" href="ClaudeCode_Capstone6_HandsOnLab.html">Mission 6 뉴스룸</a></div>
-      </div>
-      <div class="slot">
-        <div class="time">16:50 - 17:00</div>
-        <div class="title">Break</div>
-      </div>
-      <div class="session">
-        <div class="top"><span class="time">17:00 - 17:30</span><span class="badge lec">강의 + 데모</span><span class="dur">30분</span></div>
-        <h3><span class="chip">FINOPS</span>토큰을 효율적으로 쓰는 법, 모델 라우팅과 메터링</h3>
-        <p class="steps"><b>방금 쓴 토큰으로 보는 효율 패턴</b> → <b>Opus / Sonnet / Haiku 라우팅 기준</b> → <b>데모</b> OpenTelemetry 수집과 대시보드</p>
-        <p class="syn">캡스톤을 막 마친 지금이 이 이야기를 하기 가장 좋은 순간입니다. 방금 여러분이 쓴 토큰을 소재로 캐싱이 유리해지는 지점과 과제 성격별 모델 선택 기준(Opus/Sonnet/Haiku)을 정리하고, OpenTelemetry로 세션과 팀 단위 사용량을 대시보드로 확인하는 과정을 데모로 보여 드립니다. 비용 논의의 기준을 체감에서 측정값으로 옮기는 30분입니다.</p>
-      </div>
-      <div class="slot ops">
-        <div class="time">17:30 - 18:00</div>
-        <div class="title">쇼케이스 2 &amp; Closing<small>이틀간의 Slack 공유작 하이라이트, 후속 프로그램 안내와 설문</small></div>
-      </div>
-    </div>
-  </section>
+<div class="session">
+<div class="top"><span class="time">13:45 - 16:50</span><span class="badge lab">CAPSTONE R2</span><span class="dur">185분</span></div>
+<h3><span class="chip">LAB</span>캡스톤 라운드 2, AI를 품은 두 번째 완결 (Capstone 2, 4, 6)</h3>
+<p class="steps"><b>①</b> superpowers로 설계와 계획 → <b>②</b> Phase 단위 빌드와 검증 → <b>③</b> 배포과 Slack 공유, 여유가 있다면 퀄리티 강화 라운드</p>
+<p class="syn">이틀의 학습을 전부 소환하는 라운드입니다. 세 갈래 중 하나를 골라 완주합니다: 풀 트랙 <b>증시</b>(SSE 스트리밍 대시보드), <b>유튜브</b>(트렌드 레이더) 또는 2시간 트랙 <b>뉴스룸 렌즈</b>(키 발급 없음, CloudFront 실배포). 계획 → 실행 → 커밋을 반복해 완결하고, 결과 화면 또는 공개 URL을 Slack에 공유합니다.</p>
+<div class="links"><a class="lab" href="ClaudeCode_Capstone2_HandsOnLab.html">Mission 2 증시</a><a class="lab" href="ClaudeCode_Capstone4_HandsOnLab.html">Mission 4 유튜브</a><a class="lab" href="ClaudeCode_Capstone6_HandsOnLab.html">Mission 6 뉴스룸</a></div>
+</div>
+<div class="slot">
+<div class="time">16:50 - 17:00</div>
+<div class="title">Break</div>
+</div>
+<div class="session">
+<div class="top"><span class="time">17:00 - 17:30</span><span class="badge lec">강의 + 데모</span><span class="dur">30분</span></div>
+<h3><span class="chip">FINOPS</span>토큰을 효율적으로 쓰는 법, 모델 라우팅과 메터링</h3>
+<p class="steps"><b>방금 쓴 토큰으로 보는 효율 패턴</b> → <b>Opus / Sonnet / Haiku 라우팅 기준</b> → <b>데모</b> OpenTelemetry 수집과 대시보드</p>
+<p class="syn">캡스톤을 막 마친 지금이 이 이야기를 하기 가장 좋은 순간입니다. 방금 여러분이 쓴 토큰을 소재로 캐싱이 유리해지는 지점과 과제 성격별 모델 선택 기준(Opus/Sonnet/Haiku)을 정리하고, OpenTelemetry로 세션과 팀 단위 사용량을 대시보드로 확인하는 과정을 데모로 보여 드립니다. 비용 논의의 기준을 체감에서 측정값으로 옮기는 30분입니다.</p>
+</div>
+<div class="slot ops">
+<div class="time">17:30 - 18:00</div>
+<div class="title">쇼케이스 2 &amp; Closing<small>이틀간의 Slack 공유작 하이라이트, 후속 프로그램 안내</small></div>
+</div>
+</div>
+</section>
+<section class="sec">
+<div class="sec-label">SELF-PACED / REFERENCE</div>
+<h2 id="section-04">자율 실습과 참고 자료</h2>
+<div class="meta">정규 세션 밖에서 이어 갈 랩과, 랩 진행 중 옆에 띄워 두는 문서</div>
+<div class="refs">
+<a class="ref" href="ClaudeCode_Ch6_HandsOnLab.html">
+<span class="tag" style="color:var(--orange)">CH 06</span>
+<span><h3>Agent SDK, Claude Code를 코드에서 부른다</h3><p>터미널의 에이전트 루프를 내 프로그램 안으로. query, resume 대화 메모리, 커스텀 도구. 자율 실습 트랙입니다.</p></span>
+<span class="go">랩 열기 →</span>
+</a>
+<a class="ref" href="ClaudeCode_Reference1_Directory.html">
+<span class="tag">REF 1</span>
+<span><h3>디렉토리 구조, 무엇이 어디에 있는가</h3><p>~/.claude와 .claude, managed의 세 층 지도와 설정 우선순위, CLAUDE.md 계층 합산.</p></span>
+<span class="go">열기 →</span>
+</a>
+<a class="ref" href="ClaudeCode_Reference2_Commands.html">
+<span class="tag">REF 2</span>
+<span><h3>슬래시 커맨드, 세션을 조종하는 레버</h3><p>작업 흐름, 병렬, 검수, 세션 이동, 상태로 묶은 선별 목록과 워크샵 등장 위치.</p></span>
+<span class="go">열기 →</span>
+</a>
+<a class="ref" href="ClaudeCode_Reference3_Plugins.html">
+<span class="tag">REF 3</span>
+<span><h3>플러그인, 팀의 하네스를 배포하는 단위</h3><p>설치 3동사와 워크샵 3종(superpowers, project-init, harness-eval)의 역할, 신뢰 가드.</p></span>
+<span class="go">열기 →</span>
+</a>
+<a class="ref" href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">
+<span class="tag" style="color:var(--green)">PDF</span>
+<span><h3>강의자료 PDF 전체</h3><p>Chapter 1-5 슬라이드 PDF와 랩 문서 원본이 모여 있는 저장소 폴더입니다.</p></span>
+<span class="go">GitHub →</span>
+</a>
+<a class="ref" href="https://github.com/whchoi98/claude-code-workshop/tree/main/tech_doc">
+<span class="tag" style="color:var(--green)">DOC</span>
+<span><h3>기타 Tech Doc</h3><p>워크샵 본편 밖의 기술 문서 모음 (tech_doc 폴더).</p></span>
+<span class="go">GitHub →</span>
+</a>
+</div>
+</section>
+<a class="banner" href="index.html" style="display:block">
+<h3>Hands-on Lab 포털 열기</h3>
+<p>챕터 랩 전체와 Capstone Mission 4종, Reference 3부작을 한 화면에서 진행 상황과 함께 관리합니다.</p>
+<div class="cta"><span class="btn primary">index.html 열기 →</span></div>
+</a>
 
-  <section class="sec">
-    <div class="sec-label">SELF-PACED / REFERENCE</div>
-    <h2>자율 실습과 참고 자료</h2>
-    <div class="meta">정규 세션 밖에서 이어 갈 랩과, 랩 진행 중 옆에 띄워 두는 문서</div>
-    <div class="refs">
-      <a class="ref" href="ClaudeCode_Ch6_HandsOnLab.html">
-        <span class="tag" style="color:var(--orange)">CH 06</span>
-        <span><h3>Agent SDK, Claude Code를 코드에서 부른다</h3><p>터미널의 에이전트 루프를 내 프로그램 안으로. query, resume 대화 메모리, 커스텀 도구. 자율 실습 트랙입니다.</p></span>
-        <span class="go">랩 열기 →</span>
-      </a>
-      <a class="ref" href="ClaudeCode_Reference1_Directory.html">
-        <span class="tag">REF 1</span>
-        <span><h3>디렉토리 구조, 무엇이 어디에 있는가</h3><p>~/.claude와 .claude, managed의 세 층 지도와 설정 우선순위, CLAUDE.md 계층 합산.</p></span>
-        <span class="go">열기 →</span>
-      </a>
-      <a class="ref" href="ClaudeCode_Reference2_Commands.html">
-        <span class="tag">REF 2</span>
-        <span><h3>슬래시 커맨드, 세션을 조종하는 레버</h3><p>작업 흐름, 병렬, 검수, 세션 이동, 상태로 묶은 선별 목록과 워크샵 등장 위치.</p></span>
-        <span class="go">열기 →</span>
-      </a>
-      <a class="ref" href="ClaudeCode_Reference3_Plugins.html">
-        <span class="tag">REF 3</span>
-        <span><h3>플러그인, 팀의 하네스를 배포하는 단위</h3><p>설치 3동사와 워크샵 3종(superpowers, project-init, harness-eval)의 역할, 신뢰 가드.</p></span>
-        <span class="go">열기 →</span>
-      </a>
-      <a class="ref" href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">
-        <span class="tag" style="color:var(--green)">PDF</span>
-        <span><h3>강의자료 PDF 전체</h3><p>Chapter 1-5 슬라이드 PDF와 랩 문서 원본이 모여 있는 저장소 폴더입니다.</p></span>
-        <span class="go">GitHub →</span>
-      </a>
-      <a class="ref" href="https://github.com/whchoi98/claude-code-workshop/tree/main/tech_doc">
-        <span class="tag" style="color:var(--green)">DOC</span>
-        <span><h3>기타 Tech Doc</h3><p>워크샵 본편 밖의 기술 문서 모음 (tech_doc 폴더).</p></span>
-        <span class="go">GitHub →</span>
-      </a>
-    </div>
-  </section>
+<footer class="foot">
+<div class="who">Claude Code Deep Dive Workshop</div>
 
-  <a class="banner" href="index.html" style="display:block">
-    <h3>Hands-on Lab 포털 열기</h3>
-    <p>챕터 랩 전체와 Capstone Mission 4종, Reference 3부작을 한 화면에서 진행 상황과 함께 관리합니다.</p>
-    <div class="cta"><span class="btn primary">index.html 열기 →</span></div>
-  </a>
-
-  <section class="sec" id="after">
-    <div class="sec-label">AFTER THE WORKSHOP</div>
-    <a href="https://pulse.amazon/survey/COBRO6UU"
-       style="display:flex; align-items:center; gap:20px; padding:16px 18px; border:1px solid var(--line); border-radius:12px; background:var(--card);">
-      <img src="data:image/png;base64,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" alt="교육 후 설문 QR" width="140" height="140" style="border-radius:8px; display:block; flex:none;">
-      <span style="flex:1;">
-        <h3 style="margin:0 0 6px;">교육 후 설문</h3>
-        <p style="margin:0; font-size:14px; line-height:1.75;">3분이면 충분합니다. 여러분의 한 줄이 다음 워크샵의 품질이 됩니다.
-        카메라로 QR을 비추거나 이 카드를 눌러 접속하세요.</p>
-      </span>
-      <span class="btn primary" style="border-radius:999px; flex:none;">설문 열기 →</span>
-    </a>
-  </section>
-
-  <footer class="foot">
-    <div class="who">Claude Code Deep Dive Workshop</div>
-    <div>Anthropic × AWS / 2026.08.10 - 11 / 센터필드 East 18층 300~301호</div>
-    <div>실습 환경: Amazon EC2 + code-server (Claude Code 사전 설치) / 모델: Claude Fable 5, Opus 5, Sonnet 5</div>
-    <div><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a> / <a href="https://github.com/whchoi98/claude-code-workshop/tree/main/tech_doc">기타 Tech Doc</a> / 기준: Claude Code 2.1.x, 2026.07</div>
-  </footer>
+<div>실습 환경: Amazon EC2 + code-server (Claude Code 사전 설치) / 모델: Claude Fable 5, Opus 5, Sonnet 5</div>
+<div><a href="https://github.com/whchoi98/claude-code-workshop/tree/main/20260703">강의자료 PDF</a> / <a href="https://github.com/whchoi98/claude-code-workshop/tree/main/tech_doc">기타 Tech Doc</a> / 기준: Claude Code 2.1.x, 2026.07</div>
+</footer>
 </div>
 <div class="sign">Claude Code Deep Dive Workshop - 세션 소개</div>
-<button id="themeToggle" type="button" aria-label="테마 전환">라이트 모드</button>
-<script>
-(function(){
-  var KEY='hol-theme', root=document.documentElement, btn=document.getElementById('themeToggle');
-  function label(){ btn.textContent = root.getAttribute('data-theme')==='light' ? '다크 모드' : '라이트 모드'; }
-  var saved=null; try{saved=localStorage.getItem(KEY);}catch(e){}
-  if(saved==='light'){ root.setAttribute('data-theme','light'); }
-  else if(saved==='dark'){ root.removeAttribute('data-theme'); }
-  label();
-  btn.addEventListener('click',function(){
-    var light = root.getAttribute('data-theme')==='light';
-    if(light){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
-    try{ localStorage.setItem(KEY, light ? 'dark' : 'light'); }catch(e){}
-    label();
-  });
-})();
-</script>
-</body>
-</html>
+
+
+</div>
+<section class="reading-check js-only" aria-label="읽기 기록">
+  <div><p class="eyebrow">READING CHECK</p><h2>이 페이지를 읽으셨나요?</h2>
+    <p>읽음 표시는 실습 체크포인트와 별도로 관리됩니다. <span data-chapter-state>아직 읽지 않음</span></p></div>
+  <button class="button primary-button" type="button" data-progress-toggle aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span data-toggle-label>읽음으로 표시</span></button>
+</section>
+<nav class="page-pagination" aria-label="과정 이동">
+  <a class="pagination-link" href="index.html"><span><small>전체 과정</small><strong>워크샵 홈으로</strong></span></a>
+  <a class="pagination-link next" href="index.html#capstones"><span><small>다음으로</small><strong>전체 실습 살펴보기</strong></span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a>
+</nav></article>
+      <details class="article-toc" data-page-toc open><summary>이 페이지에서<span class="toc-toggle" aria-hidden="true">⌄</span></summary><nav aria-label="페이지 목차"><ol><li><a href="#section-01" data-toc-link>교육 환경</a></li><li><a href="#section-02" data-toc-link>개인 역량으로 첫 완결</a></li><li><a href="#section-03" data-toc-link>AI 통합으로 두 번째 완결</a></li><li><a href="#section-04" data-toc-link>자율 실습과 참고 자료</a></li></ol></nav><a class="back-to-top" href="#workshop-main">맨 위로 ↑</a></details>
+    </div>
+  </main>
+  <footer class="site-footer"><span>CLAUDE CODE DEEP DIVE WORKSHOP <span class="footer-date">My Workshop Reader</span></span><a href="index.html">전체 과정 ↑</a></footer>
+</div>
+<p class="reader-status" data-reader-status role="status" aria-live="polite"></p>
+
+<script src="assets/reader.js"></script>
+<script src="assets/workshop.js"></script>
+</body></html>
