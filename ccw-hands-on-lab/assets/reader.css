@@ -615,3 +615,9 @@ main:focus { outline: none; }
   .reference-card { display: flex; margin-bottom: 7px; padding: 10px 13px; break-inside: avoid; }
   .site-footer { margin: 22px 0 0; padding-bottom: 0; font-size: 8pt; }
 }
+.toolbar a.toolbar-button { text-decoration: none; }
+.toolbar { flex-shrink: 0; }
+.toolbar-button > span { white-space: nowrap; }
+@media (max-width: 560px) {
+  .toolbar a.toolbar-button > span { display: none; }
+}
