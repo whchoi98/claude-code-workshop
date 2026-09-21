@@ -15,6 +15,28 @@
 <link rel="stylesheet" href="assets/reader.css">
 <link rel="stylesheet" href="assets/legacy/ClaudeCode_Ch4_HandsOnLab.css">
 <link rel="stylesheet" href="assets/workshop.css">
+<style id="matcher-tooltip-contrast">
+#workshop-content #matcher-tip {
+  --text: #f2f3f3;
+  --muted: #b6bec9;
+  --line: #414d5c;
+  --bg-inline: #354150;
+  color: var(--text);
+  overflow: auto;
+  max-height: min(420px, calc(100vh - 120px));
+}
+#workshop-content #matcher-tip table {
+  min-width: 640px;
+}
+#workshop-content #matcher-tip code {
+  color: #ffc466;
+  background: var(--bg-inline);
+}
+</style>
+<style id="ch4-code-button-layout">
+#workshop-content .code-head button { flex-shrink: 0; white-space: nowrap; }
+#workshop-content .code-head .code-label { min-width: 0; }
+</style>
 <script src="assets/theme.js"></script>
 </head>
 <body data-course-key="6fd7cd9eb237" data-page="ClaudeCode_Ch4_HandsOnLab.html" data-current-chapter="ClaudeCode_Ch4_HandsOnLab">
@@ -87,7 +109,7 @@
 <button class="seg" data-task="t0" style="flex:2" title="준비, 2분"><span class="fill"></span><span class="seg-txt">준비</span></button>
 <button class="seg" data-task="a1" style="flex:10" title="A1 설정 계층, 10분"><span class="fill"></span><span class="seg-txt">A1 설정</span></button>
 <button class="seg" data-task="a2" style="flex:11" title="A2 권한 규칙, 11분"><span class="fill"></span><span class="seg-txt">A2 권한</span></button>
-<button class="seg" data-task="a3" style="flex:5" title="A3 permission mode, 5분"><span class="fill"></span><span class="seg-txt">A3 모드</span></button>
+<button class="seg" data-task="a3" style="flex:5" title="A3 Permission mode와 Auto 복사 정책, 5분"><span class="fill"></span><span class="seg-txt">A3 모드</span></button>
 <button class="seg" data-task="a4" style="flex:10" title="A4 Hooks, 10분"><span class="fill"></span><span class="seg-txt">A4 Hooks</span></button>
 <button class="seg" data-task="a5" style="flex:10" title="A5 MCP, 10분"><span class="fill"></span><span class="seg-txt">A5 MCP</span></button>
 <button class="seg" data-task="pb" style="flex:3" title="슈퍼랩 브리핑, 3분"><span class="fill"></span><span class="seg-txt">SL</span></button>
@@ -111,10 +133,10 @@
 </div>
 <p class="task-goal">
     앞의 다섯 Task(A1~A5)는 각각 <strong>설정, 권한, 모드, Hook, MCP</strong>라는 기본 구성을 하나씩 손에 넣는 과정이고,
-    이어지는 <strong>80분 슈퍼랩(M1~M4)</strong>은 그 구성들을 조립해 팀에 배포 가능한 스타터 킷을 만드는 과정입니다.<br/>
+    이어지는 <strong>40분 슈퍼랩(M1~M4)</strong>은 그 구성들을 조립해 팀에 배포 가능한 스타터 킷을 만드는 과정입니다.<br/>
     지금 어느 단계에 있는지 진행 중 위치가 헷갈리면 이 흐름도로 돌아오세요.
   </p>
-<nav aria-label="챕터 실습 진행 순서" class="workshop-flow-guide"><ol><li><a class="flow-step" href="#t0"><span class="flow-step-number">00</span><span class="flow-step-content"><strong>사전 준비 확인</strong><span class="flow-step-summary">실습 프로젝트와 jq 준비</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a1"><span class="flow-step-number">A1</span><span class="flow-step-content"><strong>설정 계층, 팀 설정과 개인 설정의 공존</strong><span class="flow-step-summary">팀 공유 설정과 개인 설정의 적용 범위·병합 결과 비교</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a2"><span class="flow-step-number">A2</span><span class="flow-step-content"><strong>권한 규칙, allow / ask / deny 3단 대조</strong><span class="flow-step-summary">allow·ask·deny 규칙에 따른 실행·승인·차단 동작 비교</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a3"><span class="flow-step-number">A3</span><span class="flow-step-content"><strong>permission mode, 프롬프트의 기본값을 정하는 층</strong><span class="flow-step-summary">권한 규칙에 해당하지 않는 호출의 기본 동작을 모드별로 비교</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a4"><span class="flow-step-number">A4</span><span class="flow-step-content"><strong>PostToolUse Hook, 편집 뒤 자동 검사</strong><span class="flow-step-summary">편집 후 구문 검사와 오류 피드백을 연결하는 Hook 구성</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a5"><span class="flow-step-number">A5</span><span class="flow-step-content"><strong>MCP 서버 연결, 첫 외부 도구</strong><span class="flow-step-summary">MCP 서버의 추가·확인·사용·제거와 설정 범위 이해</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#m1"><span class="flow-step-number">01</span><span class="flow-step-content"><strong>/standup, 매일 쓰는 커맨드 스킬</strong><span class="flow-step-summary">커밋 내역을 동적 컨텍스트로 읽는 /standup 스킬 구성</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#m2"><span class="flow-step-number">02</span><span class="flow-step-content"><strong>release-notes, 격리 실행 스킬</strong><span class="flow-step-summary">context: fork와 Explore 에이전트를 이용한 격리 실행 이해</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#m3"><span class="flow-step-number">03</span><span class="flow-step-content"><strong>자유 빌드, 본인 팀의 반복 작업 하나</strong><span class="flow-step-summary">팀의 반복 작업을 선정하고 실행 가능한 스킬로 구현</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#m4"><span class="flow-step-number">04</span><span class="flow-step-content"><strong>패키징과 공유, 킷을 팀의 것으로</strong><span class="flow-step-summary">설정·Hook·스킬을 문서와 함께 팀 스타터 킷으로 패키징</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li></ol></nav><details class="workshop-flow-original"><summary data-flow-original-label="">상세 흐름도 펼쳐 보기</summary><div class="flow-original-scroll"><svg aria-label="챕터 Task 진행 흐름" role="img" style="display:block;max-width:940px;margin:8px auto 2px" viewbox="0 0 940 296" width="100%" xmlns="http://www.w3.org/2000/svg">
+<nav aria-label="챕터 실습 진행 순서" class="workshop-flow-guide"><ol><li><a class="flow-step" href="#t0"><span class="flow-step-number">00</span><span class="flow-step-content"><strong>사전 준비 확인</strong><span class="flow-step-summary">실습 프로젝트와 jq 준비</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a1"><span class="flow-step-number">A1</span><span class="flow-step-content"><strong>설정 계층, 팀 설정과 개인 설정의 공존</strong><span class="flow-step-summary">팀 공유 설정과 개인 설정의 적용 범위·병합 결과 비교</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a2"><span class="flow-step-number">A2</span><span class="flow-step-content"><strong>권한 규칙, allow / ask / deny 3단 대조</strong><span class="flow-step-summary">allow·ask·deny 규칙에 따른 실행·승인·차단 동작 비교</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a3"><span class="flow-step-number">A3</span><span class="flow-step-content"><strong>Permission mode 이해와 Auto 복사 정책</strong><span class="flow-step-summary">Auto mode 규칙 등록, 도구별 실행 결과와 최종 파일 생성 여부 확인</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a4"><span class="flow-step-number">A4</span><span class="flow-step-content"><strong>PostToolUse Hook, 편집 뒤 자동 검사</strong><span class="flow-step-summary">편집 후 구문 검사와 오류 피드백을 연결하는 Hook 구성</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#a5"><span class="flow-step-number">A5</span><span class="flow-step-content"><strong>MCP 서버 연결, 첫 외부 도구</strong><span class="flow-step-summary">MCP 서버의 추가·확인·사용·제거와 설정 범위 이해</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#m1"><span class="flow-step-number">01</span><span class="flow-step-content"><strong>/standup, 매일 쓰는 커맨드 스킬</strong><span class="flow-step-summary">커밋 내역을 동적 컨텍스트로 읽는 /standup 스킬 구성</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#m2"><span class="flow-step-number">02</span><span class="flow-step-content"><strong>release-notes, 격리 실행 스킬</strong><span class="flow-step-summary">context: fork와 Explore 에이전트를 이용한 격리 실행 이해</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#m3"><span class="flow-step-number">03</span><span class="flow-step-content"><strong>자유 빌드, 본인 팀의 반복 작업 하나</strong><span class="flow-step-summary">팀의 반복 작업을 선정하고 실행 가능한 스킬로 구현</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li><li><a class="flow-step" href="#m4"><span class="flow-step-number">04</span><span class="flow-step-content"><strong>패키징과 공유, 킷을 팀의 것으로</strong><span class="flow-step-summary">설정·Hook·스킬을 문서와 함께 팀 스타터 킷으로 패키징</span></span><svg aria-hidden="true" class="icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" viewbox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a></li></ol></nav><details class="workshop-flow-original"><summary data-flow-original-label="">상세 흐름도 펼쳐 보기</summary><div class="flow-original-scroll"><svg aria-label="챕터 Task 진행 흐름" role="img" style="display:block;max-width:940px;margin:8px auto 2px" viewbox="0 0 940 296" width="100%" xmlns="http://www.w3.org/2000/svg">
 
 <text fill="var(--orange)" font-size="14" font-weight="800" letter-spacing="1.5" x="0" y="24">PART A, 다섯 개의 기초</text>
 <rect fill="var(--bg-card)" height="84" rx="12" stroke="var(--line)" stroke-width="1.4" width="175" x="0" y="38"></rect>
@@ -129,8 +151,8 @@
 <path d="M 366 80 L 374 80" fill="none" stroke="var(--orange)" stroke-width="2"></path><path d="M 374 75 L 382 80 L 374 85" fill="var(--orange)"></path>
 <rect fill="var(--bg-card)" height="84" rx="12" stroke="var(--line)" stroke-width="1.4" width="175" x="382" y="38"></rect>
 <text fill="var(--orange)" font-size="12" font-weight="800" x="396" y="62">A3</text>
-<text fill="var(--text)" font-size="15" font-weight="800" x="396" y="89">permission mode</text>
-<text fill="var(--dim)" font-size="11.5" x="396" y="108">규칙 밖 기본 동작</text>
+<text fill="var(--text)" font-size="15" font-weight="800" x="396" y="89">Permission mode</text>
+<text fill="var(--dim)" font-size="11.5" x="396" y="108">규칙 등록·도구·파일 확인</text>
 <path d="M 557 80 L 566 80" fill="none" stroke="var(--orange)" stroke-width="2"></path><path d="M 566 75 L 574 80 L 566 85" fill="var(--orange)"></path>
 <rect fill="var(--bg-card)" height="84" rx="12" stroke="var(--line)" stroke-width="1.4" width="175" x="574" y="38"></rect>
 <text fill="var(--orange)" font-size="12" font-weight="800" x="588" y="62">A4</text>
@@ -141,11 +163,11 @@
 <text fill="var(--orange)" font-size="12" font-weight="800" x="779" y="62">A5</text>
 <text fill="var(--text)" font-size="15" font-weight="800" x="779" y="89">MCP 서버</text>
 <text fill="var(--dim)" font-size="11.5" x="779" y="108">연결의 수명주기</text>
-<text fill="var(--orange)" font-size="14" font-weight="800" letter-spacing="1.5" x="0" y="186">SUPERLAB, 80분의 조립</text>
+<text fill="var(--orange)" font-size="14" font-weight="800" letter-spacing="1.5" x="0" y="186">SUPERLAB, 40분의 조립</text>
 <rect fill="var(--bg-card)" height="84" rx="12" stroke="var(--line)" stroke-width="1.4" width="175" x="0" y="200"></rect>
 <text fill="var(--orange)" font-size="12" font-weight="800" x="14" y="224">SL</text>
 <text fill="var(--text)" font-size="15" font-weight="800" x="14" y="251">슈퍼랩 브리핑</text>
-<text fill="var(--dim)" font-size="11.5" x="14" y="270">80분 셋업</text>
+<text fill="var(--dim)" font-size="11.5" x="14" y="270">40분 셋업</text>
 <path d="M 175 242 L 183 242" fill="none" stroke="var(--orange)" stroke-width="2"></path><path d="M 183 237 L 191 242 L 183 247" fill="var(--orange)"></path>
 <rect fill="var(--bg-card)" height="84" rx="12" stroke="var(--line)" stroke-width="1.4" width="175" x="191" y="200"></rect>
 <text fill="var(--orange)" font-size="12" font-weight="800" x="205" y="224">M1</text>
@@ -178,13 +200,18 @@
 <span class="time-badge">2분</span>
 </div>
 <p class="task-goal">
-    80분 내내 사용할 실습 프로젝트를 만듭니다.<br/>
-    Hook 스크립트가 <strong>jq</strong>를 사용하므로 설치 여부도 확인합니다.
+    이후 실습에서 사용할 프로젝트를 만듭니다. Hook 스크립트는 <code class="inline">jq</code>를 사용하고, 없으면 <code class="inline">Python 3</code>로 JSON을 읽습니다. 둘 중 하나를 사용할 수 있는지 확인하세요.
   </p>
 <div class="step-title"><span class="step-no">1</span>실습 프로젝트 생성</div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-001" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
-<pre id="workshop-code-001"><code>jq --version || echo "jq 없음: brew install jq 권장, 없어도 Hook은 python3로 대체 동작"
+<pre id="workshop-code-001"><code>if command -v jq &gt;/dev/null 2&gt;&amp;1; then
+  jq --version
+elif command -v python3 &gt;/dev/null 2&gt;&amp;1; then
+  python3 --version
+else
+  echo "jq 또는 Python 3를 설치한 뒤 진행하세요."
+fi
 
 mkdir -p ~/claude-lab/ch4/src &amp;&amp; cd ~/claude-lab/ch4
 
@@ -222,7 +249,7 @@ npm test</code></pre>
 </div>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
-<label class="cp-item"><input data-cp="t0" type="checkbox"/><span>jq 확인, npm test PASS, 커밋 2개가 준비되었습니다</span></label>
+<label class="cp-item"><input data-cp="t0" type="checkbox"/><span>jq 또는 Python 3 사용 가능, npm test의 PASS 출력, 커밋 2개를 확인했습니다</span></label>
 </div>
 </section>
 <!-- ================= Task A1 ================= -->
@@ -252,7 +279,7 @@ your-project/
  ├─ .mcp.json                     <span class="cmt"># 팀 공유 MCP 서버 - .claude 밖, 루트에 위치!</span>
  └─ .claude/
      ├─ <span class="ok" style="color:var(--green); font-weight:700; background:var(--green-dim); border-radius:4px; padding:1px 5px;">settings.json</span>             <span class="cmt"># ★ 팀 공유 - Git 커밋 대상 (이 랩 Step 1)</span>
-     ├─ <span class="ok" style="color:var(--green); font-weight:700; background:var(--green-dim); border-radius:4px; padding:1px 5px;">settings.local.json</span>       <span class="cmt"># ★ 개인 - 커밋 제외, 자동 gitignore (이 랩 Step 2)</span>
+     ├─ <span class="ok" style="color:var(--green); font-weight:700; background:var(--green-dim); border-radius:4px; padding:1px 5px;">settings.local.json</span>       <span class="cmt"># ★ 개인 - 커밋 제외, Git 제외 여부 확인 (이 랩 Step 2)</span>
      ├─ rules/                    <span class="cmt"># 경로 조건부 지침 조각 (paths:)</span>
      ├─ skills/, commands/, agents/, workflows/
      └─ output-styles/, agent-memory/</code></pre></div>
@@ -307,29 +334,27 @@ echo "개인 설정 완료"</code></pre>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal (~/claude-lab/ch4)</span><button aria-label="Terminal (~/claude-lab/ch4) 복사" class="ws-copy" data-copy-code="workshop-code-005" data-copy-label="Terminal (~/claude-lab/ch4) 복사" type="button">복사</button></div>
 <pre id="workshop-code-005"><code>cd ~/claude-lab/ch4
-claude</code></pre>
+claude --permission-mode default</code></pre>
 </div>
+<p class="body">A1·A2는 승인 화면을 비교하므로 <code class="inline">default</code> 모드로 시작합니다. 기존 허용 규칙이나 조직 정책에 따라 결과가 다르면 <code class="inline">/permissions</code>에서 규칙과 출처를 확인하세요.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-006" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
 <pre id="workshop-code-006"><code>/status</code></pre>
 </div>
 <div class="code-wrap output" data-code-kind="output">
 <div class="code-head"><span class="code-label">관찰 포인트</span><button aria-label="관찰 포인트 복사" class="ws-copy" data-copy-code="workshop-code-007" data-copy-label="관찰 포인트 복사" type="button">복사</button></div>
-<pre id="workshop-code-007"><code>Setting sources: User settings, Shared project settings,
-                 Project local settings, Enterprise managed settings (remote)
+<pre id="workshop-code-007"><code>Setting sources: Shared project settings, Project local settings, …
 
-<span class="cmt"># Shared project settings     = .claude/settings.json</span>
-<span class="cmt"># Project local settings      = .claude/settings.local.json</span>
-<span class="cmt"># User settings               = ~/.claude/settings.json</span>
-<span class="cmt"># Enterprise managed settings = 조직 정책, 원격 전달</span>
-<span class="cmt"># 한 줄로 나오며 파일 경로는 표시되지 않습니다</span></code></pre>
+# Shared project settings = .claude/settings.json
+# Project local settings  = .claude/settings.local.json
+# User·Managed 등 추가 소스와 표시 형식은 환경에 따라 다를 수 있습니다.</code></pre>
 </div>
-<p class="body">이 파일에는 <strong>Claude도 씁니다.</strong> read-only 내장 집합에 없는 Bash 명령을 승인해 확인합니다.</p>
+<p class="body">개인 설정에는 지속 승인으로 생성한 규칙도 저장할 수 있습니다. 다음 요청에서 승인 화면이 나타나면 저장 범위를 확인하고 진행합니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-008" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
 <pre id="workshop-code-008"><code>npm ls로 의존성 목록을 보여주세요</code></pre>
 </div>
-<p class="body">프롬프트에서 <strong>"다시 묻지 않기"</strong> 계열 옵션을 선택하세요.</p>
+<p class="body">승인 화면에서 <strong>“다시 묻지 않기” 계열의 지속 승인 옵션</strong>과 이 프로젝트의 개인 설정 범위를 선택하세요. 이미 허용돼 화면이 나오지 않으면 <code class="inline">/permissions</code>에서 해당 규칙의 출처를 확인합니다.</p>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 다른 창에서</span><button aria-label="Terminal, 다른 창에서 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Terminal, 다른 창에서 복사" type="button">복사</button></div>
 <pre id="workshop-code-009"><code>cat ~/claude-lab/ch4/.claude/settings.local.json</code></pre>
@@ -337,29 +362,29 @@ claude</code></pre>
 <div class="code-wrap output" data-code-kind="output">
 <div class="code-head"><span class="code-label">관찰 포인트</span><button aria-label="관찰 포인트 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="관찰 포인트 복사" type="button">복사</button></div>
 <pre id="workshop-code-010"><code>"allow": ["Bash(npm run *)", "Bash(npm ls *)"]
-<span class="cmt"># 손으로 쓴 규칙 옆에 자동 생성된 규칙이 추가됨</span>
-<span class="cmt"># 대화상자는 항상 공백 + * 형식으로 씁니다</span>
-<span class="cmt"># 팀 파일 settings.json은 건드려지지 않았습니다</span></code></pre>
+# 지속 승인 뒤의 저장 예시입니다.
+# 실제 생성된 규칙과 저장 범위는 파일에서 확인합니다.</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-011" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
 <pre id="workshop-code-011"><code>/permissions</code></pre>
 </div>
 <p class="body">
-    allow 목록에 팀 규칙(npm test)과 개인 규칙(npm run), 그리고 방금 자동 생성된 규칙(npm ls)이 <strong>병합되어 함께</strong> 보이면 성공입니다.
+    allow 목록에서 팀 규칙(npm test)과 개인 규칙(npm run)이 <strong>함께 적용되는지</strong> 확인합니다. 지속 승인을 저장했다면 생성된 규칙과 그 출처도 확인하세요.
     권한 규칙은 스코프 간 <strong>덮어쓰기가 아니라 병합</strong>되며, deny는 어느 스코프에 있든 우선합니다.
   </p>
 <div class="callout tip">
-<span class="co-title">운영 팁</span>
-<code class="inline">.claude/settings.json</code>은 커밋해 팀 표준으로, <code class="inline">settings.local.json</code>은
-    .gitignore에 넣어 개인용으로 유지하세요. 설정 파일은 저장 즉시 <strong>핫 리로드</strong>되어 <code class="inline">permissions</code>와 <code class="inline">hooks</code>는 재시작 없이 적용됩니다. 반면 위 블록의 <code class="inline">model</code>은 <strong>세션 시작 시 한 번만 읽습니다</strong>(변경은 <code class="inline">/model</code>).
-    설정 가능한 전체 키는 세션에서 <code class="inline">/config --help</code>로 확인할 수 있습니다.
-  </div>
+<span class="co-title">설정 반영과 공유</span>
+<code class="inline">.claude/settings.json</code>은 팀과 공유하고, <code class="inline">.claude/settings.local.json</code>은 Git 공유 대상에서 제외합니다.
+<code class="inline">git check-ignore -v -- .claude/settings.local.json</code>으로 제외 여부를 확인하고, 제외되지 않았다면 <code class="inline">.gitignore</code>에 추가하세요.
+설정 항목에 따라 반영 시점이 다를 수 있습니다. 현재 모델을 바꿀 때는 <code class="inline">/model</code>을 사용하세요.
+</div>
+<p class="body">공식 문서: <a href="https://code.claude.com/docs/en/permission-modes" target="_blank" rel="noopener noreferrer">권한 모드</a></p>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
 <label class="cp-item"><input data-cp="a1a" type="checkbox"/><span>/status에 project와 local 두 소스가 보입니다</span></label>
 <label class="cp-item"><input data-cp="a1b" type="checkbox"/><span>/permissions에서 두 스코프의 allow 규칙이 병합되어 보입니다</span></label>
-<label class="cp-item"><input data-cp="a1c" type="checkbox"/><span>Bash 승인이 settings.local.json에 규칙으로 기록되는 것을 확인했습니다</span></label>
+<label class="cp-item"><input data-cp="a1c" type="checkbox"/><span>지속 승인으로 저장한 규칙 또는 기존 허용 규칙의 저장 위치와 출처를 확인했습니다</span></label>
 </div>
 </section>
 <!-- ================= Task A2 ================= -->
@@ -388,13 +413,13 @@ claude</code></pre>
 <tr><td colspan="3" style="color:var(--dim);font-size:13px;"><code>*</code>는 한 경로 구간 안, <code>**</code>는 하위 디렉토리 전체, 심링크: allow는 링크와 대상 양쪽 규칙 필요, deny는 한쪽만 걸려도 차단</td></tr>
 </table>
 <div class="callout warn">
-<span class="co-title">규칙은 이렇게 뚫립니다</span>
+<span class="co-title">Bash 패턴의 매칭 범위와 한계</span>
 <strong>래퍼 스트리핑:</strong> <code class="inline">timeout</code>, <code class="inline">time</code>, <code class="inline">nice</code>, <code class="inline">nohup</code>, 플래그 없는 <code class="inline">xargs</code>는 규칙 매칭 전에 제거됩니다.
     그래서 <code class="inline">Bash(npm test *)</code>가 <code class="inline">timeout 30 npm test</code>도 커버합니다.
     <strong><code class="inline">npx</code>, <code class="inline">docker exec</code>, <code class="inline">devbox run</code>은 규칙 매칭 과정에서 제거되지 않습니다.</strong>
     그래서 <code class="inline">Bash(devbox run *)</code>는 <code class="inline">devbox run rm -rf .</code>를 허용합니다. 러너를 허용할 때는 내부 명령까지 포함한 규칙을 쓰세요.<br/>
 <strong>복합 명령:</strong> <code class="inline">&amp;&amp;</code>, <code class="inline">||</code>, <code class="inline">;</code>, <code class="inline">|</code>, <code class="inline">&amp;</code>, 개행으로 나뉜 <strong>각 서브명령이 독립적으로</strong> 매칭되어야 합니다.
-    그래서 인자를 제약하려는 패턴은 근본적으로 취약합니다. <code class="inline">rm</code>을 좁게 막는 대신 전면 차단하고 예외를 훅으로 여는 이유입니다.
+    명령 패턴은 해석 방식과 허용 범위를 함께 검토해야 합니다. <strong>명시적 deny를 Hook의 allow로 해제할 수는 없습니다.</strong> 내용에 따른 추가 검사는 PreToolUse Hook으로 설계하고 권한 규칙과 함께 확인하세요.
   </div>
 <div class="step-title"><span class="step-no">1</span>allow, 무확인 실행 관찰</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
@@ -417,13 +442,11 @@ claude</code></pre>
 <span class="cmt"># 제안 내용은 세션마다 다릅니다. 따라가지 말고 다음 단계로 넘어가세요</span></code></pre>
 </div>
 <div class="callout warn">
-<span class="co-title">deny에는 두 층위가 있습니다</span>
-<strong>범위 지정</strong>(<code class="inline">Bash(curl *)</code>): 도구는 컨텍스트에 남고, Claude가 호출을 시도한 뒤 차단됩니다.
-    거부 사실이 Claude에게 전달되므로 위처럼 <strong>우회를 모색</strong>합니다.<br/>
-<strong>괄호 없는 도구 이름</strong>(<code class="inline">WebFetch</code>): 도구가 <strong>컨텍스트에서 제거</strong>되어 Claude는 존재 자체를 모릅니다. 시도도, 거부 메시지도 없습니다.<br/>
-    네트워크를 정말 막으려면 <code class="inline">curl</code>/<code class="inline">wget</code> deny와 <code class="inline">WebFetch</code> 통제를 <strong>함께</strong> 걸어야 합니다.
-    한쪽만 통제하면 다른 방향으로 우회합니다.
-  </div>
+<span class="co-title">특정 호출 차단과 도구 전체 제외</span>
+<strong>범위 지정</strong>(<code class="inline">Bash(curl *)</code>): 해당 명령 패턴에 맞는 Bash 호출을 거부합니다. 거부 사실을 받은 Claude가 다른 방법을 제안할 수 있습니다.<br/>
+<strong>괄호 없는 도구 이름</strong>(<code class="inline">WebFetch</code>): 해당 도구를 세션에서 사용할 수 있는 도구 목록에서 제외합니다.<br/>
+이 규칙들은 curl·wget·WebFetch라는 특정 접근 경로를 제어합니다. 다른 프로그램의 네트워크 사용까지 제한하려면 샌드박스 등 별도의 네트워크 경계가 필요합니다.
+</div>
 <div class="step-title"><span class="step-no">3</span>ask, 승인 흐름 관찰</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-015" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
@@ -431,109 +454,140 @@ claude</code></pre>
 </div>
 <p class="body">
     Edit은 ask 규칙이므로 <strong>diff 미리보기와 승인 프롬프트</strong>가 표시됩니다. 승인해서 진행하세요.
-    A1의 Bash 승인과 달리 <strong>파일 수정 승인은 설정 파일에 기록되지 않고 세션 종료와 함께 사라집니다.</strong>
-    영구 기록되는 것은 Bash 명령 승인뿐입니다.
+    이번 편집을 승인한 것과 지속적인 파일 권한 규칙을 추가한 것은 다릅니다.
+    승인 범위는 화면에서 확인하고, 지속적으로 적용할 파일 권한은 <code class="inline">settings.json</code>의 <code class="inline">permissions</code>에 명시해 관리합니다.
   </p>
 <div class="callout warn">
 <span class="co-title">규칙 설계의 함정</span>
-    allow 목록은 <strong>배타적이지 않습니다</strong>. 세 목록 어디에도 매칭되지 않은 호출은 거부되는 게 아니라 세션의 permission mode가 정한 기본 동작을 따릅니다(기본 모드에서는 승인 프롬프트).
+    allow 목록은 <strong>배타적이지 않습니다</strong>. 세 목록 어디에도 매칭되지 않은 호출은 기본 허용 동작과 현재 permission mode의 일반 권한 처리를 따릅니다. default 모드에서도 기본 허용 읽기와 승인이 필요한 호출을 구분합니다.
     <strong>구체성은 평가 순서를 바꾸지 않습니다.</strong> deny → ask → allow 첫 매칭이 결론이므로, 넓은 deny에 좁은 allow로 예외를 우회하는 설계는 성립하지 않습니다.
   </div>
+<p class="body">공식 문서: <a href="https://code.claude.com/docs/en/permissions" target="_blank" rel="noopener noreferrer">권한 규칙</a></p>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
 <label class="cp-item"><input data-cp="a2a" type="checkbox"/><span>npm test는 무확인, curl은 차단, Edit은 승인 요청이라는 3단 차이를 관찰했습니다</span></label>
-<label class="cp-item"><input data-cp="a2b" type="checkbox"/><span>와일드카드 위치, 공백 단어 경계, 래퍼 스트리핑 우회를 설명할 수 있습니다</span></label>
+<label class="cp-item"><input data-cp="a2b" type="checkbox"/><span>와일드카드 위치, 공백 단어 경계, 래퍼 처리의 범위와 한계를 설명할 수 있습니다</span></label>
 </div>
 </section>
 <!-- ================= Task A3 ================= -->
 <section class="task" id="a3">
-<div class="task-head">
-<span class="task-num">TASK A3</span>
-<h2>permission mode, 프롬프트의 기본값을 정하는 층</h2>
-<span class="time-badge">5분</span>
-</div>
-<p class="task-goal">A2에서 규칙이 <strong>예외</strong>를 정하는 것을 봤습니다.<br/>
-    규칙에 걸리지 않은 호출의 <strong>기본 동작</strong>을 정하는 것이 permission mode입니다.<br/>
-    A2의 설정을 <strong>유지하면서</strong> 모드만 변경해, 무엇이 바뀌고 무엇이 안 바뀌는지 대조합니다.</p>
-<div style="position:relative;">
-<table class="tbl">
-<tr><th>모드</th><th>규칙에 매칭되지 않은 호출</th><th>쓰는 자리</th></tr>
-<tr><td><code>default</code></td><td>도구 첫 사용마다 프롬프트</td><td>기본값. CLI에는 <strong>Manual</strong>로 표시</td></tr>
-<tr><td><code>acceptEdits</code></td><td>파일 편집과 mkdir/touch/rm/rmdir/mv/cp/sed 자동 수락</td><td>작업 디렉토리 안에서 편집이 많을 때</td></tr>
-<tr><td><code>plan</code></td><td>읽기와 read-only 셸만, 소스 편집 안 함</td><td>낯선 코드베이스 파악. <code>/plan</code></td></tr>
-<tr>
-<td><span class="evt-tip" data-tip="auto-tip"><code>auto</code></span></td>
-<td>백그라운드 안전성 검사와 함께 자동 승인</td>
-<td>요청과 행동의 정합성을 분류기가 판단</td>
-</tr>
-<tr><td><code>dontAsk</code></td><td>자동 거부 (프롬프트 없음)</td><td><strong>"allow에 있는 것만 실행"</strong>의 정답. CI</td></tr>
-<tr><td><code>bypassPermissions</code></td><td>프롬프트 생략</td><td>컨테이너/VM 등 격리 환경 전용</td></tr>
+<div class="task-head"><span class="task-num">TASK A3</span><h2>Permission mode 이해와 Auto 복사 정책</h2><span class="time-badge">5분</span></div>
+<p class="task-goal">기본 모드를 이해하고, <strong>작업 폴더 밖으로 파일을 복사하지 않는 규칙</strong>을 Auto 세션에 적용합니다.<br/>규칙 등록을 확인하고, <strong>도구별 실행 결과와 최종 파일 생성 여부</strong>를 함께 살펴봅니다.</p>
+<table class="tbl" id="a3-mode-table">
+<thead><tr><th scope="col">모드</th><th scope="col">규칙에 매칭되지 않은 호출</th><th scope="col">쓰는 자리</th></tr></thead>
+<tbody>
+<tr><td><code style="white-space:nowrap;overflow-wrap:normal;">default</code></td><td>승인이 필요한 호출은 사용자에게 확인</td><td>CLI의 <strong>Manual</strong> 모드, 직접 승인하며 작업</td></tr>
+<tr><td><code style="white-space:nowrap;overflow-wrap:normal;">acceptEdits</code></td><td>파일 편집과 일부 파일 관리 명령 자동 승인</td><td>반복적인 코드 편집</td></tr>
+<tr><td><code style="white-space:nowrap;overflow-wrap:normal;">plan</code></td><td>읽기·조사 중심, 소스 편집 제한</td><td>수정 전 분석과 계획. <code>/plan</code></td></tr>
+<tr><td><code style="white-space:nowrap;overflow-wrap:normal;">auto</code></td><td>분류기가 요청과 행동을 검토해 허용·차단</td><td>승인 요청을 줄이면서 작업</td></tr>
+</tbody>
 </table>
-<div class="hover-tip" id="auto-tip" style="left:0; right:0; top:100%; margin-top:-14px;">
-<div class="tip-title">auto 모드 설정 - ~/.claude/settings.json (user 스코프, 참고용)</div>
-<div class="code-wrap output" data-code-kind="output" style="margin:0;"><div class="code-head"><button aria-label="코드 복사" class="ws-copy" data-copy-code="workshop-code-016" data-copy-label="코드 복사" type="button">복사</button></div>
-<pre id="workshop-code-016"><code>{
-  "permissions": { "defaultMode": "auto" },  <span class="cmt"># user, 관리 설정에서만 유효 - 프로젝트/local의 "auto"는 무시</span>
-  "autoMode": {                              <span class="cmt"># 분류기 규칙 - glob이 아니라 문장으로 작성</span>
-    "<span class="info">environment</span>": ["$defaults", "Sensitive remote targets: prod-*"],  <span class="cmt"># 신뢰 + 민감 대상 선언</span>
-    "<span class="ok">allow</span>":       ["$defaults", "kubectl get 계열은 안전"],             <span class="cmt"># 예외 허용</span>
-    "<span class="hl">soft_deny</span>":   ["$defaults", "terraform apply 금지"],                <span class="cmt"># 명시 요청 시에만 허용</span>
-    "<span class="bad">hard_deny</span>":   ["$defaults", "IAM 정책 변경"],                       <span class="cmt"># 무조건 차단 - allow로도 못 뚫음</span>
-    "classifyAllShell": true
+<div class="callout tip"><span class="co-title">이번 실습에서는 설정 파일로 Auto 모드를 선택합니다</span><strong>Pro·Max·Team</strong> 플랜의 지원되는 터미널·VS Code 환경에서는 Auto가 기본 시작 모드입니다. 기존 설정·지원 모델·조직 정책 등의 조건에 따라 실제 시작 모드는 달라질 수 있습니다.<br/><strong>Enterprise와 Amazon Bedrock의 기본 시작 모드는 Manual</strong>입니다. 이번에는 <code class="inline">deny-rule.json</code>의 <code class="inline">permissions.defaultMode: "auto"</code>로 모드를 지정하고, <code class="inline">--settings</code>로 파일을 읽습니다.</div>
+<div class="callout"><span class="co-title">Terminal 명령은 같은 터미널에서 순서대로 실행합니다</span>A2의 Claude 세션에서 <code class="inline">/exit</code>로 나온 뒤 시작합니다. 준비는 일반 셸 명령으로 진행하며, <code class="inline">deny-rule.json</code>을 그대로 읽어 한 세션에서 확인합니다. 실습은 전용 폴더에서 진행합니다.</div>
+<div class="step-title"><span class="step-no">1</span>현재 기준과 내장 기본 기준 조회</div>
+<div class="code-wrap" data-code-kind="terminal"><div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 현재 적용 기준</span><button aria-label="Terminal, 현재 적용 기준 복사" class="ws-copy" data-copy-code="workshop-code-016" data-copy-label="Terminal, 현재 적용 기준 복사" type="button">복사</button></div>
+<pre id="workshop-code-016"><code>cd ~/claude-lab/ch4
+claude auto-mode config</code></pre></div>
+<div class="code-wrap" data-code-kind="terminal"><div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 내장 기본 기준</span><button aria-label="Terminal, 내장 기본 기준 복사" class="ws-copy" data-copy-code="workshop-code-017" data-copy-label="Terminal, 내장 기본 기준 복사" type="button">복사</button></div>
+<pre id="workshop-code-017"><code>claude auto-mode defaults</code></pre></div>
+<p class="body"><code class="inline">config</code>는 현재 적용 기준, <code class="inline">defaults</code>는 내장 기본 기준입니다. 네 필드의 역할을 확인하세요.</p>
+<table class="tbl" id="a3-criteria-table"><thead><tr><th scope="col">필드</th><th scope="col">확인할 내용</th></tr></thead><tbody>
+<tr><td><code style="white-space:nowrap;overflow-wrap:normal;">environment</code></td><td>작업 환경과 신뢰 범위</td></tr>
+<tr><td><code style="white-space:nowrap;overflow-wrap:normal;">allow</code></td><td>분류기 내부의 허용 예외</td></tr>
+<tr><td><code style="white-space:nowrap;overflow-wrap:normal;">soft_deny</code></td><td>사용자 의도와 항목별 예외 조건을 함께 평가하는 차단 기준</td></tr>
+<tr><td><code style="white-space:nowrap;overflow-wrap:normal;">hard_deny</code></td><td>분류기 내부에서 사용자 의도나 allow 예외로 해제하지 않는 차단 기준</td></tr>
+</tbody></table>
+<div class="step-title"><span class="step-no">2</span>샘플 파일과 deny-rule.json 준비</div>
+<p class="body">전용 실습 폴더에 <code class="inline">work</code>와 <code class="inline">export</code>를 만듭니다. 준비할 파일은 <strong>sample.txt와 deny-rule.json 두 개</strong>입니다. Claude는 <strong>work에서 시작</strong>하며, 샘플은 개인정보나 비밀값이 없는 일반 텍스트입니다.</p>
+<div class="code-wrap output" data-code-kind="output"><div class="code-head"><span class="code-label">생성되는 실습 구조</span></div>
+<pre id="workshop-code-a3-layout"><code>~/claude-lab/a3-copy/
+├── work/                  ← Claude의 시작 작업 폴더
+│   ├── sample.txt          ← 복사 대상
+│   └── deny-rule.json      ← --settings로 읽을 설정
+└── export/                ← 작업 폴더 밖의 복사 목적지</code></pre></div>
+<p class="body">아래 코드는 두 파일을 준비하고, 재실행 시 이전 실습의 <code class="inline">local-copy.txt</code>와 <code class="inline">export/copied.txt</code>만 정리합니다.</p>
+<div class="code-wrap" data-code-kind="terminal"><div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 실습 준비</span><button aria-label="Terminal, 실습 준비 복사" class="ws-copy" data-copy-code="workshop-code-a3-setup" data-copy-label="Terminal, 실습 준비 복사" type="button">복사</button></div>
+<pre id="workshop-code-a3-setup"><code>mkdir -p ~/claude-lab/a3-copy/work ~/claude-lab/a3-copy/export &amp;&amp;
+cd ~/claude-lab/a3-copy/work &amp;&amp;
+rm -f -- local-copy.txt ../export/copied.txt &amp;&amp;
+printf &#x27;A3 copy policy sample.\nNo personal or secret data.\n&#x27; &gt; sample.txt &amp;&amp;
+cat &gt; deny-rule.json &lt;&lt;&#x27;JSON&#x27;
+{
+  &quot;permissions&quot;: {
+    &quot;defaultMode&quot;: &quot;auto&quot;
+  },
+  &quot;sandbox&quot;: {
+    &quot;enabled&quot;: false
+  },
+  &quot;autoMode&quot;: {
+    &quot;classifyAllShell&quot;: true,
+    &quot;hard_deny&quot;: [
+      &quot;$defaults&quot;,
+      &quot;작업 폴더 외부 복사 금지: 이 세션을 시작한 작업 폴더(work) 안의 파일을 그 폴더 밖으로 복사하는 행위를 금지한다. 사용자가 명시적으로 요청해도 허용하지 않는다. 파일 내용 읽기와 시작 작업 폴더 안에서의 복사는 이 금지 규칙의 대상이 아니다.&quot;
+    ]
   }
-}</code></pre>
-</div>
-</div>
-</div>
-<div class="step-title"><span class="step-no">1</span>모드 전환</div>
-<p class="body">세션 중 <strong>Shift+Tab</strong>으로 모드를 순환 전환합니다. 입력창 아래 표시가 <code class="inline">accept edits</code>로 바뀔 때까지 누르세요.
-  세션 한정이라 설정 파일은 수정하지 않습니다. 영구 적용은 <code class="inline">permissions.defaultMode</code>로 하며, 그건 슈퍼랩 PREP에서 씁니다.</p>
-<div class="step-title"><span class="step-no">2</span>안 바뀌는 것 두 가지</div>
-<div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-017" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-017"><code>npm test를 실행한 다음, curl https://example.com 도 실행해 주세요</code></pre>
-</div>
-<div class="code-wrap output" data-code-kind="output">
-<div class="code-head"><span class="code-label">관찰 포인트</span><button aria-label="관찰 포인트 복사" class="ws-copy" data-copy-code="workshop-code-018" data-copy-label="관찰 포인트 복사" type="button">복사</button></div>
-<pre id="workshop-code-018"><code>npm test  → 무확인 실행 <span class="cmt"># allow 규칙, 모드와 무관</span>
-curl      → 차단        <span class="cmt"># deny 규칙은 모든 모드에서 유효</span>
-<span class="cmt"># 모드를 올려도 거부 메시지와 대안 제안까지 그대로입니다</span></code></pre>
-</div>
-<div class="step-title"><span class="step-no">3</span>규칙이 모드를 이긴다</div>
-<div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-019" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-019"><code>src/greet.js에 farewell(name) 함수를 추가해 주세요</code></pre>
-</div>
-<p class="body">acceptEdits인데도 <strong>승인 프롬프트가 그대로 뜹니다.</strong>
-<code class="inline">ask: Edit(**)</code>가 명시적으로 매칭되므로 모드의 기본 동작까지 내려가지 않기 때문입니다.
-  모드는 <strong>규칙에 걸리지 않은 호출만</strong> 처리합니다.</p>
-<div class="callout warn">
-<span class="co-title">모드가 넘지 못하는 선</span>
-<code class="inline">deny</code> 규칙은 모든 모드에서 적용되고, <strong>명시적 ask 규칙은 <code class="inline">bypassPermissions</code>에서도 프롬프트를 띄웁니다.</strong>
-<code class="inline">/</code>나 홈 디렉토리를 대상으로 하는 <code class="inline">rm</code>은 회로 차단기로 남아 있습니다.
-    PreToolUse 훅이 allow를 반환해도 deny/ask 규칙을 넘지 못합니다(Part 3).
-    즉 <strong>모드는 기본값을, 규칙은 예외를 정하며, 규칙이 모드를 이깁니다.</strong>
-</div>
+}
+JSON</code></pre></div>
+<p class="body" id="a3-sandbox-note">Auto 분류기의 차단을 별도로 확인하기 위해, 이번 실습 세션에서만 샌드박스를 끕니다.</p>
 <div class="callout tip">
-<span class="co-title">조직에서는 모드 자체를 잠급니다</span>
-<code class="inline">permissions.disableBypassPermissionsMode</code>와 <code class="inline">permissions.disableAutoMode</code>를 <code class="inline">"disable"</code>로 두면
-    해당 모드가 Shift+Tab 순환에서 사라지고 <code class="inline">--permission-mode</code>도 거부됩니다. 관리 설정(Part 3)에 두면 사용자가 되돌릴 수 없습니다.
-    auto 모드의 판단 기준을 바꾸는 <code class="inline">autoMode</code> 키는 <strong>user / --settings / 관리 설정에서만</strong> 읽히고 프로젝트와 local 설정에서는 무시됩니다.
-    클론한 저장소가 분류기 기준을 손댈 수 없게 한 설계입니다.
-  </div>
-<div class="callout tip">
-<span class="co-title">변경 안내, auto mode가 기본이 되었습니다 (2026.08+)</span>
-    신규 환경의 기본 permission mode는 이제 <strong>auto</strong>이며, <code class="inline">/permissions</code>에
-    auto mode 분류 규칙을 보고 고치는 <strong>Auto 탭</strong>이 생겼습니다(v2.1.246+).
-    또한 프로젝트 설정(<code class="inline">.claude/settings.json</code>)의
-    <code class="inline">defaultMode: "bypassPermissions"</code>는 무시됩니다. 사용자 또는 관리 설정에서만 지정할 수 있습니다(v2.1.257+).
-  </div>
-<div class="checkpoint">
-<div class="cp-title">CHECKPOINT</div>
-<label class="cp-item"><input data-cp="a3a" type="checkbox"/><span>모드를 올려도 deny 차단과 allow 무확인 실행이 그대로인 것을 확인했습니다</span></label>
-<label class="cp-item"><input data-cp="a3b" type="checkbox"/><span>명시적 ask 규칙이 모드보다 우선한다는 것을 관찰했습니다</span></label>
+<span class="co-title">classifyAllShell의 범위는 셸 명령입니다</span>
+<code class="inline">classifyAllShell: true</code>는 Auto 모드에서 Bash·PowerShell allow 규칙의 사전 허용을 중단하고 심사 대상 셸 명령을 분류기로 보냅니다. 명시적 deny·ask는 먼저 적용됩니다.
+Read·Write·Edit까지 모두 분류기로 보내는 설정은 아닙니다. Bash의 거부와 후속 도구의 처리, 최종 파일 결과를 각각 확인하세요.
+<code class="inline">autoMode</code>는 Project·Local 설정 파일에서는 읽지 않으므로 이번 실습은 <code class="inline">--settings</code>로 전달합니다.
 </div>
-</section>
+<p class="body">추가한 규칙은 이 세션을 시작한 <strong>work 폴더</strong>를 기준으로 합니다. <code class="inline">"$defaults"</code>는 hard_deny의 내장 기준을 유지합니다. <code class="inline">deny-rule.json</code>을 <code class="inline">--settings</code>로 읽으므로 전역 설정 파일을 편집하지 않습니다.</p>
+
+<div class="step-title"><span class="step-no">3</span>설정 파일로 실행하고 Auto mode 규칙 확인</div>
+<div class="code-wrap" data-code-kind="terminal"><div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, Claude 실행</span><button aria-label="Terminal, Claude 실행 복사" class="ws-copy" data-copy-code="workshop-code-a3-policy-start" data-copy-label="Terminal, Claude 실행 복사" type="button">복사</button></div>
+<pre id="workshop-code-a3-policy-start"><code>claude --settings ./deny-rule.json</code></pre></div>
+<p class="body">Auto 모드로 시작했는지 확인하고 다음을 입력합니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt"><div class="code-head"><span class="code-label">Claude, 규칙 확인</span><button aria-label="Claude, 규칙 확인 복사" class="ws-copy" data-copy-code="workshop-code-a3-permissions" data-copy-label="Claude, 규칙 확인 복사" type="button">복사</button></div>
+<pre id="workshop-code-a3-permissions"><code>/permissions</code></pre></div>
+<p class="body"><strong>Auto mode</strong> 탭에서 <strong>Hard deny · flag</strong> 항목을 찾고, 실제로 로드된 규칙과 출처를 확인합니다.</p>
+
+<table class="tbl" id="a3-rule-check-table"><thead><tr><th scope="col">확인할 항목</th><th scope="col">의미</th></tr></thead><tbody>
+<tr><td>Hard deny의 Built-in rules</td><td><code>$defaults</code>로 내장 기본 기준을 유지했는지 확인</td></tr>
+<tr><td>Hard deny · flag의 외부 복사 금지 문장</td><td><code>deny-rule.json</code>의 커스텀 규칙이 로드됐는지 확인</td></tr>
+<tr><td>From the --settings flag</td><td>규칙을 읽은 출처가 이번 실행의 <code>--settings</code>인지 확인</td></tr>
+</tbody></table>
+<p class="body">항목을 열어 규칙 원문과 출처를 확인합니다. 이 확인은 <strong>규칙 등록 확인</strong>이며, 실제 작업 결과는 다음 단계에서 별도로 살펴봅니다.</p>
+<div class="step-title"><span class="step-no">4</span>파일 요청과 실제 도구 호출 확인</div>
+<p class="body">다음 요청을 <strong>하나씩</strong> 입력하고 응답을 확인합니다.</p>
+
+<div class="code-wrap prompt" data-code-kind="prompt"><div class="code-head"><span class="code-label">Claude, 폴더 내부 복사</span><button aria-label="Claude, 폴더 내부 복사 복사" class="ws-copy" data-copy-code="workshop-code-a3-policy-inside" data-copy-label="Claude, 폴더 내부 복사 복사" type="button">복사</button></div>
+<pre id="workshop-code-a3-policy-inside"><code>Bash 도구로 cp sample.txt local-copy.txt를 실행해 주세요.</code></pre></div>
+<div class="code-wrap prompt" data-code-kind="prompt"><div class="code-head"><span class="code-label">Claude, 폴더 외부 복사</span><button aria-label="Claude, 폴더 외부 복사 복사" class="ws-copy" data-copy-code="workshop-code-a3-policy-outside" data-copy-label="Claude, 폴더 외부 복사 복사" type="button">복사</button></div>
+<pre id="workshop-code-a3-policy-outside"><code>Bash 도구로 cp sample.txt ../export/copied.txt를 실행해 주세요.</code></pre></div>
+<p class="body">외부 복사 요청이 끝나면 <strong>Ctrl+O</strong>로 도구 호출을 펼칩니다. Bash의 결과만 보지 말고, 이후 <strong>Write 등 다른 도구가 호출됐는지</strong>와 최종 파일 결과를 확인하세요. 추가 도구 사용을 따로 지시할 필요는 없습니다.</p>
+<table class="tbl" id="a3-outcome-table"><thead><tr><th scope="col">직접 확인할 항목</th><th scope="col">기록할 내용</th></tr></thead><tbody>
+<tr><td>Auto mode 탭의 Hard deny · flag</td><td>커스텀 규칙이 세션에 등록됨</td></tr>
+<tr><td>Bash의 <code>Denied by auto mode classifier</code></td><td>해당 Bash 호출이 거부됨</td></tr>
+<tr><td>Write 등 후속 도구의 실행 결과</td><td>다른 도구를 통해 목적지 파일이 생성됐는지 확인</td></tr>
+<tr><td><code>diff</code> 결과와 <code>IDENTICAL</code></td><td>외부 파일 내용이 원본과 같은지 확인</td></tr>
+</tbody></table>
+<div class="callout"><span class="co-title">도구 차단과 최종 파일 결과를 함께 확인합니다</span>하나의 도구 호출 결과만으로 전체 작업의 완료 여부를 판단하지 않습니다. 요청이 끝난 뒤 실제 도구 순서와 최종 파일 생성 여부를 직접 확인하고 기록하세요.</div>
+<div class="step-title"><span class="step-no">5</span>외부 파일 확인</div>
+<div class="code-wrap prompt" data-code-kind="prompt"><div class="code-head"><span class="code-label">Claude, 세션 종료</span><button aria-label="Claude, 세션 종료 복사" class="ws-copy" data-copy-code="workshop-code-a3-policy-exit" data-copy-label="Claude, 세션 종료 복사" type="button">복사</button></div>
+<pre id="workshop-code-a3-policy-exit"><code>/exit</code></pre></div>
+<div class="code-wrap" data-code-kind="terminal"><div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 외부 파일 확인</span><button aria-label="Terminal, 외부 파일 확인 복사" class="ws-copy" data-copy-code="workshop-code-a3-result-check" data-copy-label="Terminal, 외부 파일 확인 복사" type="button">복사</button></div>
+<pre id="workshop-code-a3-result-check"><code>ls -l ../export/
+if [ -f ../export/copied.txt ]; then
+  diff sample.txt ../export/copied.txt &amp;&amp;
+  echo &quot;IDENTICAL&quot;
+else
+  echo &quot;외부 파일 없음&quot;
+fi</code></pre></div>
+<p class="body"><code class="inline">copied.txt</code>가 있고 <code class="inline">IDENTICAL</code>이 출력되면 <strong>외부에 원본과 같은 파일이 생성된 것</strong>입니다. 파일이 없으면 앞의 도구 결과와 함께 거절·차단 여부를 확인합니다.</p>
+
+
+<p class="body">공식 문서: <a href="https://code.claude.com/docs/en/auto-mode-config" target="_blank" rel="noopener noreferrer">Auto 분류기 설정</a></p>
+<div class="checkpoint"><div class="cp-title">CHECKPOINT</div>
+<label class="cp-item"><input data-cp="a3a" type="checkbox"/><span>기본 모드와 Auto 기준의 네 필드를 이해했습니다</span></label>
+<label class="cp-item"><input data-cp="a3b" type="checkbox"/><span>deny-rule.json을 --settings로 읽어 Auto 모드로 시작했습니다</span></label>
+<label class="cp-item"><input data-cp="a3c" type="checkbox"/><span>Auto mode 탭에서 커스텀 Hard deny 규칙과 --settings 출처를 확인했습니다</span></label>
+<label class="cp-item"><input data-cp="a3d" type="checkbox"/><span>Bash 차단 여부와 Write 등 후속 도구의 호출 결과를 확인했습니다</span></label>
+<label class="cp-item"><input data-cp="a3e" type="checkbox"/><span>최종 외부 파일과 원본을 비교하고, 도구 차단과 작업 완료 여부를 구분했습니다</span></label>
+</div></section>
 <!-- ================= Task A4 ================= -->
 <section class="task" id="a4">
 <div class="task-head">
@@ -542,20 +596,17 @@ curl      → 차단        <span class="cmt"># deny 규칙은 모든 모드에�
 <span class="time-badge">10분</span>
 </div>
 <p class="task-goal">
-    Claude가 파일을 수정할 때마다 <strong>자동으로 구문 검사</strong>가 도는 Hook을 답니다.<br/>
-    Ch3의 PreToolUse가 실행 전 차단이라면, PostToolUse는 <strong>실행 후 피드백</strong>입니다.<br/>
-    exit 2의 stderr가 Claude에게 전달되어 <strong>스스로 고치는 루프</strong>가 만들어지는 것이 핵심입니다.
-  </p>
+Edit·Write로 파일을 편집한 뒤 <strong>구문 검사</strong>를 실행하는 Hook을 구성합니다.
+PreToolUse가 실행 전 제어라면, PostToolUse는 실행 후 검사와 피드백입니다.
+등록·스크립트 단독 검사·실제 편집 이후의 결과를 나누어 확인합니다.
+</p>
 <details class="theory" open="">
 <summary>이론 브리핑 - Hook이란 무엇인가</summary>
 <div class="sol-body">
 <p class="body">
-        CLAUDE.md에 "파일을 수정하면 반드시 검사를 돌려라"라고 적어도, 따를지는 <strong>모델의 선택</strong>입니다.
-        지시는 확률적이라 실행이 생략될 수 있고, 컴팩션과 세션 리셋에서 소실됩니다.
-        Hook은 그 반대편에 있습니다. 모델에게 부탁하는 지시가 아니라
-        <strong>Claude Code 런타임이 수명주기 이벤트마다 예외 없이 실행하는 핸들러</strong>입니다.
-        "반드시"가 필요한 규칙은 지시가 아니라 훅에 둡니다.
-      </p>
+CLAUDE.md는 모델이 해석하는 지침이고, Hook은 정해진 이벤트와 조건에 맞을 때 런타임이 호출하는 처리입니다.
+이번 command Hook은 스크립트로 검사 결과를 정합니다. 등록만 확인하지 말고 실제 이벤트에서 스크립트가 실행됐는지도 확인하세요.
+</p>
 <p class="body">
         핸들러 타입은 다섯 가지입니다. <code class="inline">command</code>(셸 명령, 기본), <code class="inline">http</code>(POST 전송), <code class="inline">mcp_tool</code>(MCP 도구 호출), <code class="inline">prompt</code>(단발 LLM 판정), <code class="inline">agent</code>(서브에이전트 검증).
         이 랩은 <code class="inline">command</code>만 씁니다.
@@ -566,10 +617,10 @@ curl      → 차단        <span class="cmt"># deny 규칙은 모든 모드에�
       </p>
 <div class="code-wrap output" data-code-kind="output">
 <div class="code-head"><span class="code-label">Lifecycle - 세 개의 중첩 주기</span><button aria-label="Lifecycle - 세 개의 중첩 주기 복사" class="ws-copy" data-copy-code="workshop-code-020" data-copy-label="Lifecycle - 세 개의 중첩 주기 복사" type="button">복사</button></div>
-<pre id="workshop-code-020"><code><span class="cmt">세션당 1회         턴마다 반복 ↺              도구 호출마다 반복 ↺</span>
-SessionStart → [ UserPromptSubmit → ( <span class="hl">PreToolUse</span> → 도구 실행 → <span class="hl">PostToolUse</span> ) → Stop ] → SessionEnd
-<span class="cmt">                                      ▲ 실행 전 차단이 가능한          ▲ 이 랩이 붙는 자리 - </span>
-<span class="cmt">                                        유일한 경계                      실행 후 피드백</span></code></pre>
+<pre id="workshop-code-020"><code>세션 시작·재개       사용자 요청마다 반복 ↺       도구 호출마다 반복 ↺
+SessionStart → [ UserPromptSubmit → ( PreToolUse → 도구 실행 → PostToolUse ) → Stop ] → SessionEnd
+                                      실행 전 검사·제어           성공한 도구 실행 뒤 검사·피드백
+# 한 턴에 여러 도구를 호출할 수 있고, 도구를 호출하지 않는 턴도 있습니다.</code></pre>
 </div>
 <details style="margin:12px 0 4px; border:1px solid var(--line); border-radius:8px; background:var(--bg-code);">
 <summary style="cursor:pointer; padding:10px 14px; color:var(--muted); font-weight:700; font-size:13px;">이벤트 카탈로그 - 전체 훅 이벤트</summary>
@@ -590,7 +641,7 @@ SessionStart → [ UserPromptSubmit → ( <span class="hl">PreToolUse</span> →
 </div>
 </details>
 <div class="step-title"><span class="step-no">1</span>settings.json에 등록</div>
-<p class="body">A1의 팀 설정에 hooks 블록을 더해 재작성합니다. hooks 블록은 <strong>3단 중첩</strong>입니다. <code class="inline">"PostToolUse"</code>가 ① 이벤트(어느 수명주기 지점에서), <code class="inline">"matcher": "Edit|Write"</code>가 ② 매처(어떤 대상으로 좁혀서), 안쪽 <code class="inline">hooks</code> 배열이 ③ 핸들러(무엇을 실행할지)입니다. 경로는 <code class="inline">$CLAUDE_PROJECT_DIR</code>로 참조해 어디서 열어도 동작하게 합니다.</p>
+<p class="body">아래 명령은 이 랩의 팀 설정 전체를 재작성합니다. 별도로 추가한 설정이 있으면 먼저 확인하세요. A1의 팀 설정에 hooks 블록을 추가합니다. hooks 블록은 <strong>3단 중첩</strong>입니다. <code class="inline">"PostToolUse"</code>가 ① 이벤트(어느 수명주기 지점에서), <code class="inline">"matcher": "Edit|Write"</code>가 ② 매처(어떤 대상으로 좁혀서), 안쪽 <code class="inline">hooks</code> 배열이 ③ 핸들러(무엇을 실행할지)입니다. 경로는 <code class="inline">$CLAUDE_PROJECT_DIR</code>로 참조해 어디서 열어도 동작하게 합니다.</p>
 <p class="body"><strong>매처의 <code class="inline">Write</code>는 유효합니다.</strong> 권한 규칙에서 <code class="inline">Write(경로)</code>는 참조되지 않아 시작 시 경고가 뜨지만(그래서 A1에서 <code class="inline">Edit(**)</code>만 씁니다), 훅 매처는 A2의 권한 패턴과 다른 매칭 시스템입니다. 도구 이름의 <strong>정확 문자열</strong> 비교이고 <code class="inline">|</code>는 리스트 구분이며, <code class="inline">.*</code> 같은 문자가 섞일 때만 정규식으로 평가됩니다. 그래서 <code class="inline">Edit|Write</code>가 정상입니다.</p>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-021" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
@@ -665,25 +716,19 @@ EOF
 chmod +x ~/claude-lab/ch4/.claude/hooks/post-check.sh
 echo "Hook 스크립트 준비 완료"</code></pre>
 <div class="hover-tip" id="stdin-tip" style="top:42px;">
-<div class="tip-title">stdin 페이로드 - 이벤트 데이터는 인자(argv)가 아니라 stdin으로 들어오는 JSON 전체입니다 (http 타입이면 POST 본문)</div>
+<div class="tip-title">런타임 입력 JSON — command Hook의 stdin으로 전달됩니다. 아래는 스크립트에 필요한 필드만 발췌한 예시입니다.</div>
 <div class="code-wrap output" data-code-kind="output" style="margin:0;"><div class="code-head"><button aria-label="코드 복사" class="ws-copy" data-copy-code="workshop-code-023" data-copy-label="코드 복사" type="button">복사</button></div>
 <pre id="workshop-code-023" style="margin:0;"><code>{
-  "session_id": "abc123",           <span class="cmt"># ── 공통 필드: 모든 이벤트가 받음</span>
-  "transcript_path": "~/.claude/projects/…/….jsonl",
-  "cwd": "/home/dev/claude-lab/ch4",
-  "permission_mode": "acceptEdits",
   "hook_event_name": "PostToolUse",
-  "tool_name": "Edit",              <span class="cmt"># ── 도구 이벤트 추가 필드</span>
-  "tool_input": {                   <span class="cmt">#    도구마다 다름:</span>
-    "file_path": "src/greet.js",    <span class="cmt">#    Edit  → file_path, new_string</span>
-    "new_string": "…"               <span class="cmt">#    Write → file_path, content</span>
-  },                                <span class="cmt">#    Bash  → command</span>
-  "tool_response": { "…": "…" },    <span class="cmt"># PostToolUse 한정 - 도구 실행 결과</span>
-  "tool_use_id": "toolu_01…"
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "/home/user/claude-lab/ch4/src/greet.js"
+  }
 }</code></pre>
 </div>
 </div>
 </div>
+<p class="body">설정 JSON은 사용자가 등록하고, 입력 JSON은 이벤트가 발생할 때 런타임이 전달합니다. 스크립트는 <code class="inline">tool_input.file_path</code>를 읽고 JS·MJS 파일에 <code class="inline">node --check</code>를 실행합니다.</p>
 <div class="step-title"><span class="step-no">3</span>스크립트 단독 검증 (세션 밖)</div>
 <p class="body">세션에 붙이기 전에 스크립트만 먼저 검증합니다. Hook 디버깅의 기본기입니다.</p>
 <div class="code-wrap" data-code-kind="terminal">
@@ -700,26 +745,31 @@ echo '{"tool_input":{"file_path":"/tmp/broken.js"}}' | .claude/hooks/post-check.
 unset CLAUDE_PROJECT_DIR</code></pre>
 </div>
 <details class="theory" open="">
-<summary>이론 브리핑 - 종료 코드, 훅의 결정 계약</summary>
+<summary>종료 코드와 사후 피드백</summary>
 <div class="sol-body">
-<p class="body">
-        방금 단독 검증에서 exit 0과 exit 2를 눈으로 확인했습니다. 종료 코드는 훅이 런타임에 내리는 <strong>결정</strong>입니다:
-      </p>
+<p class="body">이 스크립트는 종료 코드와 stderr로 검사 결과를 전달합니다. 오류를 찾는 것은 스크립트이고, 후속 수정을 판단하는 것은 Claude입니다.</p>
 <table class="tbl">
-<tr><th>종료 코드</th><th>의미</th><th>Claude Code의 처리</th></tr>
-<tr><td>exit 0</td><td>결정 없음 (기권)</td><td>정상 흐름으로 위임 - 침묵은 승인이 아니라 기권입니다. stdout은 JSON 결정으로 파싱을 시도하며, 대부분의 이벤트에서 Claude에게 보이지 않습니다 (UserPromptSubmit, SessionStart만 컨텍스트로 주입)</td></tr>
-<tr><td>exit 2</td><td>차단 신호</td><td>stderr가 Claude에게 전달됩니다. PreToolUse면 호출 자체를 차단하고, PostToolUse는 도구가 이미 실행된 뒤라 차단 대신 <strong>사후 피드백</strong>이 됩니다. 이 랩의 자가 수정 루프가 정확히 이 경로입니다</td></tr>
-<tr><td>exit 1, 기타</td><td>고장 (논블로킹)</td><td>오류로만 표시하고 <strong>실행은 계속</strong>됩니다 - 차단이 아닙니다</td></tr>
+<tr><th>종료 코드</th><th>이번 실습에서 확인할 동작</th></tr>
+<tr><td>exit 0</td><td>스크립트 정상 종료. 별도 결정 출력이 없으면 정상 흐름을 계속합니다. 다른 Hook은 stdout의 구조화된 JSON으로 추가 결정을 전달할 수 있습니다.</td></tr>
+<tr><td>exit 2</td><td>PreToolUse에서는 실행 전 차단에 사용합니다. 이번 PostToolUse에서는 이미 실행된 도구를 되돌리지 않고 <strong>stderr를 사후 피드백</strong>으로 전달합니다.</td></tr>
+<tr><td>exit 1·기타</td><td>유효한 결정 출력이 없는 일반 오류는 대부분 비차단 오류로 처리됩니다. 이벤트별 예외와 출력 계약은 공식 문서에서 확인합니다.</td></tr>
 </table>
-<div class="callout warn">
-<span class="co-title">exit 1은 차단이 아닙니다</span>
-        유닉스 관용대로 "실패 = exit 1"을 쓰면, 훅이 고장난 날 <strong>보호가 조용히 사라집니다</strong>. 정책을 강제하려면 반드시 exit 2.
-        그리고 stdout JSON으로 내리는 정밀 결정(<code class="inline">permissionDecision</code> 등)은
-        <strong>exit 0에서만 파싱</strong>되므로 exit 2와 혼용하지 마세요. 세밀한 결정 형식은 Ch3 자료를 참조하세요.
-      </div>
+<p class="body">구문 검사 통과는 기능 테스트 통과와 다릅니다. 사전 준비의 <code class="inline">test.js</code>도 PASS·FAIL 문자열을 출력하는 예제이므로, FAIL 출력과 프로세스 실패 종료 코드를 구분하세요.</p>
 </div>
 </details>
 <div class="step-title"><span class="step-no">4</span>세션에서 동작 확인</div>
+<p class="body">A3에서 Auto 세션을 종료했으므로 <code class="inline">ch4</code>에서 새 세션을 엽니다. 이번에는 A3의 <code class="inline">--settings</code> 파일을 전달하지 않습니다.</p>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label">Terminal · ch4에서 새 세션 시작</span><button aria-label="Terminal · ch4에서 새 세션 시작 복사" class="ws-copy" data-copy-code="ch4-a4-start" data-copy-label="Terminal · ch4에서 새 세션 시작 복사" type="button">복사</button></div>
+<pre id="ch4-a4-start"><code>cd ~/claude-lab/ch4
+claude</code></pre>
+</div>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력 · Hook 등록 확인</span><button aria-label="Claude 세션 입력 · Hook 등록 확인 복사" class="ws-copy" data-copy-code="ch4-a4-hooks" data-copy-label="Claude 세션 입력 · Hook 등록 확인 복사" type="button">복사</button></div>
+<pre id="ch4-a4-hooks"><code>/hooks</code></pre>
+</div>
+<p class="body">PostToolUse와 <code class="inline">Edit|Write</code> 등록을 확인하세요. 다음 요청 뒤 실제 사용 도구도 확인합니다. Bash로 파일을 수정했다면 이 Hook의 실행 검증으로 보지 않습니다.</p>
+
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-025" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
 <pre id="workshop-code-025"><code>src/greet.js에 goodbye(name) 함수를 추가해 주세요</code></pre>
@@ -728,175 +778,213 @@ unset CLAUDE_PROJECT_DIR</code></pre>
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 로그 확인</span><button aria-label="Terminal, 로그 확인 복사" class="ws-copy" data-copy-code="workshop-code-026" data-copy-label="Terminal, 로그 확인 복사" type="button">복사</button></div>
 <pre id="workshop-code-026"><code>cat ~/claude-lab/ch4/.hook.log</code></pre>
 </div>
-<p class="body">
-    편집 시각과 파일 경로가 기록되어 있으면 Hook이 동작한 것입니다. 세션에서 <code class="inline">/hooks</code>를 입력하면
-    등록된 Hook 구성을 확인할 수 있습니다. 만약 Claude가 구문 오류가 있는 코드를 저장하면
-    stderr 메시지가 Claude에게 전달되어 <strong>다음 턴에서 스스로 수정</strong>합니다.
-  </p>
+<p class="body">실제 Edit·Write 호출과 그 편집 시각·파일 경로에 해당하는 <strong>새 로그</strong>를 함께 확인합니다. 구문 오류 피드백이 전달됐다면 후속 수정과 재검사 결과도 확인하세요.</p>
+<div class="callout tip">
+<span class="co-title">등록·실행·검사 통과는 별도로 확인합니다</span>
+<code class="inline">/hooks</code>는 등록 상태, 단독 테스트는 스크립트 동작, 실제 편집의 새 로그는 이벤트에서 로그 코드까지 실행됐음을 보여줍니다.
+단독 테스트도 같은 로그 파일을 사용하고 로그는 검사 전에 기록됩니다. 로그 파일의 존재만으로 검사 통과나 수정 완료를 판단하지 마세요.
+PostToolUse는 이미 저장된 파일을 자동으로 되돌리지 않습니다.
+</div>
 <div class="callout tip">
 <span class="co-title">Permissions vs Hooks, 언제 무엇을</span>
 <strong>도구/경로 단위 통제</strong>는 permissions(선언적, 빠름), <strong>내용 검사나 실행 후 자동화</strong>는 Hooks(스크립트, 유연).
     실전 조합: deny로 큰 금지선 → PreToolUse로 내용 기반 DLP(Ch3) → PostToolUse로 lint/format/로그.
     프로덕션에서는 이 자리에 <code class="inline">prettier --write</code>나 <code class="inline">eslint --fix</code>를 넣는 것이 auto-format 패턴입니다.
   </div>
-<div class="step-title"><span class="step-no">5</span>모델 전환을 지키는 훅, PreModelSwitch (v2.1.251+)</div>
-<p class="body">
-    Hook 이벤트에 <strong>PreModelSwitch / PostModelSwitch</strong>가 추가되었습니다.
-    모델 전환을 <strong>차단하거나 확인을 요구하거나 주석을 남길 수 있어</strong>, 비용이 큰 모델로의 무심한 전환을 팀 규칙으로 막을 수 있습니다.
-    A4에서 만든 것과 같은 구조로 아래를 <code class="inline">.claude/settings.json</code>에 추가하고
-    세션에서 <code class="inline">/model</code>을 실행해 훅이 발화하는지 확인해 보세요.
-  </p>
+<div class="step-title"><span class="step-no">5</span>모델 전환 안내 Hook, PreModelSwitch (v2.1.251+)</div>
+<p class="body">다음 예제는 모델 전환 전에 사용자에게 안내를 표시합니다. <code class="inline">systemMessage</code> JSON을 stdout으로 반환하며, 모델 전환을 차단하는 결정은 포함하지 않습니다.</p>
+<p class="body">아래는 추가할 JSON 구조입니다. 실제 적용은 이어지는 <strong>Terminal 명령</strong>을 다른 터미널에서 실행하세요. 기존 설정과 PostToolUse Hook을 유지하며, 이전 stderr 안내 예제가 있으면 교체합니다.</p>
 <div class="code-wrap" data-code-kind="file">
-<div class="code-head"><span class="code-label">.claude/settings.json에 추가</span><button aria-label=".claude/settings.json에 추가 복사" class="ws-copy" data-copy-code="workshop-code-027" data-copy-label=".claude/settings.json에 추가 복사" type="button">복사</button></div>
+<div class="code-head"><span class="code-label">.claude/settings.json · 추가할 JSON 예시</span><button aria-label=".claude/settings.json에 추가 복사" class="ws-copy" data-copy-code="workshop-code-027" data-copy-label=".claude/settings.json에 추가 복사" type="button">복사</button></div>
 <pre id="workshop-code-027"><code>{
   "hooks": {
-    "PreModelSwitch": [{
-      "hooks": [{
-        "type": "command",
-        "command": "echo '모델 전환 감지, 전환 사유를 확인하세요' &gt;&amp;2"
-      }]
-    }]
+    "PreModelSwitch": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\":\"모델 전환 감지, 전환 사유를 확인하세요\"}'"
+          }
+        ]
+      }
+    ]
   }
 }</code></pre>
 </div>
+<p class="body">설정 병합 명령에는 Python 3가 필요합니다. <code class="inline">python3 --version</code>으로 확인하세요. 실행 대상은 위에서 만든 ch4 설정 파일입니다.</p>
+<details class="solution"><summary>Terminal 적용 명령 열기 · 기존 설정 보존</summary><div class="sol-body">
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label">Terminal · 다른 창에서 설정 병합</span><button aria-label="Terminal · 다른 창에서 설정 병합 복사" class="ws-copy" data-copy-code="ch4-a4-merge-model-hook" data-copy-label="Terminal · 다른 창에서 설정 병합 복사" type="button">복사</button></div>
+<pre id="ch4-a4-merge-model-hook"><code>python3 - "${CH4_SETTINGS_FILE:-$HOME/claude-lab/ch4/.claude/settings.json}" &lt;&lt;'PY'
+import json
+import stat
+import sys
+import tempfile
+from pathlib import Path
+
+path = Path(sys.argv[1]).expanduser()
+settings = json.loads(path.read_text(encoding="utf-8"))
+old = "echo '모델 전환 감지, 전환 사유를 확인하세요' &gt;&amp;2"
+new = "echo '{\"systemMessage\":\"모델 전환 감지, 전환 사유를 확인하세요\"}'"
+groups = settings.setdefault("hooks", {}).setdefault("PreModelSwitch", [])
+found = False
+for group in groups:
+    for handler in group.get("hooks", []):
+        if handler.get("type") == "command":
+            if handler.get("command") == old:
+                handler["command"] = new
+            if handler.get("command") == new:
+                found = True
+if not found:
+    groups.append({"hooks": [{"type": "command", "command": new}]})
+
+temporary = None
+try:
+    with tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", dir=path.parent,
+        prefix=".settings-", suffix=".tmp", delete=False
+    ) as output:
+        temporary = Path(output.name)
+        output.write(json.dumps(settings, ensure_ascii=False, indent=2) + "\n")
+    temporary.chmod(stat.S_IMODE(path.stat().st_mode))
+    temporary.replace(path)
+finally:
+    if temporary is not None and temporary.exists():
+        temporary.unlink()
+print("PreModelSwitch 안내 Hook 반영 완료:", path)
+PY</code></pre>
+</div>
+</div></details>
+<p class="body">명령 실행 뒤 현재 세션의 <code class="inline">/hooks</code>에서 PreModelSwitch 등록을 확인하고 <code class="inline">/model</code>로 모델을 바꿔 안내가 표시되는지 확인하세요. 등록이 보이지 않으면 ch4에서 세션을 다시 시작합니다.</p>
+<p class="body">공식 문서: <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener noreferrer">Hook 입력·출력과 matcher</a></p>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
 <label class="cp-item"><input data-cp="a4a" type="checkbox"/><span>단독 검증에서 정상 파일 exit 0, 오류 파일 exit 2를 확인했습니다</span></label>
-<label class="cp-item"><input data-cp="a4b" type="checkbox"/><span>세션 편집 후 .hook.log에 기록이 남는 것을 확인했습니다</span></label>
+<label class="cp-item"><input data-cp="a4b" type="checkbox"/><span>실제 Edit·Write 편집의 시각·경로에 해당하는 새 .hook.log 기록을 확인했습니다</span></label>
 </div>
 </section>
 <!-- ================= Task A5 ================= -->
 <section class="task" id="a5">
-<div class="task-head">
-<span class="task-num">TASK A5</span>
-<h2>MCP 서버 연결, 첫 외부 도구</h2>
-<span class="time-badge">10분</span>
-</div>
-<p class="task-goal">
-    인증이 필요 없는 <strong>Claude Code 공식 문서 MCP 서버</strong>를 연결해 add → 상태 확인 → 사용 → 스코프 이해 → 제거의
-    전체 수명주기를 경험합니다.
-  </p>
+<div class="task-head"><span class="task-num">TASK A5</span><h2>MCP 서버 연결, 첫 외부 도구</h2><span class="time-badge">10분</span></div>
+<p class="task-goal">인증이 필요 없는 <strong>Claude Code 공식 문서 MCP 서버</strong>를 연결해 add → 상태 확인 → 사용 → 스코프 이해 → 제거의 전체 수명주기를 경험합니다.</p>
 <div class="step-title"><span class="step-no">1</span>서버 등록과 상태 확인</div>
+<p class="body">A4의 Claude 세션을 종료하고 터미널에서 서버를 등록합니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Terminal, 세션 밖에서 실행</span><button aria-label="Terminal, 세션 밖에서 실행 복사" class="ws-copy" data-copy-code="workshop-code-028" data-copy-label="Terminal, 세션 밖에서 실행 복사" type="button">복사</button></div>
+<div class="code-head"><span class="code-label">Claude 세션 입력 · 터미널로 돌아가기</span><button aria-label="Claude 세션 입력 · 터미널로 돌아가기 복사" class="ws-copy" data-copy-code="ch4-a5-exit-a4" data-copy-label="Claude 세션 입력 · 터미널로 돌아가기 복사" type="button">복사</button></div>
+<pre id="ch4-a5-exit-a4"><code>/exit</code></pre>
+</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label">Terminal · 서버 등록</span><button aria-label="Terminal · 서버 등록 복사" class="ws-copy" data-copy-code="workshop-code-028" data-copy-label="Terminal · 서버 등록 복사" type="button">복사</button></div>
 <pre id="workshop-code-028"><code>cd ~/claude-lab/ch4
-claude mcp add --transport http claude-code-docs https://code.claude.com/docs/mcp
+claude mcp add --transport http --scope local claude-code-docs https://code.claude.com/docs/mcp
 claude mcp list | grep claude-code-docs</code></pre>
 </div>
 <div class="code-wrap output" data-code-kind="output">
-<div class="code-head"><span class="code-label">출력 예시</span><button aria-label="출력 예시 복사" class="ws-copy" data-copy-code="workshop-code-029" data-copy-label="출력 예시 복사" type="button">복사</button></div>
+<div class="code-head"><span class="code-label">연결 상태 출력 예시</span><button aria-label="연결 상태 출력 예시 복사" class="ws-copy" data-copy-code="workshop-code-029" data-copy-label="연결 상태 출력 예시 복사" type="button">복사</button></div>
 <pre id="workshop-code-029"><code>claude-code-docs: https://code.claude.com/docs/mcp (HTTP) - ✔ Connected</code></pre>
 </div>
-<div class="step-title"><span class="step-no">2</span>세션에서 사용, 그리고 defer 확인</div>
-<p class="body">
-    서버를 연결하면 도구 정의가 전부 컨텍스트로 들어올 것 같지만, 그렇지 않습니다.
-    <strong>tool search</strong>(기본 활성)가 세션 시작 시점에는 <strong>도구 이름과 server instructions만</strong>
-    올려 두고, 도구의 상세 정의는 Claude가 실제로 그 도구를 쓰려고 할 때 가져옵니다.
-    그래서 서버를 여러 개 연결해도 컨텍스트가 급격히 줄지 않습니다.
-  </p>
-<p class="body">먼저 아무것도 쓰지 않은 상태의 컨텍스트를 봅니다.
-  all을 붙이면 항목별 상세가 펼쳐집니다.</p>
+<p class="body">Connected는 서버 연결 상태입니다. 실제 도구 호출과 응답 성공은 다음 단계에서 확인합니다.</p>
+<div class="step-title"><span class="step-no">2</span>문서 검색 도구 사용</div>
+<p class="body">새 세션을 열고 서버 도구를 호출합니다. 컨텍스트 변화도 관찰하려면 검색 전에 아래 선택 항목을 열어 기준 화면을 확인하세요.</p>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label">Terminal · 문서 검색 세션 시작</span><button aria-label="Terminal · 문서 검색 세션 시작 복사" class="ws-copy" data-copy-code="ch4-a5-start" data-copy-label="Terminal · 문서 검색 세션 시작 복사" type="button">복사</button></div>
+<pre id="ch4-a5-start"><code>cd ~/claude-lab/ch4
+claude</code></pre>
+</div>
+<details class="theory"><summary>선택 관찰 · 검색 전 컨텍스트</summary><div class="sol-body">
+<p class="body">Tool Search는 필요한 도구 정의를 지연 로드합니다. 적용 여부와 표시는 모델·설정·버전에 따라 다를 수 있습니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-030" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<div class="code-head"><span class="code-label">Claude 세션 입력 · 검색 전 선택 관찰</span><button aria-label="Claude 세션 입력 · 검색 전 선택 관찰 복사" class="ws-copy" data-copy-code="workshop-code-030" data-copy-label="Claude 세션 입력 · 검색 전 선택 관찰 복사" type="button">복사</button></div>
 <pre id="workshop-code-030"><code>/context all</code></pre>
 </div>
 <div class="code-wrap output" data-code-kind="output">
-<div class="code-head"><span class="code-label">출력 예시</span><button aria-label="출력 예시 복사" class="ws-copy" data-copy-code="workshop-code-031" data-copy-label="출력 예시 복사" type="button">복사</button></div>
-<pre id="workshop-code-031"><code>MCP tools, /mcp <span class="hl">(loaded on-demand)</span>
+<div class="code-head"><span class="code-label">Tool Search가 적용된 화면의 예시</span><button aria-label="Tool Search가 적용된 화면의 예시 복사" class="ws-copy" data-copy-code="workshop-code-031" data-copy-label="Tool Search가 적용된 화면의 예시 복사" type="button">복사</button></div>
+<pre id="workshop-code-031"><code>MCP tools, /mcp (loaded on-demand)
 
      Available
      ├ mcp__claude-code-docs__query_docs_filesystem_claude_code_docs
      ├ mcp__claude-code-docs__search_claude_code_docs
      ├ mcp__claude-code-docs__submit_feedback</code></pre>
 </div>
-<p class="body"><strong>loaded on-demand</strong>가 곧 지금 상태입니다.
-  Available 목록에 이름은 다 보이지만, 각 도구의 정의는 아직 컨텍스트에 없습니다.</p>
+<p class="body">사용 가능 목록과 로드된 상세 정의를 구분하세요. 실제 도구 이름·수와 표시 형식은 서버의 현재 상태를 따릅니다.</p>
+</div></details>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-032" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<div class="code-head"><span class="code-label">Claude 세션 입력 · 문서 검색</span><button aria-label="Claude 세션 입력 · 문서 검색 복사" class="ws-copy" data-copy-code="workshop-code-032" data-copy-label="Claude 세션 입력 · 문서 검색 복사" type="button">복사</button></div>
 <pre id="workshop-code-032"><code>claude-code-docs 서버를 사용해서 MCP_TIMEOUT 환경변수가 무엇을 하는지 찾아 주세요</code></pre>
 </div>
-<p class="body">
-    첫 호출에서 새 도구 사용 승인을 요청합니다. 승인하면 출력의 도구 호출에 <strong>서버 이름 라벨</strong>이 붙어,
-    답이 웹 검색이 아닌 MCP 서버에서 왔음을 확인할 수 있습니다.
-  </p>
+<p class="body">권한 규칙과 현재 모드에 따라 도구 사용 승인을 요청할 수 있습니다. <strong>서버 이름이 붙은 실제 도구 호출, 반환 결과, 그 결과에 근거한 답변</strong>을 확인하세요. 연결만 됐거나 호출이 실패한 상태는 검색 완료로 보지 않습니다.</p>
+<details class="theory"><summary>선택 관찰 · 도구 정의의 지연 로드 전후 비교</summary><div class="sol-body">
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-033" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<div class="code-head"><span class="code-label">Claude 세션 입력 · 검색 후 선택 관찰</span><button aria-label="Claude 세션 입력 · 검색 후 선택 관찰 복사" class="ws-copy" data-copy-code="workshop-code-033" data-copy-label="Claude 세션 입력 · 검색 후 선택 관찰 복사" type="button">복사</button></div>
 <pre id="workshop-code-033"><code>/context all</code></pre>
 </div>
-<p class="body">같은 항목을 다시 보세요. <strong>방금 호출한 search 도구만 정의가 실려 토큰이 늘어났고,
-  나머지 두 도구는 여전히 이름만 있습니다.</strong></p>
-<div class="callout tip">
-<span class="co-title">두 화면의 차이가 tool search가 미뤄 둔 분량입니다</span>
-    이름은 항상 로드되고, 정의는 쓸 때만 들어옵니다. 그래서 서버를 하나 늘리는 비용은 작지만 0은 아닙니다.
-    증가폭은 색 격자로는 잘 안 보입니다. 항목별 상세를 펼치는 <code class="inline">all</code>이 필요한 이유입니다.
-    <code class="inline">/mcp</code>로 서버 패널도 열어 보세요.
-  </div>
+<p class="body">검색 전에 확인했다면 새로 로드된 도구 정의가 있는지 비교합니다. 여러 정의가 로드되거나 이미 로드돼 차이가 없을 수도 있습니다. 토큰 증가량이나 도구 수가 예시와 같을 필요는 없습니다.</p>
+<p class="body">Tool Search가 도구 정의를 지연 로드해도 서버 안내·도구 목록과 실제 반환 결과의 비용까지 없어지는 것은 아닙니다. 전체 컨텍스트 차이를 지연 로드된 정의의 분량으로만 해석하지 마세요.</p>
+</div></details>
 <div class="step-title"><span class="step-no">3</span>스코프 승격, 팀과 공유하려면</div>
-<p class="body">
-    방금 등록은 기본값인 <strong>local 스코프</strong>였습니다. 나만, 이 프로젝트만 쓸 수 있습니다. 팀원도 같은 서버를 쓰게 하려면
-    <strong>project 스코프</strong>로 올립니다.
-  </p>
+<p class="body">지금 서버는 local 스코프로 등록돼 나만, 이 프로젝트에서 사용합니다. 팀과 공유하려면 project 스코프로 등록합니다.</p>
 <table class="tbl">
 <tr><th>스코프</th><th>저장 위치</th><th>대상</th></tr>
 <tr><td>local (기본)</td><td>~/.claude.json의 프로젝트 항목</td><td>나만, 이 프로젝트만</td></tr>
-<tr><td>project</td><td>프로젝트 루트 .mcp.json</td><td>저장소를 클론한 팀 전체 (승인 프롬프트)</td></tr>
+<tr><td>project</td><td>프로젝트 루트 .mcp.json</td><td>저장소를 클론한 팀원. 사용 승인 상태는 별도</td></tr>
 <tr><td>user</td><td>~/.claude.json 전역</td><td>나만, 모든 프로젝트</td></tr>
 </table>
+<p class="body">MCP의 local은 <code class="inline">.claude/settings.local.json</code>에 저장되지 않습니다. 같은 이름의 서버는 local &gt; project &gt; user 순으로 <strong>한 정의를 선택</strong>하며 URL·인자를 필드별로 합치지 않습니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Terminal, 세션 밖에서 실행</span><button aria-label="Terminal, 세션 밖에서 실행 복사" class="ws-copy" data-copy-code="workshop-code-034" data-copy-label="Terminal, 세션 밖에서 실행 복사" type="button">복사</button></div>
-<pre id="workshop-code-034"><code>claude mcp remove claude-code-docs
-claude mcp add --transport http --scope project claude-code-docs https://code.claude.com/docs/mcp
-cat .mcp.json
-git status
-claude mcp list | grep claude-code-docs</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력 · 스코프 변경 전 종료</span><button aria-label="Claude 세션 입력 · 스코프 변경 전 종료 복사" class="ws-copy" data-copy-code="ch4-a5-exit-local" data-copy-label="Claude 세션 입력 · 스코프 변경 전 종료 복사" type="button">복사</button></div>
+<pre id="ch4-a5-exit-local"><code>/exit</code></pre>
 </div>
-<p class="body">
-    참고 형식이던 그 JSON이 실제로 생성됩니다. 위치는 <code class="inline">.claude</code> 안이 아니라
-    <strong>프로젝트 루트</strong>이고, <code class="inline">git status</code>에 untracked로 뜹니다 - 커밋하면 팀 전체에 배포됩니다.
-  </p>
-<p class="body">
-    local을 먼저 지운 이유: 같은 이름이 여러 스코프에 있으면 <strong>local &gt; project &gt; user 순으로 항목이
-    통째로 이기고 필드 병합은 없습니다.</strong> local 등록이 남아 있으면 팀 설정을 고쳐도 내 화면은 안 바뀝니다.
-    stdio 서버(로컬 프로세스)는 <code class="inline">claude mcp add 이름 -- npx -y 패키지명</code> 형식으로 등록합니다.
-  </p>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label">Terminal · project 스코프로 등록</span><button aria-label="Terminal · project 스코프로 등록 복사" class="ws-copy" data-copy-code="workshop-code-034" data-copy-label="Terminal · project 스코프로 등록 복사" type="button">복사</button></div>
+<pre id="workshop-code-034"><code>cd ~/claude-lab/ch4 &amp;&amp;
+claude mcp remove --scope local claude-code-docs &amp;&amp;
+claude mcp add --transport http --scope project claude-code-docs https://code.claude.com/docs/mcp &amp;&amp;
+cat .mcp.json
+git status</code></pre>
+</div>
+<p class="body"><code class="inline">.mcp.json</code>이 프로젝트 루트에 생성됩니다. 이 파일을 커밋하면 서버 정의를 팀과 공유합니다. local을 먼저 제거한 이유는 같은 이름의 local 정의가 project보다 우선하기 때문입니다. stdio 서버는 <code class="inline">claude mcp add 이름 -- npx -y 패키지명</code> 형식으로 등록합니다.</p>
 <div class="step-title"><span class="step-no">4</span>팀원의 첫 실행 재현</div>
-<p class="body">
-<code class="inline">.mcp.json</code>은 클론과 함께 도착하는 파일이고 임의 명령을 실행하는 서버를 실어올 수 있습니다.
-    그래서 <strong>저장소는 자기 자신을 승인할 수 없고</strong>, 처음 쓰는 사람에게 승인 프롬프트가 뜹니다.
-    A3의 모드 잠금(프로젝트 설정의 auto 무시)과 같은 원리입니다. 그 팀원의 화면을 지금 내 머신에서 재현합니다.
-  </p>
-<div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Terminal, 세션 밖에서 실행</span><button aria-label="Terminal, 세션 밖에서 실행 복사" class="ws-copy" data-copy-code="workshop-code-035" data-copy-label="Terminal, 세션 밖에서 실행 복사" type="button">복사</button></div>
-<pre id="workshop-code-035"><code>claude mcp reset-project-choices
-claude mcp list</code></pre>
+<p class="body">서버를 등록한 사람의 승인 상태가 팀원에게 전달되지는 않습니다. 같은 프로젝트에서 MCP 서버의 승인·거절 기록을 초기화하고 새 세션을 엽니다. 아래 실습은 프로젝트 서버의 자동 승인 설정이 없는 경우를 기준으로 합니다.</p>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label">Terminal · 승인 초기화 후 새 세션 시작</span><button aria-label="Terminal · 승인 초기화 후 새 세션 시작 복사" class="ws-copy" data-copy-code="workshop-code-035" data-copy-label="Terminal · 승인 초기화 후 새 세션 시작 복사" type="button">복사</button></div>
+<pre id="workshop-code-035"><code>cd ~/claude-lab/ch4 &amp;&amp;
+claude mcp reset-project-choices &amp;&amp;
+claude</code></pre>
 </div>
 <div class="code-wrap output" data-code-kind="output">
-<div class="code-head"><span class="code-label">출력 예시</span><button aria-label="출력 예시 복사" class="ws-copy" data-copy-code="workshop-code-036" data-copy-label="출력 예시 복사" type="button">복사</button></div>
-<pre id="workshop-code-036"><code>claude-code-docs: https://code.claude.com/docs/mcp (HTTP) - <span class="hl">⏸ Pending approval</span> (run `claude` to approve)</code></pre>
+<div class="code-head"><span class="code-label">서버 승인 화면 예시 · 선택 항목 발췌</span><button aria-label="서버 승인 화면 예시 · 선택 항목 발췌 복사" class="ws-copy" data-copy-code="workshop-code-036" data-copy-label="서버 승인 화면 예시 · 선택 항목 발췌 복사" type="button">복사</button></div>
+<pre id="workshop-code-036"><code>New MCP server found in this project: claude-code-docs
+
+    Use this MCP server
+    Use this and all future MCP servers in this project
+  ❯ Continue without using this MCP server
+
+Enter to confirm · Esc to cancel</code></pre>
 </div>
-<p class="body">
-    이제 <code class="inline">claude</code>로 새 세션을 열면 승인 프롬프트가 뜹니다.
-    <strong>저장소를 클론한 팀원이 보는 바로 그 화면</strong>입니다. 승인하면 연결되고, 거절하면 서버는 비활성 상태로 남습니다.
-    프롬프트를 실수로 닫았다면 <code class="inline">/mcp</code> 패널에서 승인할 수 있습니다.
-  </p>
+<p class="body">예시에서는 세 번째 항목이 선택돼 있습니다. 방향키로 <strong>Use this MCP server</strong>를 선택해 현재 문서 서버만 승인하세요. 화면 문구는 버전에 따라 다를 수 있습니다. 승인 화면이 나오지 않으면 자동 승인 설정과 조직 정책을 확인합니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력 · 승인 후 연결 확인</span><button aria-label="Claude 세션 입력 · 승인 후 연결 확인 복사" class="ws-copy" data-copy-code="ch4-a5-panel" data-copy-label="Claude 세션 입력 · 승인 후 연결 확인 복사" type="button">복사</button></div>
+<pre id="ch4-a5-panel"><code>/mcp</code></pre>
+</div>
+<p class="body">claude-code-docs의 승인·연결 상태를 확인하세요. 프로젝트 서버 사용 승인, 외부 서비스 인증, 개별 도구 사용 권한은 서로 다릅니다. 이번 문서 서버는 별도 로그인이 필요 없지만 도구 호출 권한 판단은 별도로 적용됩니다.</p>
 <div class="step-title"><span class="step-no">5</span>정리</div>
-<p class="body">2번에서 본 대로, 연결된 서버는 사용하지 않아도 도구 이름과 안내 문구가 컨텍스트에 포함됩니다.
-  쓰지 않는 서버는 제거하세요.</p>
-<div class="callout warn">
-<span class="co-title">연결된 서버는 공짜가 아닙니다</span>
-    도구 정의는 tool search가 미뤄 주지만, <strong>도구 이름과 server instructions</strong>는
-    한 번도 쓰지 않아도 모든 세션에 로드됩니다. 서버 하나의 비용은 작아도 0은 아니고,
-    쌓이면 보입니다. 쓰지 않는 서버는 제거하세요.
-  </div>
-<div class="code-wrap" data-code-kind="terminal">
-<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-037" data-copy-label="Terminal 복사" type="button">복사</button></div>
-<pre id="workshop-code-037"><code>claude mcp remove --scope project claude-code-docs</code></pre>
+<p class="body">사용하지 않을 실습 서버를 제거합니다. Claude 세션을 종료한 뒤 터미널에서 실행하세요.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력 · 정리 전 종료</span><button aria-label="Claude 세션 입력 · 정리 전 종료 복사" class="ws-copy" data-copy-code="ch4-a5-exit-cleanup" data-copy-label="Claude 세션 입력 · 정리 전 종료 복사" type="button">복사</button></div>
+<pre id="ch4-a5-exit-cleanup"><code>/exit</code></pre>
 </div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label">Terminal · 실습 서버 제거</span><button aria-label="Terminal · 실습 서버 제거 복사" class="ws-copy" data-copy-code="workshop-code-037" data-copy-label="Terminal · 실습 서버 제거 복사" type="button">복사</button></div>
+<pre id="workshop-code-037"><code>cd ~/claude-lab/ch4
+claude mcp remove --scope project claude-code-docs</code></pre>
+</div>
+<p class="body">불필요한 연결을 정리하면 연결 관리 비용과 컨텍스트 사용을 줄이는 데 도움이 됩니다.</p>
+<p class="body">공식 문서: <a href="https://code.claude.com/docs/en/mcp" target="_blank" rel="noopener noreferrer">MCP 연결·스코프·Tool Search</a></p>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
-<label class="cp-item"><input data-cp="a5a" type="checkbox"/><span>mcp list에서 ✓ Connected를 확인하고, 서버 라벨이 붙은 도구 호출과 /context all의 MCP tools 증가를 관찰했습니다</span></label>
-<label class="cp-item"><input data-cp="a5b" type="checkbox"/><span>local / project / user 스코프의 차이를 설명할 수 있습니다</span></label>
-<label class="cp-item"><input data-cp="a5c" type="checkbox"/><span>project 스코프로 승격해 .mcp.json 생성을 확인하고, reset 후 승인 프롬프트를 관찰했습니다</span></label>
+<label class="cp-item"><input data-cp="a5a" type="checkbox"/><span>Connected 상태, 실제 MCP 도구 호출·반환 결과, 그 결과에 근거한 답변을 확인했습니다</span></label>
+<label class="cp-item"><input data-cp="a5b" type="checkbox"/><span>local / project / user의 저장 위치와 같은 이름의 서버 선택 우선순위를 설명할 수 있습니다</span></label>
+<label class="cp-item"><input data-cp="a5c" type="checkbox"/><span>.mcp.json 생성과 서버 승인·연결 상태를 확인했습니다. 자동 승인 환경이면 승인 화면이 생략된 이유를 확인했습니다</span></label>
 </div>
 </section>
 <!-- ================= PART B 브리핑 ================= -->
@@ -927,7 +1015,7 @@ claude mcp list</code></pre>
 <span class="time-badge">1분</span>
 </div>
 <p class="task-goal">슈퍼랩은 Claude가 파일을 여러 개 만들고 고치므로, 기본 모드로는 <strong>승인 요청이 쏟아져 흐름이 끊깁니다</strong>.<br/>
-    A3에서 본 <code class="inline">acceptEdits</code>를 이번에는 팀 설정에 고정하고, 학습용 ask 규칙과 Hook은 잠시 비워 둡니다.<br/>
+    파일 편집을 자동 수락하는 <code class="inline">acceptEdits</code>를 팀 설정에 고정하고, 학습용 ask 규칙과 Hook은 잠시 비워 둡니다.<br/>
     다만 <strong>deny 3줄은 그대로 남깁니다</strong> - 속도를 얻더라도 최소한의 경계는 지키기 위해서입니다.</p>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal (~/claude-lab/ch4)</span><button aria-label="Terminal (~/claude-lab/ch4) 복사" class="ws-copy" data-copy-code="workshop-code-038" data-copy-label="Terminal (~/claude-lab/ch4) 복사" type="button">복사</button></div>
@@ -1230,7 +1318,7 @@ git log --oneline | head -3</code></pre>
 <tr><th>목표</th><th>확인 질문</th><th>관련</th></tr>
 <tr><td>Layers</td><td>5단 우선순위와 팀/개인 설정 분리를 체험했는가</td><td>A1</td></tr>
 <tr><td>Permissions</td><td>allow/ask/deny 3단 대조와 와일드카드 매칭 규칙을 이해했는가</td><td>A2</td></tr>
-<tr><td>Modes</td><td>모드는 기본값을, 규칙은 예외를 정한다는 관계를 설명할 수 있는가</td><td>A3</td></tr>
+<tr><td>Modes</td><td>Auto mode 규칙 등록과 도구별 실행 결과를 확인하고, 도구 차단과 최종 파일 결과를 구분했는가</td><td>A3</td></tr>
 <tr><td>Hooks</td><td>PostToolUse 피드백 루프(exit 2)를 단독+세션에서 검증했는가</td><td>A4</td></tr>
 <tr><td>MCP</td><td>서버 수명주기(add/list/사용/remove)와 3스코프를 이해했는가</td><td>A5</td></tr>
 <tr><td>Command Skill</td><td>동적 주입 + $ARGUMENTS로 커맨드 스킬을 빌드했는가</td><td>M1</td></tr>
@@ -1284,7 +1372,7 @@ git log --oneline | head -3</code></pre>
 <a data-nav="t0" data-toc-link="" href="#t0"><span class="dot"></span>사전 준비<span class="nav-time">2분</span></a>
 <a data-nav="a1" data-toc-link="" href="#a1"><span class="dot"></span>A1 설정 계층<span class="nav-time">10분</span></a>
 <a data-nav="a2" data-toc-link="" href="#a2"><span class="dot"></span>A2 권한 규칙<span class="nav-time">11분</span></a>
-<a data-nav="a3" data-toc-link="" href="#a3"><span class="dot"></span>A3 permission mode<span class="nav-time">5분</span></a>
+<a data-nav="a3" data-toc-link="" href="#a3"><span class="dot"></span>A3 Permission mode<span class="nav-time">5분</span></a>
 <a data-nav="a4" data-toc-link="" href="#a4"><span class="dot"></span>A4 PostToolUse Hook<span class="nav-time">10분</span></a>
 <a data-nav="a5" data-toc-link="" href="#a5"><span class="dot"></span>A5 MCP 서버 연결<span class="nav-time">10분</span></a>
 <div class="nav-title" style="margin-top:18px">PART B / 슈퍼랩 40분</div>
@@ -1485,7 +1573,7 @@ git log --oneline | head -3</code></pre>
       '<button class="max-btn code-modal-close" type="button">닫기 ✕</button></div>' +
       '<div class="code-modal-body"></div>' +
     '</div>';
-  document.body.appendChild(codeModal);
+  document.getElementById("workshop-content").appendChild(codeModal);
   var codeModalBody = codeModal.querySelector(".code-modal-body");
   var codeModalTitle = codeModal.querySelector(".code-modal-title");
   function closeCodeModal() { codeModal.classList.remove("show"); codeModalBody.innerHTML = ""; }
@@ -1572,7 +1660,7 @@ git log --oneline | head -3</code></pre>
     t0: ["t0"],
     a1: ["a1a", "a1b", "a1c"],
     a2: ["a2a", "a2b"],
-    a3: ["a3a", "a3b"],
+    a3: ["a3a", "a3b", "a3c", "a3d", "a3e"],
     a4: ["a4a", "a4b"],
     a5: ["a5a", "a5b"],
     m1: ["m1"],
