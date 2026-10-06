@@ -155,7 +155,7 @@ Input(키 상태) ──&gt; Update: 물리(G, JUMP_V, 코요테/버퍼) ──&
 Render(카메라 추적, 도트 스프라이트, HUD) &lt;──────────────────────+
 
 [배포 경로]  단 한 번, cdk deploy
-index.html ──&gt; S3(비공개 버킷) &lt;── OAC ── CloudFront ──&gt; 세상의 브라우저</code></pre>
+index.html ──&gt; S3(비공개 버킷) &lt;── OAC ── CloudFront ──&gt; 사용자 브라우저</code></pre>
 </div>
 <p class="body">Level 200의 핵심 구분입니다: 게임은 <strong>매 프레임 도는 루프</strong>이고 배포는
   <strong>완성된 결과물을 공개하는 과정</strong>입니다. 루프 안에서는 dt(프레임 간격)로 물리를 계산해야
