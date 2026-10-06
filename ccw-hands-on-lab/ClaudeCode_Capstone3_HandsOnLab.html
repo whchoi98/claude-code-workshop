@@ -166,7 +166,7 @@
 </table>
 </section>
 <section class="task" id="blueprint">
-<div class="task-head"><span class="task-num">BLUEPRINT</span><h2>구현 청사진, 전시의 뼈대</h2><span class="time-badge">참고</span></div>
+<div class="task-head"><span class="task-num">BLUEPRINT</span><h2>구현 청사진, 전시의 프레임워크</h2><span class="time-badge">참고</span></div>
 <p class="task-goal">
     M1 설계가 이 구조로 수렴하도록 방향을 잡아 주는 <strong>구현 지도</strong>입니다. 계획이 이상하게 흐르면
     여기로 돌아와 대조하세요.
@@ -210,7 +210,7 @@ verify.mjs(카탈로그 무결 + Piece 계약 검사) ── 전부 PASS ──&
 <!-- ============================ M0 ============================ -->
 <section class="task" id="m0">
 <div class="task-head"><span class="task-num">MISSION 00</span><h2>사전 준비</h2><span class="time-badge">10분</span></div>
-<p class="task-goal">프로젝트 폴더, 배포용 CDK 뼈대, 그리고 <strong>브라우저로 보는 통로</strong>를 준비합니다. Bedrock 키는 필요 없습니다.</p>
+<p class="task-goal">프로젝트 폴더, 배포용 CDK 프레임워크, 그리고 <strong>브라우저로 보는 통로</strong>를 준비합니다. Bedrock 키는 필요 없습니다.</p>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-002" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
 <pre id="workshop-code-002"><code>aws sts get-caller-identity --query Account --output text
@@ -657,7 +657,7 @@ CDK 배포 스택(bin/, lib/)으로 이루어져 있다. 다음을 하네스에 
 - CLAUDE.md에 Piece 계약을 규범으로 적어라: 작품 파일은 engine.js만 import하고 서로를 모른다,
   engine.js는 모듈 스코프에서 DOM을 만지지 않는다, 작품 추가는 data.js 한 항목 + 파일 하나다
 - site/js/**를 편집한 뒤에는 node verify.mjs가 자동으로 돌게 훅을 걸어라
-- 새 작품을 뼈대부터 만들어 주는 skill을 하나 추가해라(카탈로그 항목과 Piece 하위 클래스 스켈레톤)</code></pre>
+- 새 작품을 프레임워크부터 만들어 주는 skill을 하나 추가해라(카탈로그 항목과 Piece 하위 클래스 스켈레톤)</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-025" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
