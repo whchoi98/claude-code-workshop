@@ -353,11 +353,11 @@ NEWS_FEEDS = {
 <div class="callout tip">
 <span class="co-title">자동화 옵션, auto mode</span>
     세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
-    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    brainstorming → writing-plans → executing-plans의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
     시간이 빠듯할 때 유용합니다. 단계마다 직접 검토하려면 기본(수동)을 유지하고, 되돌리려면
     <code class="inline">auto mode off</code>입니다.
   </div>
-<p class="body">브레인스토밍 후 <code class="inline">/superpowers:write-plan</code>으로 계획을 만들고
+<p class="body">브레인스토밍 후 <code class="inline">/superpowers:writing-plans</code>로 계획을 만들고
   Phase 4개 구성을 승인하세요. 계획이 위 <strong>구현 청사진</strong>(화면/라우트/운영 계약)과 대체로 합치하는지,
   그리고 <strong>후순위 규칙</strong>(호가/투자자 동향/뉴스는 확장 과제로)이 반영됐는지 확인하세요.</p>
 <div class="checkpoint">
@@ -371,7 +371,7 @@ NEWS_FEEDS = {
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프. 여유가 있다면 <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 code-reviewer 서브에이전트에게 캐시 모듈 리뷰를 맡겨 보세요.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-008" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-008"><code>/superpowers:execute-plan Phase 1만 구현하고 멈춰줘. backend venv + requirements, config.py(제공한 실데이터, US/KR 각 20개 활성), services(yfinance 벌크 + pykrx, 개별 실패 스킵), 인메모리 TTL 캐시 + single-flight, 라우트 4종(overview, quotes, stocks/{symbol}, chart?range=). uvicorn 실행과 curl 검증 방법까지.</code></pre>
+<pre id="workshop-code-008"><code>/superpowers:executing-plans Phase 1만 구현하고 멈춰줘. backend venv + requirements, config.py(제공한 실데이터, US/KR 각 20개 활성), services(yfinance 벌크 + pykrx, 개별 실패 스킵), 인메모리 TTL 캐시 + single-flight, 라우트 4종(overview, quotes, stocks/{symbol}, chart?range=). uvicorn 실행과 curl 검증 방법까지.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 실행과 스모크</span><button aria-label="Terminal, 실행과 스모크 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Terminal, 실행과 스모크 복사" type="button">복사</button></div>
@@ -422,7 +422,7 @@ def get_or_fetch(key: str, ttl: int, fetch):
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 프런트를 빌드하는 동안 백엔드 응답 필드 보강을 서브에이전트로 병행할 수 있습니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 2</span><button aria-label="Claude 세션 입력, Phase 2 복사" class="ws-copy" data-copy-code="workshop-code-011" data-copy-label="Claude 세션 입력, Phase 2 복사" type="button">복사</button></div>
-<pre id="workshop-code-011"><code>/superpowers:execute-plan Phase 2만 구현해줘. frontend(Vite React TS): 요구 5의 Dashboard(지표 바, 지수 카드 5장 등락색, US/KR 탭 종목 테이블), react-query 45초 폴링, dev 프록시(:5173 → :8000). 실행 방법을 알려줘.</code></pre>
+<pre id="workshop-code-011"><code>/superpowers:executing-plans Phase 2만 구현해줘. frontend(Vite React TS): 요구 5의 Dashboard(지표 바, 지수 카드 5장 등락색, US/KR 탭 종목 테이블), react-query 45초 폴링, dev 프록시(:5173 → :8000). 실행 방법을 알려줘.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 미리보기</span><button aria-label="Terminal, 미리보기 복사" class="ws-copy" data-copy-code="workshop-code-012" data-copy-label="Terminal, 미리보기 복사" type="button">복사</button></div>
@@ -430,7 +430,7 @@ def get_or_fetch(key: str, ttl: int, fetch):
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 3</span><button aria-label="Claude 세션 입력, Phase 3 복사" class="ws-copy" data-copy-code="workshop-code-013" data-copy-label="Claude 세션 입력, Phase 3 복사" type="button">복사</button></div>
-<pre id="workshop-code-013"><code>/superpowers:execute-plan Phase 3(StockDetail)을 구현해줘. 테이블 클릭 → react-router 진입: StockHeader(현재가/등락률/거래량), lightweight-charts 캔들(1W/1M/3M/1Y 기간 탭), ReturnsRow(기간 수익률 4종), Week52Bar(52주 범위 내 위치), 뒤로 가기 복귀까지.</code></pre>
+<pre id="workshop-code-013"><code>/superpowers:executing-plans Phase 3(StockDetail)을 구현해줘. 테이블 클릭 → react-router 진입: StockHeader(현재가/등락률/거래량), lightweight-charts 캔들(1W/1M/3M/1Y 기간 탭), ReturnsRow(기간 수익률 4종), Week52Bar(52주 범위 내 위치), 뒤로 가기 복귀까지.</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">개념 짚기 (Level 200), 폴링 vs 스트리밍</span>
@@ -457,7 +457,7 @@ def get_or_fetch(key: str, ttl: int, fetch):
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3</a>에서 본 Bedrock 라우팅과 자격의 배경, 그 위에서 도는 스트리밍 계약.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-014" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-014"><code>/superpowers:execute-plan Phase 4(AI SSE)를 구현해줘. POST /api/ai/stocks/{symbol}: Bedrock converse_stream(global.anthropic.claude-sonnet-4-6, maxTokens 1024, 리전 ap-northeast-2, 자격 인자 없이 환경변수 AWS_BEARER_TOKEN_BEDROCK, IAM 정책 금지)으로 기술적 분석/투자 포인트/리스크 3절을 text/event-stream으로: 이벤트 phase → delta* → final. 프론트 AIPanel은 fetch 직접 + 델타 누적 타자기 렌더 + phase 배지. 키 없으면 503과 패널 비활성. 마지막으로 npm run build 산출물을 backend/static으로 넣어 :8000 통합 서빙(make run 또는 스크립트)까지.</code></pre>
+<pre id="workshop-code-014"><code>/superpowers:executing-plans Phase 4(AI SSE)를 구현해줘. POST /api/ai/stocks/{symbol}: Bedrock converse_stream(global.anthropic.claude-sonnet-4-6, maxTokens 1024, 리전 ap-northeast-2, 자격 인자 없이 환경변수 AWS_BEARER_TOKEN_BEDROCK, IAM 정책 금지)으로 기술적 분석/투자 포인트/리스크 3절을 text/event-stream으로: 이벤트 phase → delta* → final. 프론트 AIPanel은 fetch 직접 + 델타 누적 타자기 렌더 + phase 배지. 키 없으면 503과 패널 비활성. 마지막으로 npm run build 산출물을 backend/static으로 넣어 :8000 통합 서빙(make run 또는 스크립트)까지.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 키 로드 후 통합 실행</span><button aria-label="Terminal, 키 로드 후 통합 실행 복사" class="ws-copy" data-copy-code="workshop-code-015" data-copy-label="Terminal, 키 로드 후 통합 실행 복사" type="button">복사</button></div>
@@ -600,7 +600,7 @@ make run    # 프론트 빌드 → :8000 통합 서빙, 브라우저에서 /prox
     지금까지 만든 것은 <strong>결과물</strong>입니다. 이 옵션은 그 결과물을 만든 <strong>작업 환경, 즉 하네스</strong>
     (CLAUDE.md, hooks, skills, commands, agents)를 표준 구조로 성숙시키고(project-init),
     그 품질을 6개 차원(정확성, 안전성, 완전성, 실행 가능성, 일관성, 검증 가능성)에서
-    채점받는(harness-eval) 단계입니다. superpowers의 3단(brainstorm, write-plan, execute-plan) 뒤에
+    채점받는(harness-eval) 단계입니다. superpowers의 3단(brainstorm, writing-plans, executing-plans) 뒤에
     <strong>4단 성숙화와 5단 평가</strong>를 붙이는 셈입니다. 캡스톤 공통의 마무리 의식입니다.
   </p>
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4</a>의 훅과 스킬을 팀 자산으로 승격하는 감각, 그리고 <a href="ClaudeCode_Reference3_Plugins.html" style="color:#c9a2ff">Reference 3</a>의 플러그인 생태계.</p>

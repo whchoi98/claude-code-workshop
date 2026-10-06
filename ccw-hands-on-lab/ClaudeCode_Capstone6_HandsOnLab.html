@@ -267,10 +267,10 @@ aws sts get-caller-identity --query Account --output text</code></pre>
 <div class="callout tip">
 <span class="co-title">자동화 옵션, auto mode</span>
     세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
-    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    brainstorming → writing-plans → executing-plans의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
     시간이 빠듯할 때 유용합니다. 되돌리려면 <code class="inline">auto mode off</code>입니다.
   </div>
-<p class="body"><code class="inline">/superpowers:write-plan</code>으로 Phase 4개 계획을 승인하고, 위 <strong>구현 청사진</strong>과 대조하세요.</p>
+<p class="body"><code class="inline">/superpowers:writing-plans</code>로 Phase 4개 계획을 승인하고, 위 <strong>구현 청사진</strong>과 대조하세요.</p>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
 <label class="cp-item"><input data-cp="m1" type="checkbox"/><span>Phase 4개 계획이 승인되었고 worktree가 열렸습니다</span></label>
@@ -291,7 +291,7 @@ aws sts get-caller-identity --query Account --output text</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-007" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-007"><code>/superpowers:execute-plan Phase 1만 구현하고 멈춰줘. 시작 전에 4개 피드 URL을 각 사 공식 RSS 허브에서 확인해 config.py에 확인일 주석과 함께 기록. backend venv + requirements(fastapi, uvicorn, httpx, feedparser, apscheduler), 소스별 격리 수집기(120초), link 멱등 스토어(소스별 50건), /api/articles(목록 + 소스 상태)와 /healthz, Dockerfile과 infra 골격까지. uvicorn과 curl 검증 방법 포함.</code></pre>
+<pre id="workshop-code-007"><code>/superpowers:executing-plans Phase 1만 구현하고 멈춰줘. 시작 전에 4개 피드 URL을 각 사 공식 RSS 허브에서 확인해 config.py에 확인일 주석과 함께 기록. backend venv + requirements(fastapi, uvicorn, httpx, feedparser, apscheduler), 소스별 격리 수집기(120초), link 멱등 스토어(소스별 50건), /api/articles(목록 + 소스 상태)와 /healthz, Dockerfile과 infra 골격까지. uvicorn과 curl 검증 방법 포함.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 스모크</span><button aria-label="Terminal, 스모크 복사" class="ws-copy" data-copy-code="workshop-code-008" data-copy-label="Terminal, 스모크 복사" type="button">복사</button></div>
@@ -318,7 +318,7 @@ curl -s localhost:8000/api/articles | head -c 500; echo</code></pre>
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 그리드를 만드는 동안 소스 상태 바를 서브에이전트로 병행할 수 있습니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-009"><code>/superpowers:execute-plan Phase 2를 구현해줘. frontend/index.html 정적 SPA 한 장: 요구 7의 기본 뷰(듀얼 테마, 소스 상태 바, 4열 카드 그리드 - 매체명 헤더, 헤드라인, 상대 시각, 원문 새 탭 링크). 모바일에서는 2열로 접히게. FastAPI 정적 서빙 mount까지.</code></pre>
+<pre id="workshop-code-009"><code>/superpowers:executing-plans Phase 2를 구현해줘. frontend/index.html 정적 SPA 한 장: 요구 7의 기본 뷰(듀얼 테마, 소스 상태 바, 4열 카드 그리드 - 매체명 헤더, 헤드라인, 상대 시각, 원문 새 탭 링크). 모바일에서는 2열로 접히게. FastAPI 정적 서빙 mount까지.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 미리보기</span><button aria-label="Terminal, 미리보기 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="Terminal, 미리보기 복사" type="button">복사</button></div>
@@ -342,7 +342,7 @@ curl -s localhost:8000/api/articles | head -c 500; echo</code></pre>
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3</a>에서 본 Bedrock 자격과 Secrets 주입의 배경, 그 위에서 도는 REST 계약.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, 렌즈</span><button aria-label="Claude 세션 입력, 렌즈 복사" class="ws-copy" data-copy-code="workshop-code-011" data-copy-label="Claude 세션 입력, 렌즈 복사" type="button">복사</button></div>
-<pre id="workshop-code-011"><code>/superpowers:execute-plan Phase 3(렌즈)을 구현해줘. llm 모듈: httpx POST converse(Bearer, maxTokens 1500, 타임아웃 504/파싱 502), 시스템 프롬프트에 요구 6의 JSON 스키마와 "JSON 외 출력 금지, 코드펜스 금지"를 명시, 응답은 json.loads 전에 백틱/여백 방어적 제거. POST /api/lens(10분 버킷 캐시). 화면 렌즈 뷰: 토픽 카드에 공통 요약 + 4개 프레임 나란히, 미보도 회색, sources 인덱스로 근거 기사 링크 칩, 뷰 전환 토글.</code></pre>
+<pre id="workshop-code-011"><code>/superpowers:executing-plans Phase 3(렌즈)을 구현해줘. llm 모듈: httpx POST converse(Bearer, maxTokens 1500, 타임아웃 504/파싱 502), 시스템 프롬프트에 요구 6의 JSON 스키마와 "JSON 외 출력 금지, 코드펜스 금지"를 명시, 응답은 json.loads 전에 백틱/여백 방어적 제거. POST /api/lens(10분 버킷 캐시). 화면 렌즈 뷰: 토픽 카드에 공통 요약 + 4개 프레임 나란히, 미보도 회색, sources 인덱스로 근거 기사 링크 칩, 뷰 전환 토글.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 렌즈 스모크</span><button aria-label="Terminal, 렌즈 스모크 복사" class="ws-copy" data-copy-code="workshop-code-012" data-copy-label="Terminal, 렌즈 스모크 복사" type="button">복사</button></div>
@@ -350,7 +350,7 @@ curl -s localhost:8000/api/articles | head -c 500; echo</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, 배포</span><button aria-label="Claude 세션 입력, 배포 복사" class="ws-copy" data-copy-code="workshop-code-013" data-copy-label="Claude 세션 입력, 배포 복사" type="button">복사</button></div>
-<pre id="workshop-code-013"><code>/superpowers:execute-plan Phase 4(배포)를 진행해줘. 선배포한 인프라에 앱 이미지를 빌드/푸시하고 서비스 갱신, CloudFront 도메인 출력. X-Origin-Verify와 Secrets 주입 확인 절차 포함.</code></pre>
+<pre id="workshop-code-013"><code>/superpowers:executing-plans Phase 4(배포)를 진행해줘. 선배포한 인프라에 앱 이미지를 빌드/푸시하고 서비스 갱신, CloudFront 도메인 출력. X-Origin-Verify와 Secrets 주입 확인 절차 포함.</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">개념 짚기 (Level 200), 관점을 묻는 프롬프트</span>

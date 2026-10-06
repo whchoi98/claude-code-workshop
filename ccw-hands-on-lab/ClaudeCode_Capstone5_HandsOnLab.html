@@ -244,10 +244,10 @@ aws sts get-caller-identity --query Account --output text   # 배포용 자격 �
 <div class="callout tip">
 <span class="co-title">자동화 옵션, auto mode</span>
     세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
-    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    brainstorming → writing-plans → executing-plans의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
     시간이 빠듯할 때 유용합니다. 되돌리려면 <code class="inline">auto mode off</code>입니다.
   </div>
-<p class="body"><code class="inline">/superpowers:write-plan</code>으로 Phase 4개 계획을 승인하고, 위 <strong>구현 청사진</strong>과 대조하세요.</p>
+<p class="body"><code class="inline">/superpowers:writing-plans</code>로 Phase 4개 계획을 승인하고, 위 <strong>구현 청사진</strong>과 대조하세요.</p>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
 <label class="cp-item"><input data-cp="m1" type="checkbox"/><span>Phase 4개 계획이 승인되었고 worktree가 열렸습니다</span></label>
@@ -268,7 +268,7 @@ aws sts get-caller-identity --query Account --output text   # 배포용 자격 �
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-006" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-006"><code>/superpowers:execute-plan Phase 1만 구현하고 멈춰줘. backend venv + requirements(fastapi, uvicorn, httpx, apscheduler), USGS 수집기(60초, 정규화, 부분 실패 격리), 이벤트 id 멱등 스토어(최대 500), /api/quakes(hours, min_mag 필터 + 통계)와 /healthz. Dockerfile과 infra(CDK: CloudFront + prefix list SG + X-Origin-Verify + ALB + Fargate + Secrets)까지 골격 생성. uvicorn 실행과 curl 검증 방법 포함.</code></pre>
+<pre id="workshop-code-006"><code>/superpowers:executing-plans Phase 1만 구현하고 멈춰줘. backend venv + requirements(fastapi, uvicorn, httpx, apscheduler), USGS 수집기(60초, 정규화, 부분 실패 격리), 이벤트 id 멱등 스토어(최대 500), /api/quakes(hours, min_mag 필터 + 통계)와 /healthz. Dockerfile과 infra(CDK: CloudFront + prefix list SG + X-Origin-Verify + ALB + Fargate + Secrets)까지 골격 생성. uvicorn 실행과 curl 검증 방법 포함.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 스모크</span><button aria-label="Terminal, 스모크 복사" class="ws-copy" data-copy-code="workshop-code-007" data-copy-label="Terminal, 스모크 복사" type="button">복사</button></div>
@@ -295,7 +295,7 @@ curl -s "localhost:8000/api/quakes?hours=24&amp;min_mag=2.5" | python3 -c "impor
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 지도를 그리는 동안 테이블과 필터를 서브에이전트로 병행할 수 있습니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-008" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-008"><code>/superpowers:execute-plan Phase 2를 구현해줘. frontend/index.html 정적 SPA 한 장: 요구 5의 화면 스펙(듀얼 테마, 통계 바, 등장방형 세계지도 SVG - 간이 대륙 윤곽 + 진앙 원(반지름=규모, 색=깊이) + 최근 1시간 펄스, KST 이벤트 테이블, 규모 슬라이더와 시간 창 토글). FastAPI 정적 서빙 mount까지. 외부 지도/차트 라이브러리 금지.</code></pre>
+<pre id="workshop-code-008"><code>/superpowers:executing-plans Phase 2를 구현해줘. frontend/index.html 정적 SPA 한 장: 요구 5의 화면 스펙(듀얼 테마, 통계 바, 등장방형 세계지도 SVG - 간이 대륙 윤곽 + 진앙 원(반지름=규모, 색=깊이) + 최근 1시간 펄스, KST 이벤트 테이블, 규모 슬라이더와 시간 창 토글). FastAPI 정적 서빙 mount까지. 외부 지도/차트 라이브러리 금지.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 미리보기</span><button aria-label="Terminal, 미리보기 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Terminal, 미리보기 복사" type="button">복사</button></div>
@@ -326,11 +326,11 @@ curl -s "localhost:8000/api/quakes?hours=24&amp;min_mag=2.5" | python3 -c "impor
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3</a>에서 본 Bedrock 자격과 Secrets 주입의 배경, 그 위에서 도는 REST 계약.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, 브리핑</span><button aria-label="Claude 세션 입력, 브리핑 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="Claude 세션 입력, 브리핑 복사" type="button">복사</button></div>
-<pre id="workshop-code-010"><code>/superpowers:execute-plan Phase 3(브리핑)을 구현해줘. llm 모듈: httpx POST converse(Bearer, maxTokens 700, 타임아웃 504/파싱 502 매핑), POST /api/brief - 입력은 24h 통계와 상위 이벤트, 출력은 요구 6의 한국어 브리핑, 10분 버킷 캐시. 화면 브리핑 카드와 버튼까지.</code></pre>
+<pre id="workshop-code-010"><code>/superpowers:executing-plans Phase 3(브리핑)을 구현해줘. llm 모듈: httpx POST converse(Bearer, maxTokens 700, 타임아웃 504/파싱 502 매핑), POST /api/brief - 입력은 24h 통계와 상위 이벤트, 출력은 요구 6의 한국어 브리핑, 10분 버킷 캐시. 화면 브리핑 카드와 버튼까지.</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, 배포</span><button aria-label="Claude 세션 입력, 배포 복사" class="ws-copy" data-copy-code="workshop-code-011" data-copy-label="Claude 세션 입력, 배포 복사" type="button">복사</button></div>
-<pre id="workshop-code-011"><code>/superpowers:execute-plan Phase 4(배포)를 진행해줘. 선배포한 인프라에 앱 이미지를 빌드/푸시하고 서비스 갱신, CloudFront 도메인 출력. X-Origin-Verify와 Secrets 주입이 살아 있는지 확인 절차 포함.</code></pre>
+<pre id="workshop-code-011"><code>/superpowers:executing-plans Phase 4(배포)를 진행해줘. 선배포한 인프라에 앱 이미지를 빌드/푸시하고 서비스 갱신, CloudFront 도메인 출력. X-Origin-Verify와 Secrets 주입이 살아 있는지 확인 절차 포함.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 배포 확인</span><button aria-label="Terminal, 배포 확인 복사" class="ws-copy" data-copy-code="workshop-code-012" data-copy-label="Terminal, 배포 확인 복사" type="button">복사</button></div>

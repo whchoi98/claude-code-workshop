@@ -322,11 +322,11 @@ git add -A &amp;&amp; git commit -m "chore: scaffold" 2&gt;/dev/null || true</co
 <div class="callout tip">
 <span class="co-title">자동화 옵션, auto mode</span>
     세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
-    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    brainstorming → writing-plans → executing-plans의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
     시간이 빠듯할 때 유용합니다. 단계마다 직접 검토하려면 기본(수동)을 유지하고, 되돌리려면
     <code class="inline">auto mode off</code>입니다.
   </div>
-<p class="body">브레인스토밍 후 <code class="inline">/superpowers:write-plan</code>으로 계획을 만들고
+<p class="body">브레인스토밍 후 <code class="inline">/superpowers:writing-plans</code>로 계획을 만들고
   Phase 4개 구성을 승인하세요. 계획이 위 <strong>구현 청사진</strong>(세 경로/구조 지도/계약)과 대체로 합치하는지 확인하세요.</p>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
@@ -339,7 +339,7 @@ git add -A &amp;&amp; git commit -m "chore: scaffold" 2&gt;/dev/null || true</co
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프. 여유가 있다면 <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 code-reviewer 서브에이전트에게 수집기/스토어 리뷰를 맡겨 보세요.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-009"><code>/superpowers:execute-plan Phase 1만 구현하고 멈춰줘. backend venv + requirements(fastapi, uvicorn, httpx, apscheduler), collector(videos.list + 기동 시 카테고리 1회 + _stat_int 격리), 스냅샷 링버퍼(멱등, 최근 48개), derive(delta/NEW/이탈/점유율), /api/trending(+?category=)와 /healthz. 수집 주기 60초(config). uvicorn 실행과 curl 검증 방법까지.</code></pre>
+<pre id="workshop-code-009"><code>/superpowers:executing-plans Phase 1만 구현하고 멈춰줘. backend venv + requirements(fastapi, uvicorn, httpx, apscheduler), collector(videos.list + 기동 시 카테고리 1회 + _stat_int 격리), 스냅샷 링버퍼(멱등, 최근 48개), derive(delta/NEW/이탈/점유율), /api/trending(+?category=)와 /healthz. 수집 주기 60초(config). uvicorn 실행과 curl 검증 방법까지.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 실행과 스모크</span><button aria-label="Terminal, 실행과 스모크 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="Terminal, 실행과 스모크 복사" type="button">복사</button></div>
@@ -397,7 +397,7 @@ class SnapshotStore:
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 화면을 그리는 동안 시계열 집계 보강을 서브에이전트로 병행할 수 있습니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 2</span><button aria-label="Claude 세션 입력, Phase 2 복사" class="ws-copy" data-copy-code="workshop-code-013" data-copy-label="Claude 세션 입력, Phase 2 복사" type="button">복사</button></div>
-<pre id="workshop-code-013"><code>/superpowers:execute-plan Phase 2만 구현해줘. frontend/index.html 정적 SPA 한 장(빌드 없이 fetch + 렌더): 요구 7의 화면 스펙(듀얼 테마 토글 + 시스템 기본, 헤더, 통계 바 4칸, 카테고리 칩 8개, 30장 카드 그리드에 순위/▲▼ delta/NEW 배지, 축약 숫자, 클릭 시 유튜브 새 탭). FastAPI가 이 파일을 정적 서빙하게 mount까지.</code></pre>
+<pre id="workshop-code-013"><code>/superpowers:executing-plans Phase 2만 구현해줘. frontend/index.html 정적 SPA 한 장(빌드 없이 fetch + 렌더): 요구 7의 화면 스펙(듀얼 테마 토글 + 시스템 기본, 헤더, 통계 바 4칸, 카테고리 칩 8개, 30장 카드 그리드에 순위/▲▼ delta/NEW 배지, 축약 숫자, 클릭 시 유튜브 새 탭). FastAPI가 이 파일을 정적 서빙하게 mount까지.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 미리보기</span><button aria-label="Terminal, 미리보기 복사" class="ws-copy" data-copy-code="workshop-code-014" data-copy-label="Terminal, 미리보기 복사" type="button">복사</button></div>
@@ -405,7 +405,7 @@ class SnapshotStore:
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 3</span><button aria-label="Claude 세션 입력, Phase 3 복사" class="ws-copy" data-copy-code="workshop-code-015" data-copy-label="Claude 세션 입력, Phase 3 복사" type="button">복사</button></div>
-<pre id="workshop-code-015"><code>/superpowers:execute-plan Phase 3(시계열)을 구현해줘. /api/trends?hours=N: 시각 버킷별 카테고리 점유율과 진입/이탈 수. 화면 하단에 인라인 SVG 누적 막대(카테고리별 색, 축 라벨은 시각), 외부 차트 라이브러리 금지.</code></pre>
+<pre id="workshop-code-015"><code>/superpowers:executing-plans Phase 3(시계열)을 구현해줘. /api/trends?hours=N: 시각 버킷별 카테고리 점유율과 진입/이탈 수. 화면 하단에 인라인 SVG 누적 막대(카테고리별 색, 축 라벨은 시각), 외부 차트 라이브러리 금지.</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">개념 짚기 (Level 200), 기준선이 정보를 만든다</span>
@@ -431,7 +431,7 @@ class SnapshotStore:
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3</a>에서 본 Bedrock 라우팅과 자격의 배경, 그 위에서 도는 REST 계약.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-016" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-016"><code>/superpowers:execute-plan Phase 4(브리핑)를 구현해줘. llm 모듈: httpx로 POST https://bedrock-runtime.ap-northeast-2.amazonaws.com/model/global.anthropic.claude-sonnet-4-6/converse, Authorization: Bearer(환경변수 AWS_BEARER_TOKEN_BEDROCK), body는 system+messages+inferenceConfig(maxTokens 800), 타임아웃은 504/파싱 실패는 502로. POST /api/brief?mode=now|daily(요구 6의 내용 구성), 같은 시각 버킷 캐시. 화면 브리핑 카드에 now/daily 버튼과 결과 렌더까지.</code></pre>
+<pre id="workshop-code-016"><code>/superpowers:executing-plans Phase 4(브리핑)를 구현해줘. llm 모듈: httpx로 POST https://bedrock-runtime.ap-northeast-2.amazonaws.com/model/global.anthropic.claude-sonnet-4-6/converse, Authorization: Bearer(환경변수 AWS_BEARER_TOKEN_BEDROCK), body는 system+messages+inferenceConfig(maxTokens 800), 타임아웃은 504/파싱 실패는 502로. POST /api/brief?mode=now|daily(요구 6의 내용 구성), 같은 시각 버킷 캐시. 화면 브리핑 카드에 now/daily 버튼과 결과 렌더까지.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 브리핑 스모크</span><button aria-label="Terminal, 브리핑 스모크 복사" class="ws-copy" data-copy-code="workshop-code-017" data-copy-label="Terminal, 브리핑 스모크 복사" type="button">복사</button></div>
@@ -528,7 +528,7 @@ regionCode를 넘겨 각국 급상승 30을 받아온다. 카테고리 매핑 �
     지금까지 만든 것은 <strong>결과물</strong>입니다. 이 옵션은 그 결과물을 만든 <strong>작업 환경, 즉 하네스</strong>
     (CLAUDE.md, hooks, skills, commands, agents)를 표준 구조로 성숙시키고(project-init),
     그 품질을 6개 차원(정확성, 안전성, 완전성, 실행 가능성, 일관성, 검증 가능성)에서
-    채점받는(harness-eval) 단계입니다. superpowers의 3단(brainstorm, write-plan, execute-plan) 뒤에
+    채점받는(harness-eval) 단계입니다. superpowers의 3단(brainstorm, writing-plans, executing-plans) 뒤에
     <strong>4단 성숙화와 5단 평가</strong>를 붙이는 셈입니다. 캡스톤 공통의 마무리 의식입니다.
   </p>
 <div class="step-title"><span class="step-no">1</span>플러그인 2종 설치</div>

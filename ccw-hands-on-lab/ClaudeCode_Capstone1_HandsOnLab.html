@@ -248,11 +248,11 @@ git add -A &amp;&amp; git commit -m "chore: scaffold" 2&gt;/dev/null || true</co
 <div class="callout tip">
 <span class="co-title">자동화 옵션, auto mode</span>
     세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
-    brainstorming → write-plan → execute-plan의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    brainstorming → writing-plans → executing-plans의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
     시간이 빠듯할 때 유용합니다. 단계마다 직접 검토하려면 기본(수동)을 유지하고, 되돌리려면
     <code class="inline">auto mode off</code>입니다.
   </div>
-<p class="body">브레인스토밍 후 <code class="inline">/superpowers:write-plan</code>으로 계획을 만들고,
+<p class="body">브레인스토밍 후 <code class="inline">/superpowers:writing-plans</code>로 계획을 만들고,
   Phase 4개 구성을 확인해 승인하세요. worktree로 이동해 작업이 시작됩니다.</p>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
@@ -265,7 +265,7 @@ git add -A &amp;&amp; git commit -m "chore: scaffold" 2&gt;/dev/null || true</co
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프. 여유가 있다면 <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 code-reviewer 서브에이전트에게 물리/충돌 코드 리뷰를 맡겨 보세요.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-006" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-006"><code>/superpowers:execute-plan Phase 1(엔진)만 구현하고 멈춰줘. 640x360 캔버스, 게임 루프, 좌우 이동과 점프(코요테 타임 0.1초, 점프 버퍼 0.1초), 임시 바닥 하나, 그리고 요구사항 2)의 CLAWD 픽셀 배열 렌더(정지 시 2프레임 다리 애니메이션이면 더 좋다). 끝나면 실행 방법을 알려줘.</code></pre>
+<pre id="workshop-code-006"><code>/superpowers:executing-plans Phase 1(엔진)만 구현하고 멈춰줘. 640x360 캔버스, 게임 루프, 좌우 이동과 점프(코요테 타임 0.1초, 점프 버퍼 0.1초), 임시 바닥 하나, 그리고 요구사항 2)의 CLAWD 픽셀 배열 렌더(정지 시 2프레임 다리 애니메이션이면 더 좋다). 끝나면 실행 방법을 알려줘.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 미리보기</span><button aria-label="Terminal, 미리보기 복사" class="ws-copy" data-copy-code="workshop-code-007" data-copy-label="Terminal, 미리보기 복사" type="button">복사</button></div>
@@ -313,11 +313,11 @@ function step(dt) {
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 레벨 배열을 설계하는 동안 코인/가시 로직 보강을 서브에이전트로 병행할 수 있습니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 2</span><button aria-label="Claude 세션 입력, Phase 2 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Claude 세션 입력, Phase 2 복사" type="button">복사</button></div>
-<pre id="workshop-code-009"><code>/superpowers:execute-plan Phase 2(레벨과 카메라)만 구현해줘. 요구사항 4)의 타일 문자열 맵(16px)과 AABB 타일 충돌, 화면 2~3배 폭 레벨, Clawd를 따라가는 카메라(레벨 경계 클램프)까지.</code></pre>
+<pre id="workshop-code-009"><code>/superpowers:executing-plans Phase 2(레벨과 카메라)만 구현해줘. 요구사항 4)의 타일 문자열 맵(16px)과 AABB 타일 충돌, 화면 2~3배 폭 레벨, Clawd를 따라가는 카메라(레벨 경계 클램프)까지.</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력, Phase 3</span><button aria-label="Claude 세션 입력, Phase 3 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="Claude 세션 입력, Phase 3 복사" type="button">복사</button></div>
-<pre id="workshop-code-010"><code>/superpowers:execute-plan Phase 3(게임플레이)을 구현해줘. C 코인(먹으면 카운트, HUD 좌상단), ^ 가시(닿으면 시작점 리스폰), F 깃발(닿으면 CLEAR 오버레이와 R 재시작), 코인 전부 먹고 깃발이면 PERFECT 표기.</code></pre>
+<pre id="workshop-code-010"><code>/superpowers:executing-plans Phase 3(게임플레이)을 구현해줘. C 코인(먹으면 카운트, HUD 좌상단), ^ 가시(닿으면 시작점 리스폰), F 깃발(닿으면 CLEAR 오버레이와 R 재시작), 코인 전부 먹고 깃발이면 PERFECT 표기.</code></pre>
 </div>
 <p class="body">레벨을 직접 그리고 싶다면 이런 문자열 아트를 프롬프트에 붙이세요. 한 글자가 타일 하나입니다.</p>
 <div class="code-wrap output" data-code-kind="output">
@@ -354,7 +354,7 @@ XXXX...XXXXX...XXXXXXXXXXXXXX...XXXXXXXX..XXXXXXXXXX</code></pre>
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 검증 루프가 배포 스모크(curl 200)로 확장됩니다. 자동화가 궁금하면 <a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5</a>의 헤드리스 패턴이 다음입니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
 <div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-012" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-012"><code>/superpowers:execute-plan Phase 4(배포)를 구현해줘. CDK 단일 스택: S3 버킷(비공개) + CloudFront(OAC) + BucketDeployment로 frontend/를 서빙, 리전 ap-northeast-2, RemovalPolicy DESTROY, 출력에 CloudFront URL.</code></pre>
+<pre id="workshop-code-012"><code>/superpowers:executing-plans Phase 4(배포)를 구현해줘. CDK 단일 스택: S3 버킷(비공개) + CloudFront(OAC) + BucketDeployment로 frontend/를 서빙, 리전 ap-northeast-2, RemovalPolicy DESTROY, 출력에 CloudFront URL.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 배포와 스모크</span><button aria-label="Terminal, 배포와 스모크 복사" class="ws-copy" data-copy-code="workshop-code-013" data-copy-label="Terminal, 배포와 스모크 복사" type="button">복사</button></div>
@@ -459,7 +459,7 @@ echo "$URL" &amp;&amp; curl -s -o /dev/null -w "%{http_code}\n" "$URL"</code></p
     지금까지 만든 것은 <strong>결과물</strong>입니다. 이 옵션은 그 결과물을 만든 <strong>작업 환경, 즉 하네스</strong>
     (CLAUDE.md, hooks, skills, commands, agents)를 표준 구조로 성숙시키고(project-init),
     그 품질을 6개 차원(정확성, 안전성, 완전성, 실행 가능성, 일관성, 검증 가능성)에서
-    채점받는(harness-eval) 단계입니다. superpowers의 3단(brainstorm, write-plan, execute-plan) 뒤에
+    채점받는(harness-eval) 단계입니다. superpowers의 3단(brainstorm, writing-plans, executing-plans) 뒤에
     <strong>4단 성숙화와 5단 평가</strong>를 붙이는 셈입니다. 캡스톤 공통의 마무리 의식입니다.
   </p>
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4</a>의 훅과 스킬을 팀 자산으로 승격하는 감각, 그리고 <a href="ClaudeCode_Reference3_Plugins.html" style="color:#c9a2ff">Reference 3</a>의 플러그인 생태계.</p>
