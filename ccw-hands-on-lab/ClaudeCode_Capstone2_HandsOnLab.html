@@ -65,18 +65,18 @@
 <header class="hero">
 <span class="eyebrow">CAPSTONE 2 / MARKET DESK ON WEB / 135 MIN</span>
 <h1>웹 시황 대시보드</h1>
-<div class="subtitle">FastAPI + React + Bedrock SSE, 브라우저에서 뛰는 시황 데스크</div>
+<div class="subtitle">FastAPI + React + Bedrock SSE, 서브에이전트와 함께 짓는 시황 데스크</div>
 <p class="lede">
     시세와 차트가 브라우저에 흐르고, AI 분석이 <strong>타자기처럼 스트리밍</strong>되는 웹 시황 데스크를
-    빈 폴더에서 빌드합니다. FastAPI 백엔드가 yfinance/pykrx를 캐시 뒤에 정리하고, React 대시보드가
-    45초마다 숨 쉬고, Bedrock의 종목 분석이 SSE로 한 글자씩 도착합니다. 배포 없이 로컬 완결,
-    다른 참가자와의 의존성도 없습니다.
+    빈 폴더에서 빌드합니다. 이번에는 긴 스펙을 쓰지 않습니다. 원작 stock-monitoring은
+    <strong>서브에이전트가 읽고</strong>, 참가자는 미션마다 두세 줄짜리 짧은 프롬프트로 지휘하며 결과를 확인합니다.
+    배포 없이 로컬에서 끝나고, 다른 참가자와의 의존성도 없습니다.
   </p>
 <div class="hero-meta">
 <span>소요 시간 <strong>135분</strong></span>
 <span>미션 <strong>5개 + DoD</strong></span>
 <span>산출물 <strong>브라우저에서 뛰는 내 시황 데스크</strong></span>
-<span>Update <strong>2026.08</strong></span>
+<span>Update <strong>2026.11</strong></span>
 </div>
 </header>
 <nav aria-label="미션 타임라인" class="timeline">
@@ -84,10 +84,10 @@
 <span class="timeline-label">진행 <strong id="progress-count">0/9</strong></span>
 <div class="segments" id="segments">
 <button class="seg" data-task="m0" style="flex:10" title="M0 사전 준비, 10분"><span class="fill"></span><span class="seg-txt">M0 준비</span></button>
-<button class="seg" data-task="m1" style="flex:15" title="M1 설계, 15분"><span class="fill"></span><span class="seg-txt">M1 설계</span></button>
-<button class="seg" data-task="m2" style="flex:35" title="M2 백엔드 코어, 35분"><span class="fill"></span><span class="seg-txt">M2 백엔드 코어</span></button>
+<button class="seg" data-task="m1" style="flex:20" title="M1 원작 분석과 설계, 20분"><span class="fill"></span><span class="seg-txt">M1 분석 + 설계</span></button>
+<button class="seg" data-task="m2" style="flex:30" title="M2 백엔드 코어, 30분"><span class="fill"></span><span class="seg-txt">M2 백엔드 코어</span></button>
 <button class="seg" data-task="m3" style="flex:45" title="M3 대시보드와 상세, 45분"><span class="fill"></span><span class="seg-txt">M3 대시보드 + 상세</span></button>
-<button class="seg" data-task="m4" style="flex:30" title="M4 AI 스트리밍과 배포, 30분"><span class="fill"></span><span class="seg-txt">M4 AI 스트리밍</span></button>
+<button class="seg" data-task="m4" style="flex:30" title="M4 AI 스트리밍과 통합 서빙, 30분"><span class="fill"></span><span class="seg-txt">M4 AI 스트리밍</span></button>
 </div>
 <span class="timeline-label">135 min</span>
 </div>
@@ -98,70 +98,81 @@
 <section class="task" id="brief">
 <div class="task-head"><span class="task-num">MISSION BRIEFING</span><h2>목표물과 기조</h2><span class="time-badge">숙지</span></div>
 <p class="task-goal">
-    다른 캡스톤과 같은 기조입니다: <strong>빈 폴더에서 superpowers 워크플로로</strong> 설계하고 Phase 단위로 빌드합니다.
-    목표물은 실존 프로젝트 stock-monitoring(FastAPI + React + Bedrock, AWS ECS 운영)을 135분 스코프로 압축한
-    웹 시황 데스크입니다. 실데이터이며, 45초마다 바뀝니다.
+    다른 캡스톤처럼 <strong>빈 폴더에서 superpowers 워크플로로</strong> 설계하고 Phase 단위로 빌드합니다.
+    다른 점은 일하는 방식입니다. 조사, 구현, 리뷰를 <strong>서브에이전트에게 나눠 맡기고</strong>, 참가자는 짧게 지시한 뒤 결과를 대조합니다.
+    목표물은 실존 프로젝트 stock-monitoring(FastAPI + React + Bedrock, AWS ECS 운영)을 135분 스코프로 줄인
+    웹 시황 데스크입니다. 실데이터이며 45초마다 바뀝니다.
   </p>
 <table class="tbl">
 <tr><th>레이어</th><th>구성</th><th>핵심 원칙</th></tr>
 <tr><td>백엔드</td><td>FastAPI, /api/market/*, /api/stocks/*, 인메모리 TTL 캐시</td><td>업스트림 호출은 캐시 뒤로, 같은 키 동시 요청은 한 번만(single-flight)</td></tr>
-<tr><td>프런트</td><td>React(Vite) + react-query + lightweight-charts</td><td>화면은 우리 API만 본다, 45초 폴링, AI만 fetch 직접</td></tr>
+<tr><td>프런트</td><td>React(Vite) + react-query + lightweight-charts, 원작의 터미널 UI</td><td>화면은 우리 API만 본다, 45초 폴링, AI만 fetch 직접</td></tr>
 <tr><td>AI</td><td>Bedrock converse_stream, SSE(phase → delta → final)</td><td>AWS_BEARER_TOKEN_BEDROCK, 키 없으면 503과 패널 비활성</td></tr>
+<tr><td>위임</td><td>Explore 서브에이전트(원작 분석), subagent-driven-development(Phase 구현), code-reviewer(리뷰)</td><td>조사와 구현은 맡기고, 대조와 판단은 내가 한다</td></tr>
 <tr><td>완결성</td><td>make run 한 번으로 :8000 통합 서빙, 배포 없음</td><td>프록시(/proxy/8000/)로 확인, 스크린샷이 피날레</td></tr>
 </table>
 <p class="body"><strong>1. Dashboard (메인 화면)</strong></p>
 <table class="tbl">
 <tr><th>기능</th><th>설명</th></tr>
-<tr><td>경제지표 바</td><td>WTI, Gold, 환율, 금리, Bitcoin 등 config의 지표를 실시간 표시</td></tr>
-<tr><td>시장 지수</td><td>S&amp;P 500, NASDAQ, DOW / KOSPI, KOSDAQ - 카드 5장, 등락색</td></tr>
-<tr><td>종목 테이블</td><td>US/KR 탭 전환, Symbol/Name/Price/Change/%/Volume, 상승 초록/하락 빨강</td></tr>
+<tr><td>마켓 스트립</td><td>지수 5종(S&amp;P 500, NASDAQ, DOW, KOSPI, KOSDAQ)과 경제지표(WTI, Gold, 환율, 금리, Bitcoin 등)를 화면 상단에 고정</td></tr>
+<tr><td>종목 테이블</td><td>US/KR 탭, Symbol/Name/Price/Change/%/Volume, 상승 빨강/하락 파랑(한국 관례)</td></tr>
 <tr><td>자동 갱신</td><td>react-query 45초 폴링, 장 마감 시간대는 백엔드가 600초 절전</td></tr>
+<tr><td>화면 무드</td><td>원작의 터미널 UI: 다크 패널 그리드, 앰버 액센트, 고정폭 숫자</td></tr>
 </table>
 <p class="body"><strong>2. StockDetail (종목 상세)</strong></p>
 <table class="tbl">
 <tr><th>기능</th><th>설명</th></tr>
 <tr><td>가격 헤더</td><td>현재가, 등락률, 거래량 (StockHeader)</td></tr>
-<tr><td>캔들 차트</td><td>lightweight-charts, 1W/1M/3M/1Y 기간 탭 (PriceChart)</td></tr>
-<tr><td>수익률과 52주</td><td>기간 수익률 4종(ReturnsRow) + 52주 범위 내 현재 위치(Week52Bar)</td></tr>
-<tr><td>AI 종목 분석</td><td>버튼 → SSE 스트리밍, 기술적 분석/투자 포인트/리스크 3절 (AIPanel)</td></tr>
+<tr><td>캔들 차트</td><td>lightweight-charts, 1W/1M/3M/6M/1Y/5Y 기간 탭 (PriceChart)</td></tr>
+<tr><td>수익률과 52주</td><td>기간 수익률(ReturnsRow) + 52주 범위 내 현재 위치(Week52Bar)</td></tr>
+<tr><td>AI 종목 분석</td><td>버튼 → SSE 스트리밍, 기술적 분석/투자 포인트/리스크 요인 3절 (AIPanel)</td></tr>
 </table>
 <div class="step-title"><span class="step-no">L</span>학습 목표, Level 200</div>
-<p class="body">이 캡스톤을 마치면 다음 네 가지를 <strong>설명할 수 있고, 다시 만들 수 있습니다</strong>.</p>
+<p class="body">이 캡스톤을 마치면 다음 다섯 가지를 <strong>설명할 수 있고, 다시 만들 수 있습니다</strong>.</p>
 <table class="tbl">
 <tr><th>목표</th><th>검증되는 순간</th></tr>
+<tr><td>조사, 구현, 리뷰를 서브에이전트에 나눠 맡기고 결과를 검증하는 법</td><td>M1의 병렬 분석이 blueprint.md로 돌아오고, M2에서 리뷰 지적을 직접 확인해 처리할 때</td></tr>
 <tr><td>업스트림 API를 캐시와 single-flight 뒤로 정리하는 백엔드 계약 설계</td><td>M2에서 같은 curl 두 번, 두 번째가 즉시 도착할 때</td></tr>
 <tr><td>폴링(react-query)과 스트리밍(SSE)을 구분해 쓰는 프런트 데이터 전략</td><td>M3의 45초 폴링과 M4의 델타 누적이 다른 코드 경로로 공존할 때</td></tr>
 <tr><td>Bedrock 스트리밍(converse_stream)을 제품 기능으로 포장하는 법</td><td>M4에서 phase 배지와 타자기 렌더가 동작할 때</td></tr>
-<tr><td>superpowers Phase 리듬으로 풀스택을 조립하는 법</td><td>M1의 계획이 M2~M4에서 그대로 소화될 때</td></tr>
+<tr><td>짧은 의도 프롬프트와 superpowers Phase 리듬으로 풀스택을 조립하는 법</td><td>M1의 계획이 M2~M4에서 두세 줄 지시만으로 소화될 때</td></tr>
 </table>
 <div class="step-title"><span class="step-no">R</span>챕터 연결 지도, 배운 내용이 재등장하는 곳</div>
 <p class="body">이 캡스톤은 새 기술을 가르치지 않습니다. <strong>Ch1~6에서 배운 것을 실전 배치</strong>합니다.</p>
 <table class="tbl">
 <tr><th>챕터</th><th>이 캡스톤에서 재등장하는 곳</th></tr>
 <tr><td><a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1 설치부터 Headless까지</a></td><td>M0~전체: 세션 운용, 지시 → 실행 → 검증 루프, CLAUDE.md를 존중하는 습관</td></tr>
-<tr><td><a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2 Subagents</a></td><td>M2~M3: code-reviewer 서브에이전트로 Phase 산출물 리뷰, 백엔드/프런트 병렬 진행</td></tr>
+<tr><td><a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2 Subagents</a></td><td>M1~M4: Task 디스패치 3패턴이 그대로 나옵니다. 병렬 호출(M1 원작 분석), 명시적 호출(M2 code-reviewer), 자동 디스패치(M3 리뷰), 그리고 Phase를 태스크별 서브에이전트로 돌리는 subagent-driven-development</td></tr>
 <tr><td><a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3 Admin Setup</a></td><td>M0/M4: Bedrock 라우팅과 자격의 배경, Bearer 키가 조직 통제선 안에서 도는 이유</td></tr>
 <tr><td><a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4 Settings, 훅과 스킬</a></td><td>OPT: 하네스 성숙화, 훅과 스킬을 프로젝트 자산으로 승격하는 마무리 의식</td></tr>
-<tr><td><a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5 CLI Reference</a></td><td>확장 방향: 헤드리스 패턴으로 /api/health 스모크를 파이프라인화</td></tr>
+<tr><td><a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5 CLI Reference</a></td><td>M1: <code class="inline">--add-dir</code>로 원작 폴더를 세션 범위에 추가. 확장 방향: 헤드리스 패턴으로 /api/health 스모크를 파이프라인화</td></tr>
 <tr><td><a href="ClaudeCode_Ch6_HandsOnLab.html" style="color:#c9a2ff">Ch6 Agent SDK</a></td><td>확장 방향: 백엔드에 in-process 도구로 Claude를 심는 다음 단계의 방향</td></tr>
 </table>
 <div class="callout tip">
 <span class="co-title">규칙, 캡스톤 공통</span>
-    ① 코드와 파일 구성을 직접하지 않고, Claude에게 지시해서 만듭니다 ② 각 Phase의 DoD를 통과해야 다음으로
-    ③ 막히면 "막힐 때 열어보기"의 힌트를 씁니다. 다른 참가자와의 의존성은 없습니다.
+    ① 코드와 파일 구성을 직접 하지 않고, Claude에게 지시해서 만듭니다 ② 각 Phase의 DoD를 통과해야 다음으로
+    ③ 원작은 참고본입니다. config의 종목 데이터는 옮겨 써도 되지만 코드는 Claude가 새로 작성합니다
+    ④ 막히면 "막힐 때 열어보기"의 힌트를 씁니다. 다른 참가자와의 의존성은 없습니다.
+  </div>
+<div class="callout tip">
+<span class="co-title">이번 캡스톤의 프롬프트 원칙</span>
+    프롬프트에는 <strong>무엇을 원하는지만</strong> 짧게 씁니다. 어떻게 만들지는 원작을 읽은 서브에이전트와
+    brainstorming이 채웁니다. 결과가 기대와 다르면 스펙을 늘리지 말고 <strong>다른 점을 한 문장으로</strong> 말하세요.
+    예: "상승이 초록으로 보여, 원작처럼 빨강으로 바꿔 줘".
   </div>
 </section>
 <section class="task" id="blueprint">
-<div class="task-head"><span class="task-num">BLUEPRINT</span><h2>구현 청사진, 원작 상세 분석</h2><span class="time-badge">참고</span></div>
+<div class="task-head"><span class="task-num">BLUEPRINT</span><h2>구현 청사진, 서브에이전트 결과와 대조하기</h2><span class="time-badge">참고</span></div>
 <p class="task-goal">
-    원작 stock-monitoring의 실코드를 분석해 뽑은 <strong>구현 지도</strong>입니다. M1 설계가 이 구조로
-    수렴하도록 방향을 잡아 주고, 계획이 이상하게 흐르면 여기로 돌아와 대조하세요.
+    원작 stock-monitoring(2026.09 기준)의 실코드에서 뽑은 <strong>정답지</strong>입니다. M1에서 서브에이전트가 돌려준
+    <code class="inline">docs/blueprint.md</code>를 이 표와 대조하고, 빠진 항목이 있으면 한 문장으로 보충을 지시하세요.
+    계획이 이상하게 흐를 때도 여기로 돌아옵니다.
   </p>
 <div class="step-title"><span class="step-no">0</span>요청 흐름 한 눈에</div>
 <div class="code-wrap output" data-code-kind="output">
 <div class="code-head"><span class="code-label">두 개의 데이터 경로, 폴링과 스트리밍</span><button aria-label="두 개의 데이터 경로, 폴링과 스트리밍 복사" class="ws-copy" data-copy-code="workshop-code-001" data-copy-label="두 개의 데이터 경로, 폴링과 스트리밍 복사" type="button">복사</button></div>
 <pre id="workshop-code-001"><code>[폴링 경로]  45초마다 (장 마감 시 600초)
-Browser ── react-query ──&gt; FastAPI ──&gt; TTL Cache ──(miss, single-flight)──&gt; yfinance / pykrx
+Browser ── react-query ──&gt; FastAPI ──&gt; TTL Cache ──(miss, single-flight)──&gt; yfinance (US + KR .KS/.KQ)
    ^                          |            |
    +──── JSON 완결 응답 ──────+      (hit) 즉시 반환, 업스트림 무호출
 
@@ -175,30 +186,34 @@ Browser ── fetch(SSE) ──&gt; FastAPI ── converse_stream ──&gt; B
 <div class="step-title"><span class="step-no">1</span>화면과 컴포넌트 지도 (원작 실물)</div>
 <table class="tbl">
 <tr><th>화면</th><th>구성 컴포넌트</th><th>전환</th></tr>
-<tr><td>Dashboard</td><td>지표 바, 지수 카드, 종목 테이블(US/KR 탭)</td><td>종목 클릭 → StockDetail</td></tr>
-<tr><td>StockDetail</td><td>StockHeader, FundamentalCards, PriceChart(캔들), ReturnsRow, Week52Bar, OrderBook, InvestorPanel, StockNews, AIPanel</td><td>react-router, 뒤로 가기 복귀</td></tr>
-<tr><td>ArticleAnalysis</td><td>기사 본문 + AI 분석(react-markdown 렌더)</td><td>뉴스에서 진입</td></tr>
+<tr><td>Dashboard (/)</td><td>MarketStrip(지수 + 지표 크롤), MarketPulse(상승/하락/보합 집계), SectorBars, StockTable(US/KR/★관심 탭), MacroPanel, NewsFeed, StatusBar</td><td>종목 클릭 → StockDetail</td></tr>
+<tr><td>StockDetail (/stocks/:symbol)</td><td>Watchlist 레일, StockHeader, PriceChart(캔들 + MA, 볼린저, RSI, MACD), ReturnsRow, Week52Bar, FundamentalCards, OrderBook, InvestorPanel, StockNews, AIPanel(자유 질문)</td><td>react-router, 뒤로 가기 복귀</td></tr>
+<tr><td>ArticleAnalysis (/articles)</td><td>기사 URL 입력 + AI 분석 SSE 결과(react-markdown 렌더)</td><td>뉴스 링크 또는 직접 입력으로 진입</td></tr>
 </table>
-<p class="body">워크샵 스코프는 <strong>핵심 구성</strong>만: StockHeader + PriceChart + ReturnsRow + Week52Bar + AIPanel.
-  OrderBook/InvestorPanel/StockNews/ArticleAnalysis는 바이브 코딩 라운드의 확장 과제로 남깁니다.</p>
+<p class="body">워크샵 스코프는 <strong>핵심 구성</strong>만: MarketStrip + StockTable + StockHeader + PriceChart(캔들) + ReturnsRow + Week52Bar + AIPanel.
+  나머지는 퀄리티 강화 라운드의 카드로 남깁니다.</p>
 <div class="step-title"><span class="step-no">2</span>API 계약 (원작 라우트 실측)</div>
 <table class="tbl">
 <tr><th>라우트</th><th>역할</th></tr>
-<tr><td>GET /api/health</td><td>살아있음 확인</td></tr>
-<tr><td>GET /api/market/overview</td><td>지수 5종 + 경제지표 (Dashboard 상단)</td></tr>
-<tr><td>GET /api/market/quotes</td><td>US/KR 종목 시세 일괄</td></tr>
-<tr><td>GET /api/stocks/{symbol}</td><td>가격 헤더 + 기간 수익률 + 52주 범위</td></tr>
-<tr><td>GET /api/stocks/{symbol}/chart?range=</td><td>캔들 OHLC (1w/1m/3m/1y, 원작은 기간별 TTL 캐시)</td></tr>
-<tr><td>POST /api/ai/stocks/{symbol}</td><td>SSE 스트리밍 분석 (원작은 기사 분석 POST /api/ai/articles도 제공)</td></tr>
+<tr><td>GET /api/health</td><td>살아있음 확인, 소스별 상태(yahoo/rss/bedrock)</td></tr>
+<tr><td>GET /api/market/overview</td><td>지수 5종 + 경제지표 (마켓 스트립)</td></tr>
+<tr><td>GET /api/market/quotes?market=us|kr</td><td>시장별 종목 시세 일괄</td></tr>
+<tr><td>GET /api/stocks/{symbol}</td><td>가격 헤더 + 기간 수익률 + 52주 범위, 유니버스 밖 심볼은 404</td></tr>
+<tr><td>GET /api/stocks/{symbol}/chart?period=</td><td>캔들 OHLC. period는 1w|1m|3m|6m|1y|5y (1w 시간봉, 5y 주봉, 나머지 일봉), 기간별 TTL 캐시</td></tr>
+<tr><td>POST /api/ai/stocks/{symbol}</td><td>SSE 스트리밍 분석. 원작은 선택 본문 {"question"}으로 자유 질문을 받고, 기사 분석 POST /api/ai/articles도 제공</td></tr>
 </table>
 <div class="step-title"><span class="step-no">3</span>데이터와 운영 계약</div>
 <table class="tbl">
 <tr><th>계약</th><th>내용</th></tr>
+<tr><td>종목 유니버스</td><td>원작은 미국 100 + 한국 100(영문명, 한글명 name_ko, 섹터 포함). 워크샵은 config에 전부 두되 <strong>시장별 20개만 활성</strong>: 참가자 전원이 같은 IP에서 Yahoo를 부르므로 호출량을 줄인다</td></tr>
+<tr><td>데이터 소스</td><td>yfinance 하나. 한국 종목은 .KS/.KQ 접미사, 지수는 ^KS11/^KQ11. 개별 심볼 실패는 건너뛴다</td></tr>
+<tr><td>응답 envelope</td><td>모든 데이터 응답은 {"asOf", "marketOpen", "data"} 한 형태. 프런트는 asOf로 갱신 시각을 그린다</td></tr>
 <tr><td>갱신 주기</td><td>주가 45초, 뉴스 120초, <strong>장 마감 시간대 600초 절전</strong> (market-hours-aware)</td></tr>
-<tr><td>캐시</td><td>원작은 L1 메모리 + L2 DynamoDB 티어드(TTL: 차트 기간별, 펀더멘털 12h, AI 6h, L2 24h) + single-flight 잠금 + 60초 시세 오버레이. 워크샵은 <strong>L1 메모리 + single-flight</strong>만</td></tr>
-<tr><td>AI 스트리밍</td><td>호출 프리미티브는 converse_stream 하나(블로킹 invoke_model은 삭제됨). SSE 이벤트 phase → delta* → final, 시나리오별 maxTokens 상한 분리(잘림 신호 ai_stream_truncated)</td></tr>
+<tr><td>캐시</td><td>원작은 L1 메모리 + L2 DynamoDB 계층형(TTL: 차트 1w 10분부터 1y/5y 24시간, 펀더멘털 12h, AI 6h, L2 24h) + single-flight 잠금 + 시세 캐시 가격 오버레이. 워크샵은 <strong>L1 메모리 + single-flight</strong>만</td></tr>
+<tr><td>AI 스트리밍</td><td>호출은 converse_stream 하나, SSE 이벤트 phase → delta* → final. final은 모든 경로에서 보낸다(스트림이 열린 뒤의 오류는 final 안의 {"error", "status"}로). 원작의 비용 방어는 IP당 분당 3회, 6시간 결과 캐시, 전역 동시 2</td></tr>
 <tr><td>프런트 데이터</td><td>react-query가 45초 폴링으로 화면을 살리되, <strong>AI 스트리밍만 fetch 직접</strong>: react-query는 "완결된 결과 하나"를 캐시하는 모델이라 델타 누적에 맞지 않는다(원작 주석)</td></tr>
 <tr><td>키의 거처</td><td>Bedrock 인증은 boto3 기본 해석에 맡긴다 = AWS_BEARER_TOKEN_BEDROCK 환경변수를 그대로 인식. 자격 실패는 503으로 매핑, 앱은 정상</td></tr>
+<tr><td>UI 규칙</td><td>터미널 디자인 언어(원작 ADR-001): 패널 그리드, 앰버 액센트, 상승 빨강/하락 파랑/보합 본문색, 초록은 장 상태 점 전용, 색은 CSS 토큰으로만</td></tr>
 </table>
 <div class="step-title"><span class="step-no">4</span>기술 선택 5</div>
 <table class="tbl">
@@ -212,13 +227,18 @@ Browser ── fetch(SSE) ──&gt; FastAPI ── converse_stream ──&gt; B
 </section>
 <section class="task" id="m0">
 <div class="task-head"><span class="task-num">MISSION 00</span><h2>사전 준비</h2><span class="time-badge">10분</span></div>
-<p class="task-goal">Python과 Node 확인, 프로젝트 폴더, 그리고 <strong>Bearer 키(.env)</strong>까지. Phase 4의 AI 스트리밍에 필요합니다.</p>
+<p class="task-goal">Python과 Node 확인, 프로젝트 폴더, <strong>원작 참고본</strong>, 그리고 <strong>Bearer 키(.env)</strong>까지 준비합니다. 키는 Phase 4의 AI 스트리밍에 필요합니다.</p>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-002" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
 <pre id="workshop-code-002"><code>python3 --version &amp;&amp; node --version    # Python 3.11+, Node 20+
-mkdir -p ~/capstone/capstone-2 &amp;&amp; cd ~/capstone/capstone-2
-git init -q 2&gt;/dev/null; git config user.name "capstone"; git config user.email "capstone@lab.local"</code></pre>
+mkdir -p ~/capstone/capstone-2/.claude/agents &amp;&amp; cd ~/capstone/capstone-2
+git init -q 2&gt;/dev/null; git config user.name "capstone"; git config user.email "capstone@lab.local"
+[ -d ~/capstone/ref/stock-monitoring ] || git clone -q --depth 1 https://github.com/whchoi98/stock-monitoring ~/capstone/ref/stock-monitoring
+ls ~/capstone/ref/stock-monitoring    # backend  docs  frontend  infra ...</code></pre>
 </div>
+<p class="body"><code class="inline">~/capstone/ref/stock-monitoring</code>은 M1에서 서브에이전트가 읽을 원작 참고본입니다.
+  프로젝트 폴더 밖에 두어 내 git 이력과 섞이지 않게 합니다. <code class="inline">.claude/agents</code>를 세션 시작 전에 만들어 두면
+  M1에서 만드는 서브에이전트를 세션 재시작 없이 인식합니다.</p>
 <p class="body">다른 캡스톤에서 이미 만들었다면 <code class="inline">~/capstone/.env</code>가 있으니 1/2는 건너뛰세요.</p>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal 1/2, .env에 Bearer 토큰 저장</span><button aria-label="Terminal 1/2, .env에 Bearer 토큰 저장 복사" class="ws-copy" data-copy-code="workshop-code-003" data-copy-label="Terminal 1/2, .env에 Bearer 토큰 저장 복사" type="button">복사</button></div>
@@ -240,145 +260,102 @@ aws bedrock-runtime converse \
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
 <label class="cp-item"><input data-cp="m0a" type="checkbox"/><span>Converse 스모크가 응답했습니다 (키 유효)</span></label>
-<label class="cp-item"><input data-cp="m0b" type="checkbox"/><span>capstone-2 폴더와 git 신원이 준비되었습니다</span></label>
+<label class="cp-item"><input data-cp="m0b" type="checkbox"/><span>capstone-2 폴더, git 신원, 원작 참고본이 준비되었습니다</span></label>
 </div>
 </section>
 <section class="task" id="m1">
-<div class="task-head"><span class="task-num">MISSION 01</span><h2>설계, 브레인스토밍</h2><span class="time-badge">15분</span></div>
-<p class="task-goal">API 계약, 캐시, SSE 스트리밍, Phase 순서까지 <strong>요구 9조항</strong>으로 넘깁니다.</p>
-<p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 세션 운용과 Capstone Setup의 superpowers 워크플로.</p>
+<div class="task-head"><span class="task-num">MISSION 01</span><h2>원작 분석과 설계</h2><span class="time-badge">20분</span></div>
+<p class="task-goal">서브에이전트 두 개가 원작을 <strong>병렬로</strong> 읽어 청사진과 config를 돌려주면, 그것을 바탕으로 <strong>짧은 프롬프트 하나</strong>로 설계합니다.</p>
+<p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a> Task 디스패치의 병렬 호출 패턴과 Capstone Setup의 superpowers 워크플로.</p>
 <div class="code-wrap" data-code-kind="terminal">
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal (~/capstone/capstone-2)</span><button aria-label="Terminal (~/capstone/capstone-2) 복사" class="ws-copy" data-copy-code="workshop-code-005" data-copy-label="Terminal (~/capstone/capstone-2) 복사" type="button">복사</button></div>
-<pre id="workshop-code-005"><code>cd ~/capstone/capstone-2 &amp;&amp; claude</code></pre>
+<pre id="workshop-code-005"><code>cd ~/capstone/capstone-2 &amp;&amp; claude --add-dir ~/capstone/ref/stock-monitoring</code></pre>
 </div>
+<p class="body"><code class="inline">--add-dir</code>는 프로젝트 밖의 원작 폴더를 이 세션의 작업 범위에 넣습니다
+  (<a href="ClaudeCode_Reference2_Commands.html" style="color:#c9a2ff">Reference 2</a>). 서브에이전트가 원작 파일을 읽을 때마다 권한 확인이 뜨지 않습니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력 1/2, 설계</span><button aria-label="Claude 세션 입력 1/2, 설계 복사" class="ws-copy" data-copy-code="workshop-code-006" data-copy-label="Claude 세션 입력 1/2, 설계 복사" type="button">복사</button></div>
-<pre id="workshop-code-006"><code>/superpowers:brainstorming 다음 요구사항으로 "Market Desk on Web", 웹 시황 대시보드를 설계하자.
-1) 구조: backend/(Python 3.11+ FastAPI, app/api 라우트, app/services 데이터, app/core/config.py 상수,
-   venv + requirements.txt: fastapi, uvicorn, yfinance, pykrx, httpx, boto3) +
-   frontend/(Vite + React + TypeScript, 의존성: @tanstack/react-query, lightweight-charts)
-2) 데이터: yfinance(미국 주식 + 지수 ^GSPC/^IXIC/^DJI + 경제지표), pykrx(한국 주식, 지수는 yfinance
-   ^KS11/^KQ11). 종목/지표 목록은 config.py 상수로, 실데이터 목록은 설계 직후 이어서 제공한다.
-   시작은 US 20 + KR 20으로 잘라 쓰고 전체 50 + 50은 config에서 여는 구조로.
-   개별 심볼 실패는 건너뛰고, US 시세는 yf.download 벌크로
-3) API 계약(FastAPI 라우트): GET /api/health, GET /api/market/overview(지수 5 + 지표),
-   GET /api/market/quotes(US/KR 시세), GET /api/stocks/{symbol}(가격 헤더 + 기간 수익률 + 52주 범위),
-   GET /api/stocks/{symbol}/chart?range=1w|1m|3m|1y(캔들 OHLC). 응답은 프론트가 그대로 그릴 수 있는 JSON
-4) 캐시: 인메모리 TTL 캐시 하나로 시작(시세 45초, 차트는 기간별로 길게), 같은 키 동시 요청은 한 번만
-   부르는 single-flight 잠금. 장 마감 시간대에는 갱신 주기를 600초로 늦춘다
-5) Dashboard 화면: 상단 경제지표 바, 지수 카드 5장(등락색), 종목 테이블(US/KR 탭, Symbol/Name/Price/
-   Change/%/Volume, 상승 초록/하락 빨강), react-query로 45초 자동 갱신
-6) StockDetail 화면: 테이블에서 클릭 진입. StockHeader(현재가, 등락률, 거래량), lightweight-charts
-   캔들 차트(1W/1M/3M/1Y 기간 탭), ReturnsRow(기간 수익률 4종), Week52Bar(52주 범위 내 현재 위치),
-   뒤로 가기로 대시보드 복귀
-7) AI 분석(SSE 스트리밍): POST /api/ai/stocks/{symbol}가 Bedrock converse_stream
-   (global.anthropic.claude-sonnet-4-6, maxTokens 1024)으로 기술적 분석/투자 포인트/리스크를 한국어로
-   생성하며 text/event-stream으로 흘린다. 이벤트는 phase → delta(부분 텍스트)* → final 순서.
-   프론트 AIPanel은 델타를 누적해 타자기처럼 렌더하고, 이 호출만 react-query 대신 fetch를 직접 쓴다
-   (react-query는 완결된 결과 캐시 모델이라 점진 델타에 맞지 않는다).
-   인증은 환경변수 AWS_BEARER_TOKEN_BEDROCK(발급 API 키), boto3 클라이언트에 자격 인자를 넣지 않고
-   리전 ap-northeast-2. Bedrock IAM 정책은 만들지 않으며, 키가 없으면 503을 주고 패널만 비활성
-8) UI 무드(텍스트 스펙): 다크 딥네이비, 숫자 우측 정렬, 상승 초록 ▲ / 하락 빨강 ▼,
-   AI 패널은 스트리밍 중 phase 배지(fetching/analyzing)를 보여준다
-9) 구현 순서는 Phase 1(백엔드 코어: overview/quotes/{symbol}/chart + 캐시, uvicorn과 curl 검증) →
-   Phase 2(Dashboard, dev 서버로 미리보기) → Phase 3(StockDetail + 캔들 차트) →
-   Phase 4(AI SSE + 프론트 빌드를 backend/static으로 넣어 :8000 통합 서빙).
-   시간 제약 2시간: 테스트 생략, curl과 브라우저로 검증. 호가/투자자 동향/뉴스는 후순위(확장 과제로만 남긴다)
-결정이 필요하면 이 범위 안에서 최소한으로만 물어봐.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력 1/4, 원작 병렬 분석</span><button aria-label="Claude 세션 입력 1/4, 원작 병렬 분석 복사" class="ws-copy" data-copy-code="workshop-code-006" data-copy-label="Claude 세션 입력 1/4, 원작 병렬 분석 복사" type="button">복사</button></div>
+<pre id="workshop-code-006"><code>~/capstone/ref/stock-monitoring 에 원작 시황 대시보드가 있어. Explore 서브에이전트 두 개를 병렬로 띄워 조사해 줘.
+- 하나는 구조, API 라우트, 화면 구성, 캐시와 AI 스트리밍 방식을 요약
+- 하나는 backend/app/core/config.py에서 지수, 종목(미국 100, 한국 100, 한글명과 섹터 포함), 경제지표 상수를 추출
+요약은 docs/blueprint.md로, 상수는 backend/app/core/config.py로 저장하고 커밋해 줘. 코드는 참고만 하고 옮기지 마.</code></pre>
 </div>
+<p class="body">두 서브에이전트는 백그라운드로 돕니다. 기다리는 동안 다음 입력으로 리뷰어를 미리 만들어 둡니다.
+  이 리뷰어는 M2~M4에서 계속 씁니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력 2/2, config 실데이터 (설계 대화에 이어서)</span><button aria-label="Claude 세션 입력 2/2, config 실데이터 (설계 대화에 이어서) 복사" class="ws-copy" data-copy-code="workshop-code-007" data-copy-label="Claude 세션 입력 2/2, config 실데이터 (설계 대화에 이어서) 복사" type="button">복사</button></div>
-<pre id="workshop-code-007"><code>이어서, 방금 설계에 쓸 config.py 실데이터야. 이 상수들을 config.py에 그대로 반영해줘.
-이름 매핑(US_STOCK_NAMES)과 섹터 매핑(US_STOCK_SECTORS)은 네가 아는 대로 채워.
-
-REFRESH_INTERVAL = 45
-CLOSED_REFRESH_INTERVAL = 600  # 장 마감 시 절전 주기
-NEWS_REFRESH_INTERVAL = 120
-
-US_INDICES = {"^GSPC": "S&amp;P 500", "^IXIC": "NASDAQ", "^DJI": "DOW"}
-KR_INDICES = {"^KS11": "KOSPI", "^KQ11": "KOSDAQ"}
-
-US_STOCKS = [
-  "AAPL","MSFT","GOOGL","AMZN","NVDA","META","TSLA","BRK-B","JPM","V",
-  "JNJ","UNH","WMT","MA","PG","HD","XOM","CVX","LLY","ABBV",
-  "PFE","KO","PEP","MRK","COST","AVGO","AMD","ORCL","CRM","NFLX",
-  "ADBE","CSCO","ACN","TXN","INTC","QCOM","INTU","AMAT","BKNG","ISRG",
-  "MDLZ","ADP","REGN","VRTX","GILD","PANW","LRCX","MU","KLAC","SNPS",
-]
-
-KR_STOCKS = {  # 코드: 이름 (섹터는 아래 어휘로 네가 매핑)
-  "005930":"Samsung Electronics","000660":"SK Hynix","373220":"LG Energy Solution",
-  "005380":"Hyundai Motor","000270":"Kia","207940":"Samsung Biologics",
-  "006400":"Samsung SDI","035420":"NAVER","035720":"Kakao","005490":"POSCO Holdings",
-  "068270":"Celltrion","028260":"Samsung C&amp;T","105560":"KB Financial","055550":"Shinhan Financial",
-  "012330":"Hyundai Mobis","066570":"LG Electronics","003670":"POSCO Future M","051910":"LG Chem",
-  "096770":"SK Innovation","034730":"SK","000810":"Samsung Fire","003550":"LG",
-  "032830":"Samsung Life","009150":"Samsung Electro","086790":"Hana Financial","010130":"Korea Zinc",
-  "033780":"KT&amp;G","011200":"HMM","247540":"Ecopro BM","377300":"Kakao Pay",
-  "030200":"KT","017670":"SK Telecom","018260":"Samsung SDS","036570":"NCsoft",
-  "316140":"Woori Financial","003490":"Korea Shipbuilding","034020":"Doosan Enerbility",
-  "011170":"Lotte Chemical","024110":"Industrial Bank of Korea","010950":"S-Oil",
-  "006800":"Mirae Asset Securities","004020":"Hyundai Steel","000720":"Hyundai E&amp;C",
-  "002790":"Amore Pacific","138040":"Meritz Financial","259960":"Krafton",
-  "326030":"SK Biopharm","323410":"Kakao Bank","361610":"SK IE Technology","352820":"Hive",
-}
-KR 섹터 어휘: Semiconductor, Battery, Auto, Auto Parts, Bio, Internet, Steel, Holding, Financial,
-Insurance, Securities, Fintech, Electronics, Materials, Chemical, Energy, Telecom, IT Services,
-Gaming, Shipbuilding, Industrial, Shipping, Construction, Cosmetics, Entertainment, Tobacco,
-Non-Ferrous, Components
-
-INDICATORS = {  # 심볼: (이름, 단위)
-  "CL=F": ("WTI Oil","$"), "GC=F": ("Gold","$"), "SI=F": ("Silver","$"), "HG=F": ("Copper","$"),
-  "EURUSD=X": ("EUR/USD",""), "KRW=X": ("USD/KRW","W"), "JPY=X": ("USD/JPY",""),
-  "CNY=X": ("USD/CNY",""), "^TNX": ("US 10Y","%"), "BTC-USD": ("Bitcoin","$"), "ETH-USD": ("Ethereum","$"),
-}
-
-SECTOR_INDICATOR_MAP = {  # 종목 섹터 -&gt; 관련 지표 (Detail의 관련 지표 매핑)
-  "Technology": ["^IXIC","BTC-USD"], "Semiconductor": ["^IXIC","BTC-USD"],
-  "Internet": ["^IXIC","BTC-USD"], "Communication": ["^IXIC","BTC-USD"],
-  "Energy": ["CL=F","HG=F"], "Chemical": ["CL=F","HG=F"], "Materials": ["CL=F","HG=F"],
-  "Financial": ["^TNX","EURUSD=X"], "Insurance": ["^TNX","EURUSD=X"], "Fintech": ["^TNX","BTC-USD"],
-  "Consumer": ["GC=F","EURUSD=X"], "Auto": ["KRW=X","CL=F"], "Healthcare": ["GC=F","^TNX"],
-  "Bio": ["GC=F","^TNX"], "Battery": ["HG=F","SI=F"], "Steel": ["HG=F","CNY=X"],
-  "Telecom": ["^TNX","KRW=X"], "Holding": ["^TNX","KRW=X"], "Electronics": ["^IXIC","KRW=X"],
-}
-
-NEWS_FEEDS = {
-  "yahoo": "https://finance.yahoo.com/news/rssindex",
-  "yahoo_markets": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC&amp;region=US&amp;lang=en-US",
-  "hankyung": "https://www.hankyung.com/feed/economy",
-  "mk": "https://www.mk.co.kr/rss/30100041/",
-}</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력 2/4, 기다리는 동안 리뷰어 만들기</span><button aria-label="Claude 세션 입력 2/4, 기다리는 동안 리뷰어 만들기 복사" class="ws-copy" data-copy-code="workshop-code-007" data-copy-label="Claude 세션 입력 2/4, 기다리는 동안 리뷰어 만들기 복사" type="button">복사</button></div>
+<pre id="workshop-code-007"><code>조사가 도는 동안 이 프로젝트에 code-reviewer 서브에이전트를 만들어 줘.
+도구는 읽기 전용(Read, Grep, Glob, git diff)만 주고, 버그와 캐시 동시성 문제 중 확신이 높은 것만 보고하게. 만들고 커밋해 줘.</code></pre>
+</div>
+<div class="callout tip">
+<span class="co-title">관찰 포인트, 병렬 호출</span>
+    두 서브에이전트가 프롬프트 아래 패널에 나란히 뜹니다. <code class="inline">/tasks</code>로 진행을 보고, 끝나면 메인이 결과를 합쳐 파일로 씁니다.
+    Explore는 읽기 전용이고 <strong>결론만</strong> 돌려줍니다. 원작 코드가 메인 컨텍스트에 통째로 실리지 않으니
+    "코드는 옮기지 않는다"는 규칙이 구조적으로 지켜집니다.
+  </div>
+<div class="callout tip">
+<span class="co-title">대조 포인트, blueprint.md</span>
+    <code class="inline">docs/blueprint.md</code>가 위 구현 청사진의 라우트 6개, single-flight 캐시, SSE 이벤트 순서(phase, delta, final),
+    상승 빨강/하락 파랑 규칙을 담았는지 훑어보세요. 빠졌다면 "blueprint.md에 SSE 이벤트 순서가 없어, 원작에서 찾아 보충해 줘"처럼
+    한 문장으로 지시합니다.
+  </div>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력 3/4, 설계</span><button aria-label="Claude 세션 입력 3/4, 설계 복사" class="ws-copy" data-copy-code="workshop-code-008" data-copy-label="Claude 세션 입력 3/4, 설계 복사" type="button">복사</button></div>
+<pre id="workshop-code-008"><code>/superpowers:brainstorming docs/blueprint.md를 바탕으로 원작을 135분 버전으로 줄인 "Market Desk on Web"을 설계하자.
+범위는 대시보드, 종목 상세(캔들 차트), AI 분석 스트리밍까지. 화면은 원작의 터미널 UI를 따르고 종목은 시장별 20개만 켜.
+배포와 테스트는 생략하고 curl과 브라우저로 검증한다. 결정이 필요하면 최소한으로만 물어봐.</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">자동화 옵션, auto mode</span>
     세션에 <code class="inline">auto mode on</code>을 선언해 두면 superpowers가
-    brainstorming → writing-plans → executing-plans의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
+    brainstorming → writing-plans → 실행의 <strong>단계 전환과 승인 대기를 자동으로</strong> 이어 갑니다.
     시간이 빠듯할 때 유용합니다. 단계마다 직접 검토하려면 기본(수동)을 유지하고, 되돌리려면
     <code class="inline">auto mode off</code>입니다.
   </div>
-<p class="body">브레인스토밍 후 <code class="inline">/superpowers:writing-plans</code>로 계획을 만들고
-  Phase 4개 구성을 승인하세요. 계획이 위 <strong>구현 청사진</strong>(화면/라우트/운영 계약)과 대체로 합치하는지,
-  그리고 <strong>후순위 규칙</strong>(호가/투자자 동향/뉴스는 확장 과제로)이 반영됐는지 확인하세요.</p>
+<p class="body">브레인스토밍이 끝나면 아래 한 줄로 계획을 만들고 Phase 4개 구성을 승인하세요. 계획 끝에 실행 방식을 묻는 질문이 나오면
+  <strong>Subagent-Driven</strong>을 고릅니다. 태스크마다 새 서브에이전트가 구현하고, 태스크 사이에 리뷰가 붙는 방식입니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력 4/4, 계획</span><button aria-label="Claude 세션 입력 4/4, 계획 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Claude 세션 입력 4/4, 계획 복사" type="button">복사</button></div>
+<pre id="workshop-code-009"><code>/superpowers:writing-plans Phase 4개로 나눠 줘: 백엔드 코어, 대시보드, 종목 상세, AI 스트리밍과 통합 서빙.</code></pre>
+</div>
+<div class="callout warn">
+<span class="co-title">원작이 안 읽힌다면</span>
+    ① clone이 실패했다면 M0의 clone 줄을 다시 실행하세요 ② GitHub clone이 막힌 환경이라면 입력 1/4의 경로 대신
+    <code class="inline">https://github.com/whchoi98/stock-monitoring</code>을 주고 웹에서 읽게 합니다
+    ③ 서브에이전트가 원작 코드를 길게 붙여 오면 "결론과 표만 남겨 줘"라고 줄이게 하세요.
+  </div>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
-<label class="cp-item"><input data-cp="m1" type="checkbox"/><span>Phase 4개 계획이 승인되었고 worktree가 열렸습니다</span></label>
+<label class="cp-item"><input data-cp="m1" type="checkbox"/><span>docs/blueprint.md와 config.py가 커밋되었고, Phase 4개 계획이 승인되었습니다</span></label>
 </div>
 </section>
 <section class="task" id="m2">
-<div class="task-head"><span class="task-num">MISSION 02</span><h2>Phase 1, 백엔드 코어</h2><span class="time-badge">35분</span></div>
-<p class="task-goal">FastAPI가 <strong>overview / quotes / 종목 상세 / 차트</strong>를 캐시 뒤에서 돌려주면 이 Phase는 끝입니다.</p>
-<p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프. 여유가 있다면 <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 code-reviewer 서브에이전트에게 캐시 모듈 리뷰를 맡겨 보세요.</p>
+<div class="task-head"><span class="task-num">MISSION 02</span><h2>Phase 1, 백엔드 코어</h2><span class="time-badge">30분</span></div>
+<p class="task-goal">FastAPI가 <strong>overview / quotes / 종목 상세 / 차트</strong>를 캐시 뒤에서 돌려주면 이 Phase는 끝입니다. 구현은 서브에이전트가, 리뷰는 M1에서 만든 code-reviewer가 맡습니다.</p>
+<p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch1_HandsOnLab.html" style="color:#c9a2ff">Ch1</a>의 지시 → 실행 → 검증 루프, <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 명시적 호출 패턴.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-008" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-008"><code>/superpowers:executing-plans Phase 1만 구현하고 멈춰줘. backend venv + requirements, config.py(제공한 실데이터, US/KR 각 20개 활성), services(yfinance 벌크 + pykrx, 개별 실패 스킵), 인메모리 TTL 캐시 + single-flight, 라우트 4종(overview, quotes, stocks/{symbol}, chart?range=). uvicorn 실행과 curl 검증 방법까지.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력 1/2, 구현</span><button aria-label="Claude 세션 입력 1/2, 구현 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="Claude 세션 입력 1/2, 구현 복사" type="button">복사</button></div>
+<pre id="workshop-code-010"><code>/superpowers:subagent-driven-development 계획의 Phase 1만 진행하고 멈춰줘. 끝나면 uvicorn 실행과 curl 검증 방법을 알려줘.</code></pre>
 </div>
+<div class="callout tip">
+<span class="co-title">관찰 포인트, 태스크마다 새 서브에이전트</span>
+    subagent-driven-development는 계획의 태스크마다 <strong>새 서브에이전트</strong>를 띄워 구현하고, 스펙 준수와 코드 품질을 리뷰한 뒤
+    다음 태스크로 넘어갑니다. 메인 세션은 지휘와 기록만 하므로 Phase가 길어져도 컨텍스트가 덜 찹니다.
+    중간에 "계속할까요?"를 묻지 않고 지정한 Phase 끝까지 이어 가는 것이 정상 동작입니다.
+  </div>
 <div class="code-wrap" data-code-kind="terminal">
-<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 실행과 스모크</span><button aria-label="Terminal, 실행과 스모크 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Terminal, 실행과 스모크 복사" type="button">복사</button></div>
-<pre id="workshop-code-009"><code>cd backend &amp;&amp; .venv/bin/uvicorn app.main:app --port 8000 &amp;
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 실행과 스모크</span><button aria-label="Terminal, 실행과 스모크 복사" class="ws-copy" data-copy-code="workshop-code-011" data-copy-label="Terminal, 실행과 스모크 복사" type="button">복사</button></div>
+<pre id="workshop-code-011"><code>cd backend &amp;&amp; .venv/bin/uvicorn app.main:app --port 8000 &amp;
 sleep 3
 curl -s localhost:8000/api/market/overview | head -c 300; echo
-curl -s "localhost:8000/api/stocks/AAPL/chart?range=1m" | head -c 200; echo</code></pre>
+time (curl -s "localhost:8000/api/market/quotes?market=kr" | head -c 200; echo)
+time (curl -s "localhost:8000/api/market/quotes?market=kr" | head -c 200; echo)   # 두 번째는 캐시로 즉시
+curl -s "localhost:8000/api/stocks/AAPL/chart?period=1m" | head -c 200; echo</code></pre>
+</div>
+<p class="body">라우트 모양이 이 명령과 조금 다르게 설계됐다면 Claude가 알려 준 검증 명령을 쓰세요. 중요한 것은 두 번째 quotes 호출이 즉시 오는지입니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력 2/2, 리뷰</span><button aria-label="Claude 세션 입력 2/2, 리뷰 복사" class="ws-copy" data-copy-code="workshop-code-012" data-copy-label="Claude 세션 입력 2/2, 리뷰 복사" type="button">복사</button></div>
+<pre id="workshop-code-012"><code>code-reviewer 서브에이전트로 캐시 모듈을 리뷰해 줘. 지적마다 맞는지 직접 확인하고, 확인된 것만 고쳐서 커밋해.</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">개념 짚기 (Level 200), 캐시와 single-flight</span>
@@ -387,12 +364,17 @@ curl -s "localhost:8000/api/stocks/AAPL/chart?range=1m" | head -c 200; echo</cod
     워크샵장에서 전원이 동시에 새로고침해도 yfinance가 평온한 이유가 이 두 줄에 있습니다.
     원작은 여기에 DynamoDB L2를 얹어 컨테이너가 재시작돼도 캐시가 살아남게 합니다.
   </div>
+<div class="callout warn">
+<span class="co-title">리뷰 결과를 그대로 믿지 않기</span>
+    리뷰어의 지적도 서브에이전트의 주장입니다. Ch2에서 본 것처럼 메인이 코드와 실행 결과로 다시 확인한 뒤에만 고칩니다.
+    quotes가 비거나 429가 오면 전원이 같은 IP에서 Yahoo를 부르는 탓일 수 있습니다. 활성 종목을 더 줄이고 TTL을 지키세요.
+  </div>
 <details class="solution">
 <summary>막힐 때 열어보기, single-flight 캐시 핵심 힌트</summary>
 <div class="sol-body">
 <div class="code-wrap" data-code-kind="file">
-<div class="code-head"><span class="code-label">cache.py 골격 (참고 조각)</span><button aria-label="cache.py 골격 (참고 조각) 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="cache.py 골격 (참고 조각) 복사" type="button">복사</button></div>
-<pre id="workshop-code-010"><code>import time, threading
+<div class="code-head"><span class="code-label">cache.py 골격 (참고 조각)</span><button aria-label="cache.py 골격 (참고 조각) 복사" class="ws-copy" data-copy-code="workshop-code-013" data-copy-label="cache.py 골격 (참고 조각) 복사" type="button">복사</button></div>
+<pre id="workshop-code-013"><code>import time, threading
 _store, _locks = {}, {}
 def get_or_fetch(key: str, ttl: int, fetch):
     now = time.time()
@@ -412,25 +394,35 @@ def get_or_fetch(key: str, ttl: int, fetch):
 </details>
 <div class="checkpoint">
 <div class="cp-title">DEFINITION OF DONE</div>
-<label class="cp-item"><input data-cp="m2a" type="checkbox"/><span>overview와 quotes가 실데이터 JSON으로 도착합니다</span></label>
-<label class="cp-item"><input data-cp="m2b" type="checkbox"/><span>같은 curl을 연달아 치면 두 번째가 캐시로 즉시 옵니다</span></label>
+<label class="cp-item"><input data-cp="m2a" type="checkbox"/><span>overview와 quotes가 실데이터 JSON으로 오고, 같은 curl 두 번째가 캐시로 즉시 옵니다</span></label>
+<label class="cp-item"><input data-cp="m2b" type="checkbox"/><span>code-reviewer의 지적을 직접 확인해 처리하고 커밋했습니다</span></label>
 </div>
 </section>
 <section class="task" id="m3">
 <div class="task-head"><span class="task-num">MISSION 03</span><h2>Phase 2 + 3, 대시보드와 상세</h2><span class="time-badge">45분</span></div>
 <p class="task-goal">React 대시보드가 45초마다 숨 쉬고, 종목을 클릭하면 <strong>캔들 차트가 있는 상세 화면</strong>이 열립니다.</p>
-<p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 병렬 감각. 프런트를 빌드하는 동안 백엔드 응답 필드 보강을 서브에이전트로 병행할 수 있습니다.</p>
+<p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch2_HandsOnLab.html" style="color:#c9a2ff">Ch2</a>의 자동 디스패치 패턴. 이번에는 리뷰어 이름을 부르지 않아도 메인이 description을 보고 code-reviewer를 고릅니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, Phase 2</span><button aria-label="Claude 세션 입력, Phase 2 복사" class="ws-copy" data-copy-code="workshop-code-011" data-copy-label="Claude 세션 입력, Phase 2 복사" type="button">복사</button></div>
-<pre id="workshop-code-011"><code>/superpowers:executing-plans Phase 2만 구현해줘. frontend(Vite React TS): 요구 5의 Dashboard(지표 바, 지수 카드 5장 등락색, US/KR 탭 종목 테이블), react-query 45초 폴링, dev 프록시(:5173 → :8000). 실행 방법을 알려줘.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, Phase 2</span><button aria-label="Claude 세션 입력, Phase 2 복사" class="ws-copy" data-copy-code="workshop-code-014" data-copy-label="Claude 세션 입력, Phase 2 복사" type="button">복사</button></div>
+<pre id="workshop-code-014"><code>/superpowers:subagent-driven-development Phase 2(대시보드)를 진행하고 멈춰줘. 끝나면 dev 서버 실행 방법을 알려줘.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
-<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 미리보기</span><button aria-label="Terminal, 미리보기 복사" class="ws-copy" data-copy-code="workshop-code-012" data-copy-label="Terminal, 미리보기 복사" type="button">복사</button></div>
-<pre id="workshop-code-012"><code>cd frontend &amp;&amp; npm run dev   # 브라우저에서 /proxy/5173/</code></pre>
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 미리보기</span><button aria-label="Terminal, 미리보기 복사" class="ws-copy" data-copy-code="workshop-code-015" data-copy-label="Terminal, 미리보기 복사" type="button">복사</button></div>
+<pre id="workshop-code-015"><code>cd frontend &amp;&amp; npm run dev   # 브라우저에서 /proxy/5173/</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, Phase 3</span><button aria-label="Claude 세션 입력, Phase 3 복사" class="ws-copy" data-copy-code="workshop-code-013" data-copy-label="Claude 세션 입력, Phase 3 복사" type="button">복사</button></div>
-<pre id="workshop-code-013"><code>/superpowers:executing-plans Phase 3(StockDetail)을 구현해줘. 테이블 클릭 → react-router 진입: StockHeader(현재가/등락률/거래량), lightweight-charts 캔들(1W/1M/3M/1Y 기간 탭), ReturnsRow(기간 수익률 4종), Week52Bar(52주 범위 내 위치), 뒤로 가기 복귀까지.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, Phase 3</span><button aria-label="Claude 세션 입력, Phase 3 복사" class="ws-copy" data-copy-code="workshop-code-016" data-copy-label="Claude 세션 입력, Phase 3 복사" type="button">복사</button></div>
+<pre id="workshop-code-016"><code>/superpowers:subagent-driven-development Phase 3(종목 상세)를 진행하고 멈춰줘.</code></pre>
+</div>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력, 자동 디스패치 리뷰</span><button aria-label="Claude 세션 입력, 자동 디스패치 리뷰 복사" class="ws-copy" data-copy-code="workshop-code-017" data-copy-label="Claude 세션 입력, 자동 디스패치 리뷰 복사" type="button">복사</button></div>
+<pre id="workshop-code-017"><code>지금까지의 프런트 변경 사항을 리뷰해 줘</code></pre>
+</div>
+<p class="body">화면이 원작과 다르게 느껴지면 스펙을 새로 쓰지 말고 원작을 다시 읽게 하세요.
+  서브에이전트가 원작의 규칙을 찾아오고, 메인은 우리 구조에 맞춰 반영합니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력, 화면이 원작과 다를 때 (예시)</span><button aria-label="Claude 세션 입력, 화면이 원작과 다를 때 (예시) 복사" class="ws-copy" data-copy-code="workshop-code-018" data-copy-label="Claude 세션 입력, 화면이 원작과 다를 때 (예시) 복사" type="button">복사</button></div>
+<pre id="workshop-code-018"><code>종목 테이블이 원작보다 밋밋해. Explore 서브에이전트로 원작 StockTable과 tokens.css를 확인하고, 우리 테이블을 그 규칙에 맞춰 줘.</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">개념 짚기 (Level 200), 폴링 vs 스트리밍</span>
@@ -440,10 +432,11 @@ def get_or_fetch(key: str, ttl: int, fetch):
     WebSocket을 쓰지 않는 것 자체가 하나의 설계 결정입니다.
   </div>
 <div class="callout warn">
-<span class="co-title">이 미션의 3대 함정</span>
+<span class="co-title">이 미션의 함정 네 가지</span>
     ① 프론트에서 API가 404 = dev 프록시 미설정, vite.config의 proxy로 /api를 :8000에 물리세요.
     ② 차트가 빈 화면 = OHLC 시간 포맷 불일치, lightweight-charts는 time을 유닉스 초 또는 "YYYY-MM-DD"로 받습니다.
     ③ KR 종목이 0원 = 장 마감 시간대의 정상 동작, 백엔드도 600초 절전 주기로 도는 중입니다.
+    ④ 상승이 초록으로 보임 = 서구 관례가 섞인 것, "원작처럼 상승 빨강, 하락 파랑으로"라고 한 문장이면 됩니다.
   </div>
 <div class="checkpoint">
 <div class="cp-title">DEFINITION OF DONE</div>
@@ -452,17 +445,21 @@ def get_or_fetch(key: str, ttl: int, fetch):
 </div>
 </section>
 <section class="task" id="m4">
-<div class="task-head"><span class="task-num">MISSION 04</span><h2>Phase 4, AI 스트리밍과 배포</h2><span class="time-badge">30분</span></div>
+<div class="task-head"><span class="task-num">MISSION 04</span><h2>Phase 4, AI 스트리밍과 통합 서빙</h2><span class="time-badge">30분</span></div>
 <p class="task-goal">분석 버튼을 누르면 <strong>Bedrock의 답이 한 글자씩 흘러드는 것</strong>, 이 캡스톤의 하이라이트입니다.</p>
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch3_HandsOnLab.html" style="color:#c9a2ff">Ch3</a>에서 본 Bedrock 라우팅과 자격의 배경, 그 위에서 도는 스트리밍 계약.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-014" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-014"><code>/superpowers:executing-plans Phase 4(AI SSE)를 구현해줘. POST /api/ai/stocks/{symbol}: Bedrock converse_stream(global.anthropic.claude-sonnet-4-6, maxTokens 1024, 리전 ap-northeast-2, 자격 인자 없이 환경변수 AWS_BEARER_TOKEN_BEDROCK, IAM 정책 금지)으로 기술적 분석/투자 포인트/리스크 3절을 text/event-stream으로: 이벤트 phase → delta* → final. 프론트 AIPanel은 fetch 직접 + 델타 누적 타자기 렌더 + phase 배지. 키 없으면 503과 패널 비활성. 마지막으로 npm run build 산출물을 backend/static으로 넣어 :8000 통합 서빙(make run 또는 스크립트)까지.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력 1/2, 구현</span><button aria-label="Claude 세션 입력 1/2, 구현 복사" class="ws-copy" data-copy-code="workshop-code-019" data-copy-label="Claude 세션 입력 1/2, 구현 복사" type="button">복사</button></div>
+<pre id="workshop-code-019"><code>/superpowers:subagent-driven-development Phase 4(AI 스트리밍과 통합 서빙)를 진행해 줘. 키는 환경변수 AWS_BEARER_TOKEN_BEDROCK을 쓰고, 키가 없으면 AI 패널만 꺼지게.</code></pre>
 </div>
 <div class="code-wrap" data-code-kind="terminal">
-<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 키 로드 후 통합 실행</span><button aria-label="Terminal, 키 로드 후 통합 실행 복사" class="ws-copy" data-copy-code="workshop-code-015" data-copy-label="Terminal, 키 로드 후 통합 실행 복사" type="button">복사</button></div>
-<pre id="workshop-code-015"><code>set -a; source ~/capstone/.env; set +a   # Bearer 키 로드
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 키 로드 후 통합 실행</span><button aria-label="Terminal, 키 로드 후 통합 실행 복사" class="ws-copy" data-copy-code="workshop-code-020" data-copy-label="Terminal, 키 로드 후 통합 실행 복사" type="button">복사</button></div>
+<pre id="workshop-code-020"><code>set -a; source ~/capstone/.env; set +a   # Bearer 키 로드
 make run    # 프론트 빌드 → :8000 통합 서빙, 브라우저에서 /proxy/8000/</code></pre>
+</div>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력 2/2, 최종 리뷰</span><button aria-label="Claude 세션 입력 2/2, 최종 리뷰 복사" class="ws-copy" data-copy-code="workshop-code-021" data-copy-label="Claude 세션 입력 2/2, 최종 리뷰 복사" type="button">복사</button></div>
+<pre id="workshop-code-021"><code>code-reviewer로 이번 작업 전체를 마지막으로 리뷰해 줘. 확인된 문제만 고치고 make run으로 다시 띄운 뒤 커밋해.</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">개념 짚기 (Level 200), SSE 와이어 포맷</span>
@@ -479,68 +476,75 @@ make run    # 프론트 빌드 → :8000 통합 서빙, 브라우저에서 /prox
     <code class="inline">X-Accel-Buffering: no</code> 헤더와 미디어타입 text/event-stream을 확인하세요.
   </div>
 <p class="body">대시보드 → 종목 상세 → 분석 스트리밍까지 한 바퀴 돌리고, <strong>흐르는 화면의 스크린샷을 Slack에 공유</strong>하세요.
-  그게 배포입니다. 원작은 여기에 티어드 캐시(DynamoDB L2)와 ECS Fargate 배포까지 얹혀 운영 중입니다, 다음 단계가 궁금하다면 그 방향입니다. 그리고 <a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5</a>의 헤드리스 패턴으로 /api/health 스모크를 파이프라인화하면 운영의 첫 발입니다.</p>
+  그게 배포입니다. 원작은 여기에 계층형 캐시(DynamoDB L2)와 ECS Fargate 배포까지 얹혀 운영 중입니다, 다음 단계가 궁금하다면 그 방향입니다. 그리고 <a href="ClaudeCode_Ch5_HandsOnLab.html" style="color:#c9a2ff">Ch5</a>의 헤드리스 패턴으로 /api/health 스모크를 파이프라인화하면 운영의 첫 발입니다.</p>
 <div class="checkpoint">
 <div class="cp-title">DEFINITION OF DONE</div>
 <label class="cp-item"><input data-cp="m4a" type="checkbox"/><span>AI 분석이 델타 단위로 스트리밍되어 타자기처럼 렌더됩니다 (Bearer 인증)</span></label>
-<label class="cp-item"><input data-cp="m4b" type="checkbox"/><span>make run 통합 서빙(:8000) 화면의 스크린샷을 Slack에 공유했습니다</span></label>
+<label class="cp-item"><input data-cp="m4b" type="checkbox"/><span>최종 리뷰 후 make run 통합 서빙(:8000) 화면의 스크린샷을 Slack에 공유했습니다</span></label>
 </div>
 </section>
 <section class="task" id="gq">
 <div class="task-head"><span class="task-num">BONUS</span><h2>데스크 퀄리티 강화 라운드, 기능을 올려라</h2><span class="time-badge">+α 자유</span></div>
 <p class="task-goal">
-    핵심 구성이 돌았다면 이제 <strong>데스크를 내 것으로 만드는 시간</strong>입니다. 원작에 실존하는 기능들을
-    강화 카드로 준비했습니다, 끌리는 것을 골라 하나씩 주문하세요. 요령은 같습니다: 한 번에 하나, 화면으로 확인하고, 마음에 들면 커밋.
+    핵심 구성이 돌았다면 이제 <strong>데스크를 내 것으로 만드는 시간</strong>입니다. 강화 카드는 모두 원작에 실제로 있는 기능입니다.
+    요령은 M1과 같습니다: 원작 구현은 서브에이전트가 읽고, 참가자는 <strong>기능 이름과 조건 한 줄</strong>만 말합니다.
+    한 번에 하나, 화면으로 확인하고, 마음에 들면 커밋.
   </p>
-<div class="step-title"><span class="step-no">A</span>강화 카드 1, 호가창</div>
+<div class="step-title"><span class="step-no">0</span>이식 프롬프트 틀</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-016" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-016"><code>StockDetail에 호가창(OrderBook)을 추가하자. GET /api/stocks/{symbol}/orderbook:
-현재가를 중심으로 매도 10단계(파란 막대, 왼쪽으로) / 매수 10단계(빨간 막대, 오른쪽으로),
-공개 실데이터가 없으니 random.seed(int(price * 100))로 가격에 고정된 그럴듯한 시뮬레이션.
-프론트는 3열(매도잔량 | 가격 | 매수잔량) 레이아웃, 45초 폴링에 동참.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 빈칸만 바꿔 쓰기</span><button aria-label="Claude 세션 입력, 빈칸만 바꿔 쓰기 복사" class="ws-copy" data-copy-code="workshop-code-022" data-copy-label="Claude 세션 입력, 빈칸만 바꿔 쓰기 복사" type="button">복사</button></div>
+<pre id="workshop-code-022"><code>원작의 [기능 이름]이 어떻게 구현됐는지 Explore 서브에이전트로 확인해 줘.
+우리 구조에 맞게 줄인 계획을 먼저 보여 주고, 승인하면 구현해. [지킬 조건 한 줄]</code></pre>
 </div>
-<div class="step-title"><span class="step-no">B</span>강화 카드 2, 투자자 동향</div>
+<div class="step-title"><span class="step-no">A</span>강화 카드 1, 한글 초성 검색</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-017" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-017"><code>StockDetail에 투자자 동향(InvestorPanel)을 추가하자. GET /api/stocks/{symbol}/investors:
-개인/외국인/기관의 최근 10일 순매수 추정치 표. 실데이터가 없으니 일별 거래량과 캔들 방향에서
-개인 60 / 외국인 30 / 기관 10 비율로 추정하고 개인은 역방향 가정(원작 방식).
-순매수 초록 / 순매도 빨강, 날짜 내림차순.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-023" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-023"><code>원작의 종목 검색(SymbolSearch, ⌘K)이 한글명과 초성을 어떻게 맞추는지 Explore 서브에이전트로 확인해 줘.
+우리 구조에 맞게 줄인 계획을 먼저 보여 주고, 승인하면 구현해. "ㅅㅅㅈㅈ"로 삼성전자가 나와야 해.</code></pre>
 </div>
-<div class="step-title"><span class="step-no">C</span>강화 카드 3, 종목 뉴스와 기사 분석</div>
+<div class="step-title"><span class="step-no">B</span>강화 카드 2, 관심 종목과 가격 알림</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-018" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-018"><code>종목 뉴스(StockNews)와 기사 AI 분석 화면(ArticleAnalysis)을 추가하자.
-1) GET /api/stocks/{symbol}/news: Yahoo Finance RSS에서 해당 심볼 뉴스 5건(제목, 링크, 시각)
-2) 뉴스 클릭 → /article 라우트: httpx로 본문 추출(외부 URL만 허용하는 SSRF 가드) 후
-   POST /api/ai/articles가 SSE로 요약/시장 영향/투자 인사이트를 스트리밍(기존 delta 계약 재사용)
-3) 영어 기사는 한국어 번역을 맨 앞에.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-024" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-024"><code>원작의 관심 종목 ★과 가격 알림이 어떻게 구현됐는지 Explore 서브에이전트로 확인해 줘.
+우리 구조에 맞게 줄인 계획을 먼저 보여 주고, 승인하면 구현해. 사용자 상태는 원작처럼 브라우저 localStorage에만 둬.</code></pre>
 </div>
-<div class="step-title"><span class="step-no">D</span>강화 카드 4, 라이트/다크 테마</div>
+<div class="step-title"><span class="step-no">C</span>강화 카드 3, 차트 보조지표</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-019" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-019"><code>라이트/다크 듀얼 테마를 추가하자. 기본은 prefers-color-scheme, 헤더 토글로 전환,
-선택은 localStorage에 기억. 색은 전부 CSS 변수로 빼서 두 테마 모두에서
-등락색(초록/빨강)과 차트 캔들의 대비가 유지되게. lightweight-charts의 배경/그리드 색도 테마를 따라가게.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-025" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-025"><code>원작 PriceChart의 MA5/MA20, 볼린저 밴드, RSI, MACD가 어떻게 구현됐는지 Explore 서브에이전트로 확인해 줘.
+우리 구조에 맞게 줄인 계획을 먼저 보여 주고, 승인하면 구현해. 보조 패널은 크로스헤어를 공유하게.</code></pre>
 </div>
-<div class="step-title"><span class="step-no">E</span>강화 카드 5, 나만의 데스크로</div>
-<p class="body">여기부터는 정해진 카드가 없습니다. <strong>당신이 프로덕트 오너입니다</strong>. 시황을 보며 아쉬웠던 것
-  하나를 골라, 위 카드들처럼 직접 요구사항을 써서 주문하세요. 아이디어가 필요하면: 관심종목 즐겨찾기,
-  등락률 알림 하이라이트, 섹터 등락 바, 시장 요약(Top 상승/하락), 지표 스파크라인, 뉴스 키워드 필터.</p>
+<div class="step-title"><span class="step-no">D</span>강화 카드 4, AI 자유 질문</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 빈칸을 내 아이디어로</span><button aria-label="Claude 세션 입력, 빈칸을 내 아이디어로 복사" class="ws-copy" data-copy-code="workshop-code-020" data-copy-label="Claude 세션 입력, 빈칸을 내 아이디어로 복사" type="button">복사</button></div>
-<pre id="workshop-code-020"><code>내 데스크에 [내가 원하는 기능]을 추가하자. 규칙:
-1) API 계약: [필요한 라우트와 응답 형태 한두 문장]
-2) 화면: [어디에 어떻게 보이는지, 갱신 주기]
-3) 데이터: [출처, 실데이터가 없으면 시뮬레이션 방식]
-4) 기존 캐시/폴링/스트리밍 계약은 깨지 않는다
-구현 전에 이 규칙을 네 계획으로 다시 말해주고, 승인하면 진행해.</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-026" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-026"><code>원작 AIPanel의 자유 질문이 어떻게 구현됐는지 Explore 서브에이전트로 확인해 줘.
+우리 구조에 맞게 줄인 계획을 먼저 보여 주고, 승인하면 구현해. 질문은 1~200자, 프롬프트 안에서 구분자로 격리해.</code></pre>
+</div>
+<div class="step-title"><span class="step-no">E</span>강화 카드 5, 호가창과 투자자 동향</div>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-027" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-027"><code>원작의 호가창(OrderBook)과 투자자 동향(InvestorPanel)이 어떻게 구현됐는지 Explore 서브에이전트로 확인해 줘.
+우리 구조에 맞게 줄인 계획을 먼저 보여 주고, 승인하면 구현해. 시뮬레이션 데이터는 응답에 "simulated": true를 붙여.</code></pre>
+</div>
+<div class="step-title"><span class="step-no">F</span>강화 카드 6, 종목 뉴스와 기사 분석</div>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-028" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-028"><code>원작의 종목 뉴스(StockNews)와 기사 분석(ArticleAnalysis)이 어떻게 구현됐는지 Explore 서브에이전트로 확인해 줘.
+우리 구조에 맞게 줄인 계획을 먼저 보여 주고, 승인하면 구현해. 기사 본문 조회에는 원작의 SSRF 가드를 꼭 넣어.</code></pre>
+</div>
+<div class="step-title"><span class="step-no">G</span>강화 카드 7, 나만의 데스크로</div>
+<p class="body">여기부터는 정해진 카드가 없습니다. <strong>당신이 프로덕트 오너입니다</strong>. 원작에 있는 기능(섹터 등락 바, 라이트 테마,
+  설치형 PWA)은 위의 이식 틀로, 원작에 없는 기능(지표 스파크라인, 등락률 순위 하이라이트 등)은 아래처럼 brainstorming으로 시작하세요.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력, 빈칸을 내 아이디어로</span><button aria-label="Claude 세션 입력, 빈칸을 내 아이디어로 복사" class="ws-copy" data-copy-code="workshop-code-029" data-copy-label="Claude 세션 입력, 빈칸을 내 아이디어로 복사" type="button">복사</button></div>
+<pre id="workshop-code-029"><code>/superpowers:brainstorming 내 데스크에 [내가 원하는 기능]을 추가하고 싶어.
+기존 캐시, 폴링, 스트리밍 계약은 깨지 않는 선에서 설계하고, 결정은 최소한으로만 물어봐.</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">강화 라운드의 요령</span>
-    ① 카드 하나 = 커밋 하나, 되돌아갈 지점을 만들며 갑니다. ② 화면으로 확인하고 <strong>다른 점을 말로</strong> 다듬으세요.
-    ③ 마지막엔 <code class="inline">make run</code>으로 통합 서빙을 다시 굳혀 Slack의 스크린샷을 최신으로.
+    ① 카드 하나 = 커밋 하나, 되돌아갈 지점을 만들며 갑니다. ② 서브에이전트가 가져온 원작 방식이 내 구조와 다르면 <strong>내 구조가 우선</strong>입니다.
+    원작은 답안이 아니라 참고서입니다. ③ 서로 다른 화면을 고치는 카드 두 장은 서브에이전트에 병렬로 맡길 수 있고, 같은 파일을 고치는 카드는 차례로 진행합니다.
+    ④ 마지막엔 <code class="inline">make run</code>으로 통합 서빙을 다시 굳혀 Slack의 스크린샷을 최신으로.
   </div>
 <div class="checkpoint dod">
 <div class="cp-title">BONUS DONE, 진행률 미집계</div>
@@ -551,30 +555,30 @@ make run    # 프론트 빌드 → :8000 통합 서빙, 브라우저에서 /prox
 <div class="task-head"><span class="task-num">BONUS</span><h2>바이브 코딩 라운드, 원작을 향해</h2><span class="time-badge">+α 자유</span></div>
 <p class="task-goal">
     Phase 빌드가 끝났다면 이제 <strong>바이브 코딩</strong>입니다: 완성 화면의 묘사를 주고 "이렇게 나오게 해줘"를
-    반복하는 루프. 아래 세 장면은 원작이 실제로 도달한 모습을 글로 옮긴 것입니다. 내 화면과 다른 점을 찾아 하나씩 주문하세요.
+    반복하는 루프. 아래 세 장면은 원작이 실제로 도달한 터미널 화면을 글로 옮긴 것입니다. 내 화면과 다른 점을 찾아 하나씩 주문하세요.
   </p>
 <div class="step-title"><span class="step-no">1</span>장면 A, Dashboard의 마감 디테일</div>
 <div class="code-wrap output" data-code-kind="output">
-<div class="code-head"><span class="code-label">타깃 묘사, 프롬프트에 붙여 쓰세요</span><button aria-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" class="ws-copy" data-copy-code="workshop-code-021" data-copy-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" type="button">복사</button></div>
-<pre id="workshop-code-021"><code>- 상단 경제지표 바: 지표들이 가로로 흐르고 등락은 색과 ▲▼로
-- 지수 카드 5장: 값 크게, 등락률 작게, 카드 보더나 포인트 컬러가 등락을 따른다
-- 종목 테이블: US/KR 탭, 숫자 전부 우측 정렬 모노 감각, 행 호버 하이라이트
-- footer 또는 헤더에 "마지막 갱신 시각"과 다음 갱신까지의 감각</code></pre>
+<div class="code-head"><span class="code-label">타깃 묘사, 프롬프트에 붙여 쓰세요</span><button aria-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" class="ws-copy" data-copy-code="workshop-code-030" data-copy-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" type="button">복사</button></div>
+<pre id="workshop-code-030"><code>- 상단 sticky 마켓 스트립: 지수 5종과 지표가 한 줄로 흐르고, 등락은 상승 빨강 ▲ / 하락 파랑 ▼
+- 패널 그리드: 위젯마다 1px 테두리와 6px 라운드 패널, 헤더는 대문자 영문 eyebrow + 한국어 제목
+- 종목 테이블: US/KR 탭, 숫자와 심볼은 고정폭 서체로 우측 정렬, 행 호버 하이라이트, 선택은 앰버
+- 하단 상태 바: 장 상태 점(초록은 상태 전용), 폴링 주기, KST 시계</code></pre>
 </div>
 <div class="step-title"><span class="step-no">2</span>장면 B, StockDetail의 마감 디테일</div>
 <div class="code-wrap output" data-code-kind="output">
-<div class="code-head"><span class="code-label">타깃 묘사, 프롬프트에 붙여 쓰세요</span><button aria-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" class="ws-copy" data-copy-code="workshop-code-022" data-copy-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" type="button">복사</button></div>
-<pre id="workshop-code-022"><code>- StockHeader: 심볼과 이름, 현재가 크게, 등락은 색+▲▼, 거래량은 축약(1.2M)
-- 캔들 차트: 기간 탭(1W/1M/3M/1Y) 중 활성 탭 하이라이트, 상승 초록/하락 빨강 캔들
-- ReturnsRow: 1W/1M/3M/1Y 수익률이 한 줄에, 양수 초록/음수 빨강
+<div class="code-head"><span class="code-label">타깃 묘사, 프롬프트에 붙여 쓰세요</span><button aria-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" class="ws-copy" data-copy-code="workshop-code-031" data-copy-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" type="button">복사</button></div>
+<pre id="workshop-code-031"><code>- StockHeader: 심볼과 이름, 현재가 크게, 등락은 색 + ▲▼, 거래량은 축약(1.2M)
+- 캔들 차트: 기간 탭(1W/1M/3M/6M/1Y/5Y) 중 활성 탭은 앰버, 상승 빨강/하락 파랑 캔들, 크로스헤어
+- ReturnsRow: 기간 수익률이 한 줄에, 양수 빨강/음수 파랑
 - Week52Bar: 52주 저가~고가 바 위에 현재가 마커
-- 확장 후보(원작에 있는 것): 호가창 OrderBook, 투자자 동향 InvestorPanel, 종목 뉴스 StockNews,
-  기사 AI 분석 화면 ArticleAnalysis - 끌리는 것 하나를 같은 리듬으로 추가</code></pre>
+- 확장 후보(원작에 있는 것): 워치리스트 레일, 호가창 OrderBook, 투자자 동향 InvestorPanel, 종목 뉴스 StockNews,
+  기사 AI 분석 ArticleAnalysis - 끌리는 것 하나를 강화 카드의 이식 틀로 추가</code></pre>
 </div>
 <div class="step-title"><span class="step-no">3</span>장면 C, AI 패널의 마감 디테일</div>
 <div class="code-wrap output" data-code-kind="output">
-<div class="code-head"><span class="code-label">타깃 묘사, 프롬프트에 붙여 쓰세요</span><button aria-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" class="ws-copy" data-copy-code="workshop-code-023" data-copy-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" type="button">복사</button></div>
-<pre id="workshop-code-023"><code>- 분석 버튼을 누르면 phase 배지가 fetching → analyzing 으로 바뀌고
+<div class="code-head"><span class="code-label">타깃 묘사, 프롬프트에 붙여 쓰세요</span><button aria-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" class="ws-copy" data-copy-code="workshop-code-032" data-copy-label="타깃 묘사, 프롬프트에 붙여 쓰세요 복사" type="button">복사</button></div>
+<pre id="workshop-code-032"><code>- 분석 버튼(앰버)을 누르면 phase 배지가 fetching → analyzing 으로 바뀌고
 - 본문은 delta가 도착하는 대로 타자기처럼 자라며, 마크다운(## 절, 굵은 키워드)이 살아 있다
 - 스트리밍 중 다시 누르면 진행 중인 요청을 취소하고 새로 시작
 - 키가 없을 때는 "AI 분석 비활성" 안내만 조용히</code></pre>
@@ -582,8 +586,8 @@ make run    # 프론트 빌드 → :8000 통합 서빙, 브라우저에서 /prox
 <div class="callout tip">
 <span class="co-title">바이브 코딩의 요령</span>
     ① 한 번에 한 화면, 한 번에 한 디테일. ② 실행해 보고 <strong>다른 점을 말로</strong> 알려주는 반복이 핵심입니다,
-    "델타가 뭉쳐서 온다"처럼. ③ 마음에 든 순간마다 커밋해 되돌아갈 지점을 만드세요.
-    스펙은 방향을 잡고, 바이브는 마감을 만듭니다.
+    "델타가 뭉쳐서 온다"처럼. ③ 묘사만으로 감이 안 오면 "원작의 해당 컴포넌트를 서브에이전트로 확인해 줘"를 덧붙이세요.
+    ④ 마음에 든 순간마다 커밋해 되돌아갈 지점을 만드세요. 스펙은 방향을 잡고, 바이브는 마감을 만듭니다.
   </div>
 <div class="checkpoint dod">
 <div class="cp-title">BONUS DONE, 진행률 미집계</div>
@@ -606,8 +610,8 @@ make run    # 프론트 빌드 → :8000 통합 서빙, 브라우저에서 /prox
 <p class="body" style="color:#A6ABBE">이 미션의 바탕 학습: <a href="ClaudeCode_Ch4_HandsOnLab.html" style="color:#c9a2ff">Ch4</a>의 훅과 스킬을 팀 자산으로 승격하는 감각, 그리고 <a href="ClaudeCode_Reference3_Plugins.html" style="color:#c9a2ff">Reference 3</a>의 플러그인 생태계.</p>
 <div class="step-title"><span class="step-no">1</span>플러그인 2종 설치</div>
 <div class="code-wrap" data-code-kind="terminal">
-<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-024" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
-<pre id="workshop-code-024"><code>claude plugin marketplace add https://github.com/whchoi98/project-init
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 전체 복사</span><button aria-label="Terminal, 전체 복사 복사" class="ws-copy" data-copy-code="workshop-code-033" data-copy-label="Terminal, 전체 복사 복사" type="button">복사</button></div>
+<pre id="workshop-code-033"><code>claude plugin marketplace add https://github.com/whchoi98/project-init
 claude plugin install project-init@project-init
 claude plugin marketplace add https://github.com/whchoi98/harness-eval
 claude plugin install harness-eval@harness-eval
@@ -616,8 +620,8 @@ claude plugin list</code></pre>
 <p class="body">설치 후 새 Claude 세션을 시작하세요, superpowers 때와 같은 규칙입니다.</p>
 <div class="step-title"><span class="step-no">2</span>성숙화, /project-init:init-project와 /project-init:sync-docs</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력 (새 세션, worktree에서)</span><button aria-label="Claude 세션 입력 (새 세션, worktree에서) 복사" class="ws-copy" data-copy-code="workshop-code-025" data-copy-label="Claude 세션 입력 (새 세션, worktree에서) 복사" type="button">복사</button></div>
-<pre id="workshop-code-025"><code>/project-init:init-project .</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력 (새 세션, worktree에서)</span><button aria-label="Claude 세션 입력 (새 세션, worktree에서) 복사" class="ws-copy" data-copy-code="workshop-code-034" data-copy-label="Claude 세션 입력 (새 세션, worktree에서) 복사" type="button">복사</button></div>
+<pre id="workshop-code-034"><code>/project-init:init-project .</code></pre>
 </div>
 <p class="body">
     이 프로젝트의 하네스는 아직 얇습니다(FastAPI 앱과 React 앱 하나씩). 기존 프로젝트 감지 모드가
@@ -625,12 +629,12 @@ claude plugin list</code></pre>
     CLAUDE.md가 이미 있으면 덮어쓰기 전에 물어봅니다. 끝나면 이어서:
   </p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-026" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-026"><code>/project-init:sync-docs</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-035" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-035"><code>/project-init:sync-docs</code></pre>
 </div>
 <div class="code-wrap output" data-code-kind="output">
-<div class="code-head"><span class="code-label">출력 예시 (요약)</span><button aria-label="출력 예시 (요약) 복사" class="ws-copy" data-copy-code="workshop-code-027" data-copy-label="출력 예시 (요약) 복사" type="button">복사</button></div>
-<pre id="workshop-code-027"><code>## Sync Report
+<div class="code-head"><span class="code-label">출력 예시 (요약)</span><button aria-label="출력 예시 (요약) 복사" class="ws-copy" data-copy-code="workshop-code-036" data-copy-label="출력 예시 (요약) 복사" type="button">복사</button></div>
+<pre id="workshop-code-036"><code>## Sync Report
 ### Quality Scores (Before -&gt; After)
 | ./CLAUDE.md           | D (48) | B (82) | +34 |
 | ./backend/CLAUDE.md   | F (10) | C (61) | +51 |
@@ -639,12 +643,12 @@ claude plugin list</code></pre>
 </div>
 <div class="step-title"><span class="step-no">3</span>평가, /harness-eval로 등급 받기</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-028" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-028"><code>/harness-eval:quick</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-037" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-037"><code>/harness-eval:quick</code></pre>
 </div>
 <div class="code-wrap output" data-code-kind="output">
-<div class="code-head"><span class="code-label">출력 예시</span><button aria-label="출력 예시 복사" class="ws-copy" data-copy-code="workshop-code-029" data-copy-label="출력 예시 복사" type="button">복사</button></div>
-<pre id="workshop-code-029"><code>{"mode": "quick", "scores": {"overall": 7.0, "grade": "B"}, "checklist": {"pass": 12, "warn": 3, "fail": 1}}</code></pre>
+<div class="code-head"><span class="code-label">출력 예시</span><button aria-label="출력 예시 복사" class="ws-copy" data-copy-code="workshop-code-038" data-copy-label="출력 예시 복사" type="button">복사</button></div>
+<pre id="workshop-code-038"><code>{"mode": "quick", "scores": {"overall": 7.0, "grade": "B"}, "checklist": {"pass": 12, "warn": 3, "fail": 1}}</code></pre>
 </div>
 <p class="body">
     이 캡스톤의 비자명한 지식은 <strong>스트리밍 계약</strong>입니다. "왜 AI만 fetch를 직접 쓰는가,
@@ -653,8 +657,8 @@ claude plugin list</code></pre>
     같은 원칙으로 확장합니다. 여유가 있다면 결정을 기록으로 남기세요:
   </p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-030" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-030"><code>/add-adr streaming-ai-contract
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-039" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-039"><code>/add-adr streaming-ai-contract
 /add-runbook market-web-run</code></pre>
 </div>
 <div class="callout warn">
@@ -678,6 +682,7 @@ claude plugin list</code></pre>
 <tr><td>캐시가 곧 예의</td><td>업스트림은 캐시 뒤에서 한 번만, single-flight로 동시 요청도 한 번만</td></tr>
 <tr><td>스트리밍 계약</td><td>phase → delta → final, 그리고 "점진 델타에는 react-query가 아니라 fetch"라는 도구 선택의 근거</td></tr>
 <tr><td>절전 설계</td><td>장이 닫히면 600초로 늦춘다, 시스템은 세상의 리듬을 알아야 한다</td></tr>
+<tr><td>위임과 검증</td><td>조사와 구현은 서브에이전트에게, 대조와 판단은 내가. 리뷰어의 지적도 직접 확인한 뒤에 고친다</td></tr>
 </table>
 <div class="next-box">
 <div>
@@ -711,7 +716,7 @@ claude plugin list</code></pre>
 </div>
 <footer>
 <div class="who">Claude Code Deep Dive Workshop, Capstone 2</div>
-<div>기준: Claude Code 2.1.x + FastAPI + React(Vite) + Bedrock SSE, Sonnet 4.6, 2026.08</div>
+<div>기준: Claude Code 2.1.x + FastAPI + React(Vite) + Bedrock SSE, Sonnet 4.6, 원작 stock-monitoring 2026.09, 2026.11</div>
 </footer>
 
 
@@ -731,8 +736,8 @@ claude plugin list</code></pre>
 <a data-nav="brief" data-toc-link="" href="#brief"><span class="dot"></span>브리핑<span class="nav-time"></span></a>
 <a data-nav="blueprint" data-toc-link="" href="#blueprint"><span class="dot"></span>구현 청사진<span class="nav-time">참고</span></a>
 <a data-nav="m0" data-toc-link="" href="#m0"><span class="dot"></span>M0 사전 준비<span class="nav-time">10분</span></a>
-<a data-nav="m1" data-toc-link="" href="#m1"><span class="dot"></span>M1 설계<span class="nav-time">15분</span></a>
-<a data-nav="m2" data-toc-link="" href="#m2"><span class="dot"></span>M2 백엔드 코어<span class="nav-time">35분</span></a>
+<a data-nav="m1" data-toc-link="" href="#m1"><span class="dot"></span>M1 분석과 설계<span class="nav-time">20분</span></a>
+<a data-nav="m2" data-toc-link="" href="#m2"><span class="dot"></span>M2 백엔드 코어<span class="nav-time">30분</span></a>
 <a data-nav="m3" data-toc-link="" href="#m3"><span class="dot"></span>M3 대시보드와 상세<span class="nav-time">45분</span></a>
 <a data-nav="m4" data-toc-link="" href="#m4"><span class="dot"></span>M4 AI 스트리밍<span class="nav-time">30분</span></a>
 <a data-nav="gq" data-toc-link="" href="#gq"><span class="dot"></span>BONUS 퀄리티 강화<span class="nav-time">+α</span></a>
