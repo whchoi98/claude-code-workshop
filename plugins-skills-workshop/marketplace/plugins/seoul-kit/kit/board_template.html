@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
+<title>현황판</title>
+<!--
+  서울 현황판 틀 (seoul-kit).
+  화면 내용은 아래 board-data 한 곳에만 들어 있습니다. board-contract 는 그 자료가 지켜야 할 규칙표입니다.
+  두 곳 모두 kit.py board 가 채우며, 규칙에 어긋난 자료가 들어오면 화면 대신 고칠 곳을 보여 줍니다.
+-->
+<style>
+:root{
+  --paper:#f4f2ec; --card:#ffffff; --ink:#15171c; --muted:#6a7180; --line:#e2ded3;
+  --green:#1e9e5a; --yellow:#e2a400; --red:#d8443c; --bar:#3457d5; --bar-soft:#e3e8fb;
+  --font:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Noto Sans CJK KR",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;
+  background-image:radial-gradient(rgba(21,23,28,.07) 1px,transparent 1px);background-size:22px 22px}
+main{max-width:1480px;margin:0 auto;padding:44px clamp(20px,4vw,56px) 72px}
+header{display:flex;flex-wrap:wrap;gap:20px 40px;align-items:flex-end;justify-content:space-between;margin-bottom:34px}
+.live{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.live i{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 rgba(216,68,60,.5);animation:ping 2s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 12px rgba(216,68,60,0)}100%{box-shadow:0 0 0 0 rgba(216,68,60,0)}}
+h1{margin:10px 0 6px;font-size:clamp(30px,4.2vw,54px);line-height:1.12;font-weight:800;letter-spacing:-.02em}
+.sub{margin:0;font-size:clamp(16px,1.5vw,20px);color:var(--muted)}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:14px}
+.legend{display:flex;gap:18px;font-size:14px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:12px;height:12px;border-radius:50%}
+button.mode{font:inherit;font-size:14px;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer}
+button.mode:hover{border-color:var(--ink)}
+kbd{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;margin-left:6px;color:var(--muted)}
+
+.cards{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:18px;margin-bottom:34px}
+@media (max-width:1100px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.cards{grid-template-columns:minmax(0,1fr)}}
+.card{position:relative;display:flex;justify-content:space-between;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px 22px 22px 26px;overflow:hidden;
+  opacity:0;transform:translateY(18px);animation:rise .6s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i)*90ms)}
+@keyframes rise{to{opacity:1;transform:none}}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--tone,var(--line))}
+.card>div:first-child{flex:1;min-width:0}
+.card .label{font-size:16px;font-weight:600;color:var(--muted)}
+.card .value{display:flex;align-items:baseline;gap:6px;margin:6px 0 8px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.card .value b{font-size:clamp(40px,3.5vw,60px);font-weight:800}
+.card .value span{font-size:20px;font-weight:700;color:var(--muted);letter-spacing:0}
+.card .note{font-size:14.5px;color:var(--ink)}
+.tag{display:inline-block;margin-right:8px;padding:1px 9px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;background:var(--tone)}
+.lamp{flex:none;align-self:center;display:flex;flex-direction:column;gap:7px;padding:9px 8px;border-radius:18px;background:#1b1e25}
+.lamp i{width:20px;height:20px;border-radius:50%;background:#3a3f4a}
+.lamp i.on{background:var(--tone);box-shadow:0 0 14px 2px var(--tone);animation:glow 2.6s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 5px 0 var(--tone)}}
+
+section.block{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px 28px;margin-bottom:22px}
+.block h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+.cap{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:14px}
+.cap small{font-size:13.5px;color:var(--muted)}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:16.5px;font-variant-numeric:tabular-nums}
+th{position:relative;text-align:left;padding:11px 14px;font-size:14px;font-weight:700;color:var(--muted);border-bottom:2px solid var(--ink);cursor:pointer;user-select:none;white-space:nowrap}
+th.num,td.num{text-align:right}
+th:hover{color:var(--ink)}
+th[data-dir]::after{content:"▲";margin-left:6px;font-size:10px}
+th[data-dir="desc"]::after{content:"▼"}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.top{font-weight:800;color:var(--bar)}
+td .track{height:6px;margin-top:6px;border-radius:3px;background:var(--bar-soft);overflow:hidden}
+td .track i{display:block;height:100%;width:0;border-radius:3px;background:var(--bar);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+td .unit{margin-left:3px;font-size:13px;color:var(--muted);font-weight:500}
+ol.ins{margin:0;padding:0;list-style:none;counter-reset:n;display:grid;gap:12px}
+ol.ins li{counter-increment:n;display:flex;gap:14px;align-items:baseline;font-size:clamp(17px,1.5vw,20px);font-weight:600}
+ol.ins li::before{content:counter(n);flex:none;width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-size:14px;font-weight:800;display:grid;place-items:center;transform:translateY(-2px)}
+.src{font-size:13.5px;color:var(--muted)}
+.src ul{margin:8px 0 0;padding-left:18px}
+.src a{color:inherit;word-break:break-all}
+footer{margin-top:18px;font-size:13px;color:var(--muted);text-align:right}
+
+body.present .focusable{transition:opacity .35s,transform .35s,box-shadow .35s}
+body.present .focusable:not(.focus){opacity:.14!important}
+body.present .focusable.focus{transform:scale(1.015);box-shadow:0 18px 50px rgba(21,23,28,.16)}
+body.present header{opacity:.5}
+
+#problem{max-width:760px;margin:12vh auto;padding:0 24px}
+#problem h1{font-size:34px}
+#problem ul{padding-left:20px;font-size:17px;line-height:1.8}
+#problem p{color:var(--muted)}
+.still *,.still *::before{animation:none!important;transition:none!important}
+.still .card{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}.card{opacity:1;transform:none}}
+@media print{body{background:#fff}.mode,footer{display:none}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script type="application/json" id="board-contract">__CONTRACT__</script>
+<script type="application/json" id="board-data">__DATA__</script>
+<script>
+(function () {
+  'use strict';
+  var app = document.getElementById('app');
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  // ── 검사기: kit/rules.py 와 같은 규칙을 같은 순서로 본다 ──────────────
+  var CONTROL = /[\u0000-\u001f\u007f\u2028\u2029]/;
+  function isNum(v) { return typeof v === 'number' && isFinite(v); }
+  function join(path, key) { return path ? path + '.' + key : key; }
+  function checkString(v, node, path, errs) {
+    if (typeof v !== 'string') { errs.push(path + ': 글자로 적어야 합니다'); return; }
+    if (node.enum) {
+      if (node.enum.indexOf(v) < 0) errs.push(path + ': ' + node.enum.join(', ') + ' 가운데 하나여야 합니다(지금 「' + v + '」)');
+      return;
+    }
+    if (CONTROL.test(v) || v !== v.trim()) errs.push(path + ': 줄바꿈과 앞뒤 빈칸은 넣을 수 없습니다');
+    var size = Array.from(v).length;
+    var low = node.min === undefined ? 1 : node.min;
+    if (size < low) errs.push(path + ': 비워 둘 수 없습니다');
+    if (size > node.max) errs.push(path + ': ' + node.max + '자 이하여야 합니다(지금 ' + size + '자)');
+    if (node.url && !/^https?:\/\/[^\s]+$/.test(v)) errs.push(path + ': http:// 또는 https:// 로 시작하는 주소여야 합니다');
+  }
+  function checkNumber(v, node, path, errs) {
+    if (!isNum(v)) { errs.push(path + ': 따옴표 없는 숫자여야 합니다'); return; }
+    if (node.integer && Math.floor(v) !== v) errs.push(path + ': 소수점 없는 숫자여야 합니다');
+    if (node.min !== undefined && v < node.min) errs.push(path + ': ' + node.min + ' 이상이어야 합니다');
+    if (node.max !== undefined && v > node.max) errs.push(path + ': ' + node.max + ' 이하여야 합니다');
+  }
+  function check(v, node, path, errs) {
+    var kind = node.type, key;
+    if (kind === 'object') {
+      if (v === null || typeof v !== 'object' || Array.isArray(v)) { errs.push((path || '자료') + ': 중괄호 { } 로 묶은 묶음이어야 합니다'); return; }
+      for (key in v) if (!(key in node.fields)) errs.push(join(path, key) + ': 쓸 수 없는 항목입니다(쓸 수 있는 항목: ' + Object.keys(node.fields).join(', ') + ')');
+      (node.required || []).forEach(function (k) { if (!(k in v)) errs.push(join(path, k) + ': 꼭 있어야 하는 항목입니다'); });
+      for (key in node.fields) if (key in v) check(v[key], node.fields[key], join(path, key), errs);
+    } else if (kind === 'array') {
+      if (!Array.isArray(v)) { errs.push(path + ': 대괄호 [ ] 로 묶은 목록이어야 합니다'); return; }
+      var low = node.min || 0, high = node.max === undefined ? 1e6 : node.max;
+      if (v.length < low || v.length > high) errs.push(path + ': ' + low + '개에서 ' + high + '개 사이여야 합니다(지금 ' + v.length + '개)');
+      v.forEach(function (item, i) { check(item, node.items, path + '[' + i + ']', errs); });
+    } else if (kind === 'string') {
+      checkString(v, node, path, errs);
+    } else if (kind === 'number') {
+      checkNumber(v, node, path, errs);
+    } else if (kind === 'boolean') {
+      if (typeof v !== 'boolean') errs.push(path + ': true 또는 false 여야 합니다');
+    } else if (kind === 'cell') {
+      if (!isNum(v)) checkString(v, { max: node.max || 40, min: 1 }, path, errs);
+    }
+  }
+  function tableShape(columns, rows, path, errs) {
+    rows.forEach(function (row, r) {
+      if (row.length !== columns.length) { errs.push(path + '.rows[' + r + ']: 칸이 ' + columns.length + '개여야 합니다(지금 ' + row.length + '개)'); return; }
+      columns.forEach(function (col, c) {
+        var where = path + '.rows[' + r + '][' + c + ']';
+        if (col.type === 'number' && !isNum(row[c])) errs.push(where + ': 「' + col.label + '」 열은 따옴표 없는 숫자여야 합니다');
+        if (col.type === 'text' && typeof row[c] !== 'string') errs.push(where + ': 「' + col.label + '」 열은 따옴표로 묶은 글자여야 합니다');
+      });
+    });
+  }
+  function problem(title, lines, tail) {
+    document.title = title;
+    var box = el('div'); box.id = 'problem';
+    box.appendChild(el('h1', '', title));
+    var list = el('ul');
+    lines.forEach(function (line) { list.appendChild(el('li', '', line)); });
+    box.appendChild(list);
+    box.appendChild(el('p', '', tail));
+    app.replaceWith(box);
+  }
+
+  var contract, data, errs = [];
+  try { contract = JSON.parse(document.getElementById('board-contract').textContent); }
+  catch (e) { problem('이 파일은 현황판 틀입니다', ['아직 자료가 들어 있지 않습니다.'], 'kit.py board 명령으로 자료를 채우면 화면이 나옵니다.'); return; }
+  try { data = JSON.parse(document.getElementById('board-data').textContent); }
+  catch (e) { errs.push('board-data 를 읽을 수 없습니다. 쉼표나 따옴표가 빠지지 않았는지 보세요.'); }
+  if (!errs.length) check(data, contract, '', errs);
+  if (!errs.length) tableShape(data.table.columns, data.table.rows, 'table', errs);
+  if (errs.length) { problem('자료를 다시 확인해 주세요', errs, '고칠 곳은 board-data 안의 값뿐입니다. 화면 틀과 규칙표는 그대로 두세요.'); return; }
+
+  // ── 화면 그리기 ───────────────────────────────────────────────────
+  var still = location.hash === '#still' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (still) document.documentElement.classList.add('still');
+  var legend = data.legend || { green: '여유', yellow: '보통', red: '붐빔' };
+  var TONE = { green: 'var(--green)', yellow: 'var(--yellow)', red: 'var(--red)' };
+  function fmt(value, decimals) {
+    return new Intl.NumberFormat('ko-KR', { minimumFractionDigits: decimals || 0, maximumFractionDigits: decimals || 0 }).format(value);
+  }
+  function countUp(node, value, decimals) {
+    if (still) { node.textContent = fmt(value, decimals); return; }
+    var start = performance.now(), span = 1100;
+    (function tick(now) {
+      var t = Math.min(1, (now - start) / span), eased = 1 - Math.pow(1 - t, 3);
+      node.textContent = fmt(value * eased, decimals);
+      if (t < 1) requestAnimationFrame(tick); else node.textContent = fmt(value, decimals);
+    })(start);
+  }
+
+  document.title = data.title;
+  var header = el('header'), left = el('div'), side = el('div', 'side');
+  var live = el('div', 'live'); live.appendChild(el('i')); live.appendChild(el('span', '', data.asOf));
+  left.appendChild(live); left.appendChild(el('h1', '', data.title));
+  if (data.subtitle) left.appendChild(el('p', 'sub', data.subtitle));
+  var modeBtn = el('button', 'mode', '발표 모드'); modeBtn.type = 'button'; modeBtn.appendChild(el('kbd', '', 'P'));
+  var legendBox = el('div', 'legend');
+  ['green', 'yellow', 'red'].forEach(function (name) {
+    var item = el('span'), dot = el('i'); dot.style.background = TONE[name];
+    item.appendChild(dot); item.appendChild(document.createTextNode(legend[name])); legendBox.appendChild(item);
+  });
+  side.appendChild(modeBtn); side.appendChild(legendBox);
+  header.appendChild(left); header.appendChild(side); app.appendChild(header);
+
+  var cards = el('div', 'cards');
+  cards.style.setProperty('--cols', data.cards.length <= 4 ? data.cards.length : 3);
+  data.cards.forEach(function (card, i) {
+    var box = el('article', 'card focusable'); box.style.setProperty('--i', i);
+    if (TONE[card.signal]) box.style.setProperty('--tone', TONE[card.signal]);
+    var body = el('div');
+    body.appendChild(el('div', 'label', card.label));
+    var value = el('div', 'value'), big = el('b', '', '0');
+    value.appendChild(big); if (card.unit) value.appendChild(el('span', '', card.unit));
+    body.appendChild(value);
+    var note = el('div', 'note');
+    if (TONE[card.signal]) note.appendChild(el('span', 'tag', legend[card.signal]));
+    if (card.note) note.appendChild(document.createTextNode(card.note));
+    body.appendChild(note); box.appendChild(body);
+    if (TONE[card.signal]) {
+      var lamp = el('div', 'lamp');
+      ['red', 'yellow', 'green'].forEach(function (name) { lamp.appendChild(el('i', name === card.signal ? 'on' : '')); });
+      box.appendChild(lamp);
+    }
+    cards.appendChild(box);
+    setTimeout(function () { countUp(big, card.value, card.decimals); }, still ? 0 : 200 + i * 90);
+  });
+  app.appendChild(cards);
+
+  var columns = data.table.columns, rows = data.table.rows.slice();
+  var peaks = columns.map(function (col, c) {
+    return col.type === 'number' ? Math.max.apply(null, rows.map(function (row) { return row[c]; })) : null;
+  });
+  var tableBlock = el('section', 'block focusable'), cap = el('div', 'cap');
+  cap.appendChild(el('h2', '', data.table.caption)); cap.appendChild(el('small', '', '머리글을 누르면 그 열로 정렬합니다'));
+  tableBlock.appendChild(cap);
+  var scroll = el('div', 'scroll'), table = el('table'), thead = el('thead'), headRow = el('tr'), tbody = el('tbody');
+  columns.forEach(function (col, c) {
+    var th = el('th', col.type === 'number' ? 'num' : '', col.label);
+    th.tabIndex = 0;
+    function sort() {
+      var dir = th.dataset.dir === 'desc' ? 'asc' : 'desc';
+      Array.prototype.forEach.call(headRow.children, function (other) { delete other.dataset.dir; });
+      th.dataset.dir = dir;
+      rows.sort(function (a, b) {
+        var diff = col.type === 'number' ? a[c] - b[c] : String(a[c]).localeCompare(String(b[c]), 'ko');
+        return dir === 'asc' ? diff : -diff;
+      });
+      drawRows(false);
+    }
+    th.addEventListener('click', sort);
+    th.addEventListener('keydown', function (e) { if (e.key === 'Enter') sort(); });
+    headRow.appendChild(th);
+  });
+  function drawRows(first) {
+    tbody.textContent = '';
+    rows.forEach(function (row) {
+      var tr = el('tr');
+      columns.forEach(function (col, c) {
+        var td = el('td', col.type === 'number' ? 'num' : '');
+        if (col.type !== 'number') { td.textContent = row[c]; tr.appendChild(td); return; }
+        td.appendChild(document.createTextNode(fmt(row[c], col.decimals)));
+        if (col.unit) td.appendChild(el('span', 'unit', col.unit));
+        if (col.bar && row[c] === peaks[c] && rows.length > 2) td.classList.add('top');
+        if (col.bar) {
+          var track = el('div', 'track'), fill = el('i');
+          var width = peaks[c] > 0 ? Math.max(0, row[c]) / peaks[c] * 100 : 0;
+          track.appendChild(fill); td.appendChild(track);
+          if (still || !first) fill.style.width = width + '%';
+          else setTimeout(function () { fill.style.width = width + '%'; }, 500);
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+  drawRows(true);
+  thead.appendChild(headRow); table.appendChild(thead); table.appendChild(tbody); scroll.appendChild(table);
+  tableBlock.appendChild(scroll); app.appendChild(tableBlock);
+
+  var insBlock = el('section', 'block focusable'), insCap = el('div', 'cap');
+  insCap.appendChild(el('h2', '', '읽어 낸 것')); insBlock.appendChild(insCap);
+  var ol = el('ol', 'ins');
+  data.insights.forEach(function (line) { ol.appendChild(el('li', '', line)); });
+  insBlock.appendChild(ol); app.appendChild(insBlock);
+
+  var src = el('div', 'src'); src.appendChild(el('strong', '', '출처'));
+  var ul = el('ul');
+  data.sources.forEach(function (source) {
+    var li = el('li', '', source.name + (source.detail ? ' · ' + source.detail : ''));
+    if (source.url) {
+      var a = el('a', '', source.url); a.href = source.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      li.appendChild(document.createTextNode(' · ')); li.appendChild(a);
+    }
+    ul.appendChild(li);
+  });
+  src.appendChild(ul); app.appendChild(src);
+  app.appendChild(el('footer', '', 'P 발표 모드 · 방향키와 Space 로 넘기기 · Esc 끝내기'));
+
+  // ── 발표 모드: 카드, 표, 읽어 낸 것을 하나씩 비춘다 ───────────────────
+  var stops = Array.prototype.slice.call(document.querySelectorAll('.focusable')), at = -1;
+  function focus(index) {
+    at = (index + stops.length) % stops.length;
+    stops.forEach(function (node, i) { node.classList.toggle('focus', i === at); });
+    stops[at].scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
+  }
+  function present(on) {
+    document.body.classList.toggle('present', on);
+    if (on) focus(0); else { at = -1; stops.forEach(function (node) { node.classList.remove('focus'); }); }
+  }
+  modeBtn.addEventListener('click', function () { present(!document.body.classList.contains('present')); });
+  addEventListener('keydown', function (e) {
+    var on = document.body.classList.contains('present');
+    if (e.key === 'p' || e.key === 'P' || e.key === 'ㅔ') { present(!on); return; }
+    if (!on) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); focus(at + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); focus(at - 1); }
+    else if (e.key === 'Escape') present(false);
+  });
+})();
+</script>
+</body>
+</html>

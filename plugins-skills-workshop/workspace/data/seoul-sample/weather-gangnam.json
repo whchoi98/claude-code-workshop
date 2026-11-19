@@ -1,0 +1,33 @@
+{
+ "tool": "get_weather",
+ "arguments": {
+  "place": "강남역"
+ },
+ "result": {
+  "data": {
+   "place": "강남역",
+   "temperatureC": 1.5,
+   "sensibleTemperatureC": null,
+   "maxTempC": 4,
+   "minTempC": -2,
+   "humidityPct": 45,
+   "precipitation": "-",
+   "precipitationType": "없음",
+   "precipitationMessage": "비 또는 눈 소식이 없어요.",
+   "sunrise": "07:16",
+   "sunset": "17:19",
+   "uvLevel": "낮음",
+   "pm10": 16,
+   "pm10Level": "좋음",
+   "pm25": 6,
+   "pm25Level": "좋음",
+   "airQualityIndex": "좋음",
+   "airMessage": "대기질에 이상이 없어요.",
+   "warnings": [],
+   "measuredAt": "2026-11-19 22:00"
+  },
+  "asOf": "2026-11-19 22:00",
+  "source": "OA-21285 (citydata WEATHER_STTS, 기상청 연계)",
+  "notes": []
+ }
+}

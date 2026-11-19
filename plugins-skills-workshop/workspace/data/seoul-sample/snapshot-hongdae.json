@@ -1,0 +1,49 @@
+{
+ "tool": "get_city_snapshot",
+ "arguments": {
+  "place": "홍대 관광특구"
+ },
+ "result": {
+  "data": {
+   "place": "홍대 관광특구",
+   "population": {
+    "place": "홍대 관광특구",
+    "code": "POI007",
+    "congestionLevel": "여유",
+    "congestionMessage": "사람이 몰려있을 가능성이 낮고 붐빔은 거의 느껴지지 않아요. 도보 이동이 자유로워요.",
+    "populationMin": 68000,
+    "populationMax": 70000,
+    "malePct": 46.6,
+    "femalePct": 53.4,
+    "agePct": {
+     "0s": 0.7,
+     "10s": 8.3,
+     "20s": 39.5,
+     "30s": 20.1,
+     "40s": 12.1,
+     "50s": 9.4,
+     "60s": 5.6,
+     "70s+": 4.5
+    },
+    "residentPct": 35.3,
+    "nonResidentPct": 64.7,
+    "measuredAt": "2026-11-19 21:35",
+    "forecast": []
+   },
+   "weatherSummary": "기온 1.6°C, 비 또는 눈 소식이 없어요., PM2.5 좋음",
+   "roadMessage": "해당 장소로 이동·진입시 시간이 다소 소요될 수 있어요.",
+   "events": [
+    {
+     "name": "",
+     "period": "",
+     "place": ""
+    }
+   ]
+  },
+  "asOf": "2026-11-19 21:35",
+  "source": "OA-21285 (citydata)",
+  "notes": [
+   "인구는 약 15분 지연. 세부 분야는 개별 tool로 조회하세요."
+  ]
+ }
+}

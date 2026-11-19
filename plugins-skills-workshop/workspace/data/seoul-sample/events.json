@@ -1,0 +1,114 @@
+{
+ "tool": "search_cultural_events",
+ "arguments": {
+  "limit": 8
+ },
+ "result": {
+  "data": {
+   "count": 500,
+   "events": [
+    {
+     "category": "무용",
+     "district": "서초구",
+     "title": "앰비규어스댄스컴퍼니 [세 개의 심장]",
+     "period": "2027-02-12~2027-02-28",
+     "startDate": "2027-02-12",
+     "endDate": "2027-02-28",
+     "place": "한전아트센터",
+     "fee": "R 90,000원 / S 70,000원 /  A 50,000원",
+     "isFree": false,
+     "link": "https://www.instagram.com/amdaco/"
+    },
+    {
+     "category": "국악",
+     "district": "서초구",
+     "title": "2026 송년음악회 [One Voice, One Dream]",
+     "period": "2026-12-26~2026-12-26",
+     "startDate": "2026-12-26",
+     "endDate": "2026-12-26",
+     "place": "국립국악원 예악당",
+     "fee": "S석 50,000원 / A석 30,000원 / B석 20,000원",
+     "isFree": false,
+     "link": "http://worldpansori.com/?wHuLfc4e"
+    },
+    {
+     "category": "콘서트",
+     "district": "강동구",
+     "title": "2026 카즈미 타테이시 트리오 내한공연-크리스마스, 재즈를 만나다-(서울)",
+     "period": "2026-12-24~2026-12-24",
+     "startDate": "2026-12-24",
+     "endDate": "2026-12-24",
+     "place": "강동아트센터 대극장 한강",
+     "fee": "VIP석 88,000원 / R석 77,000원 / S석 66,000원 / A석 55,000원",
+     "isFree": false,
+     "link": "https://tickets.interpark.com/goods/26010350"
+    },
+    {
+     "category": "클래식",
+     "district": "영등포구",
+     "title": "동물의 사육제에 초대받은 하피스트",
+     "period": "2026-12-23~2026-11-23",
+     "startDate": "2026-12-23",
+     "endDate": "2026-11-23",
+     "place": "영산아트홀(여의도)",
+     "fee": "R석 50,000원 / S석 30,000원",
+     "isFree": false,
+     "link": "https://blog.naver.com/handawoori/224476016853"
+    },
+    {
+     "category": "콘서트",
+     "district": "영등포구",
+     "title": "2026 카즈미 타테이시 트리오 내한공연-지브리, 재즈를 만나다-(서울)",
+     "period": "2026-12-22~2026-12-22",
+     "startDate": "2026-12-22",
+     "endDate": "2026-12-22",
+     "place": "영등포아트홀",
+     "fee": "VIP석 88,000원 / R석 77,000원 / S석 66,000원",
+     "isFree": false,
+     "link": "https://tickets.interpark.com/goods/26010060"
+    },
+    {
+     "category": "클래식",
+     "district": "서초구",
+     "title": "[서초문화재단] 2026서리풀 어울림 콘서트 [바이올리니스트 김지선의 Dia:logue-graph]",
+     "period": "2026-12-22~2026-12-22",
+     "startDate": "2026-12-22",
+     "endDate": "2026-12-22",
+     "place": "반포심산아트홀",
+     "fee": "",
+     "isFree": true,
+     "link": "https://www.seochocf.or.kr/site/main/seocho/show/view?show_idx=1020"
+    },
+    {
+     "category": "전시/미술",
+     "district": "종로구",
+     "title": "기미르 개인전 [변온 비늘 근처] 한반도 토종&해양 파충류 세밀화",
+     "period": "2026-12-21~2026-12-29",
+     "startDate": "2026-12-21",
+     "endDate": "2026-12-29",
+     "place": "갤러리 딜라이트 1층",
+     "fee": "",
+     "isFree": true,
+     "link": "https://m.blog.naver.com/mir_gallery/224448254555"
+    },
+    {
+     "category": "교육/체험",
+     "district": "노원구",
+     "title": "[서울시립과학관] 과학교양 진로 북토크: 과학 공학과 애니메이션을 연결하다",
+     "period": "2026-12-20~2026-12-20",
+     "startDate": "2026-12-20",
+     "endDate": "2026-12-20",
+     "place": "서울시립과학관 3층 스타홀",
+     "fee": "",
+     "isFree": true,
+     "link": "https://science.seoul.go.kr/sciEdu/talk/read?menuId=73&progMstId=2418"
+    }
+   ]
+  },
+  "asOf": "2026-11-19T13:04:36.706Z",
+  "source": "OA-15486 (culturalEventInfo)",
+  "notes": [
+   "서버에서 category/keyword로 1차 검색 후 최대 500건 내에서 자치구·기간·무료 필터를 적용했습니다."
+  ]
+ }
+}

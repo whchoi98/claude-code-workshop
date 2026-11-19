@@ -1,0 +1,49 @@
+{
+ "tool": "get_city_snapshot",
+ "arguments": {
+  "place": "성수카페거리"
+ },
+ "result": {
+  "data": {
+   "place": "성수카페거리",
+   "population": {
+    "place": "성수카페거리",
+    "code": "POI068",
+    "congestionLevel": "여유",
+    "congestionMessage": "사람이 몰려있을 가능성이 낮고 붐빔은 거의 느껴지지 않아요. 도보 이동이 자유로워요.",
+    "populationMin": 18000,
+    "populationMax": 20000,
+    "malePct": 49.5,
+    "femalePct": 50.5,
+    "agePct": {
+     "0s": 1.4,
+     "10s": 5,
+     "20s": 28.3,
+     "30s": 21.5,
+     "40s": 14.1,
+     "50s": 13.2,
+     "60s": 9.6,
+     "70s+": 6.9
+    },
+    "residentPct": 47.7,
+    "nonResidentPct": 52.3,
+    "measuredAt": "2026-11-19 21:35",
+    "forecast": []
+   },
+   "weatherSummary": "기온 1.3°C, 비 또는 눈 소식이 없어요., PM2.5 좋음",
+   "roadMessage": "해당 장소로 이동·진입시 시간이 다소 소요될 수 있어요.",
+   "events": [
+    {
+     "name": "",
+     "period": "",
+     "place": ""
+    }
+   ]
+  },
+  "asOf": "2026-11-19 21:35",
+  "source": "OA-21285 (citydata)",
+  "notes": [
+   "인구는 약 15분 지연. 세부 분야는 개별 tool로 조회하세요."
+  ]
+ }
+}

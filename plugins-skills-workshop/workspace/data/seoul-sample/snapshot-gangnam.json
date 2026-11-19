@@ -1,0 +1,49 @@
+{
+ "tool": "get_city_snapshot",
+ "arguments": {
+  "place": "강남역"
+ },
+ "result": {
+  "data": {
+   "place": "강남역",
+   "population": {
+    "place": "강남역",
+    "code": "POI014",
+    "congestionLevel": "보통",
+    "congestionMessage": "사람이 몰려있을 수 있지만 크게 붐비지는 않아요. 도보 이동에 큰 제약이 없어요.",
+    "populationMin": 52000,
+    "populationMax": 54000,
+    "malePct": 52.6,
+    "femalePct": 47.4,
+    "agePct": {
+     "0s": 1.2,
+     "10s": 5.6,
+     "20s": 29.3,
+     "30s": 25.4,
+     "40s": 18.5,
+     "50s": 11.4,
+     "60s": 5.2,
+     "70s+": 3.4
+    },
+    "residentPct": 35,
+    "nonResidentPct": 65,
+    "measuredAt": "2026-11-19 21:35",
+    "forecast": []
+   },
+   "weatherSummary": "기온 1.5°C, 비 또는 눈 소식이 없어요., PM2.5 좋음",
+   "roadMessage": "해당 장소로 이동·진입시 시간이 다소 소요될 수 있어요.",
+   "events": [
+    {
+     "name": "",
+     "period": "",
+     "place": ""
+    }
+   ]
+  },
+  "asOf": "2026-11-19 21:35",
+  "source": "OA-21285 (citydata)",
+  "notes": [
+   "인구는 약 15분 지연. 세부 분야는 개별 tool로 조회하세요."
+  ]
+ }
+}

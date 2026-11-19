@@ -1,0 +1,69 @@
+{
+ "tool": "get_city_snapshot",
+ "arguments": {
+  "place": "광화문·덕수궁"
+ },
+ "result": {
+  "data": {
+   "place": "광화문·덕수궁",
+   "population": {
+    "place": "광화문·덕수궁",
+    "code": "POI009",
+    "congestionLevel": "여유",
+    "congestionMessage": "사람이 몰려있을 가능성이 낮고 붐빔은 거의 느껴지지 않아요. 도보 이동이 자유로워요.",
+    "populationMin": 16000,
+    "populationMax": 18000,
+    "malePct": 52.4,
+    "femalePct": 47.6,
+    "agePct": {
+     "0s": 0.4,
+     "10s": 3.4,
+     "20s": 21.6,
+     "30s": 24.1,
+     "40s": 22.9,
+     "50s": 16.9,
+     "60s": 7.5,
+     "70s+": 3.1
+    },
+    "residentPct": 24.9,
+    "nonResidentPct": 75.1,
+    "measuredAt": "2026-11-19 21:35",
+    "forecast": []
+   },
+   "weatherSummary": "기온 0°C, 비 또는 눈 소식이 없어요., PM2.5 좋음",
+   "roadMessage": "해당 장소로 이동·진입시 시간이 다소 소요될 수 있어요.",
+   "events": [
+    {
+     "name": "[세종문화회관] 26 세종시즌 [트리플 빌 올 포 한스 판 마넨]",
+     "period": "2026-11-19~2026-11-22",
+     "place": "세종문화회관 세종M씨어터"
+    },
+    {
+     "name": "SJF at the Theater 2026 - 백예린X윤석철",
+     "period": "2026-11-17~2026-11-21",
+     "place": "세종대극장"
+    },
+    {
+     "name": "[교보아트스페이스] 동양화에 기운 Hearts Inclined to Ink",
+     "period": "2026-11-03~2026-12-13",
+     "place": "교보아트스페이스"
+    },
+    {
+     "name": "2026 문학 속 영화 투어",
+     "period": "2026-09-12~2026-12-05",
+     "place": "서울시 전역"
+    },
+    {
+     "name": "2026 아뜰리에 광화 세 번째 전시 [물드는 빛]",
+     "period": "2026-09-01~2026-11-30",
+     "place": "세종문화회관 외벽 미디어파사드(지하철 5호선 광화문역)"
+    }
+   ]
+  },
+  "asOf": "2026-11-19 21:35",
+  "source": "OA-21285 (citydata)",
+  "notes": [
+   "인구는 약 15분 지연. 세부 분야는 개별 tool로 조회하세요."
+  ]
+ }
+}

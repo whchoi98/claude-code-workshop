@@ -1,0 +1,77 @@
+{
+ "tool": "get_commercial_activity",
+ "arguments": {
+  "place": "성수카페거리"
+ },
+ "result": {
+  "data": {
+   "place": "성수카페거리",
+   "level": "보통",
+   "paymentCount": 39,
+   "paymentAmountMin": 1300000,
+   "paymentAmountMax": 1400000,
+   "measuredAt": "20261119 2150",
+   "categories": [
+    {
+     "large": "음식·음료",
+     "mid": "한식",
+     "level": "한산한",
+     "paymentCount": 9,
+     "amountMin": 250000,
+     "amountMax": 300000,
+     "merchantCount": 198
+    },
+    {
+     "large": "음식·음료",
+     "mid": "일식/중식/양식",
+     "level": "보통",
+     "paymentCount": 4,
+     "amountMin": 400000,
+     "amountMax": 450000,
+     "merchantCount": 127
+    },
+    {
+     "large": "음식·음료",
+     "mid": "기타요식",
+     "level": "보통",
+     "paymentCount": 9,
+     "amountMin": 400000,
+     "amountMax": 450000,
+     "merchantCount": 207
+    },
+    {
+     "large": "유통",
+     "mid": "편의점",
+     "level": "한산한",
+     "paymentCount": 6,
+     "amountMin": 50000,
+     "amountMax": 60000,
+     "merchantCount": 35
+    },
+    {
+     "large": "패션·뷰티",
+     "mid": "패션/잡화",
+     "level": "한산한",
+     "paymentCount": 4,
+     "amountMin": 100000,
+     "amountMax": 150000,
+     "merchantCount": 126
+    },
+    {
+     "large": "여가·오락",
+     "mid": "스포츠/문화/레저",
+     "level": "한산한",
+     "paymentCount": 7,
+     "amountMin": 60000,
+     "amountMax": 70000,
+     "merchantCount": 75
+    }
+   ]
+  },
+  "asOf": "20261119 2150",
+  "source": "OA-22385 (citydata_cmrcl)",
+  "notes": [
+   "신한카드 내국인 결제 기준, 약 15분 지연. 전수 데이터가 아니므로 절대액이 아닌 평소 대비 수준으로 해석하세요."
+  ]
+ }
+}

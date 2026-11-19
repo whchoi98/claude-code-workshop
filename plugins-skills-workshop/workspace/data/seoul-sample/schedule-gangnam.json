@@ -1,0 +1,191 @@
+{
+ "tool": "get_subway_schedule",
+ "arguments": {
+  "station": "강남",
+  "line": "2호선",
+  "includeTimetable": true,
+  "limit": 8
+ },
+ "result": {
+  "data": {
+   "station": "강남",
+   "day": "평일",
+   "lines": [
+    {
+     "line": "2호선",
+     "stationCode": "0222",
+     "directions": [
+      {
+       "direction": "상행·내선",
+       "first": {
+        "time": "05:36",
+        "nextDay": false,
+        "from": "삼성",
+        "to": "성수"
+       },
+       "last": {
+        "time": "00:46",
+        "nextDay": true,
+        "from": "성수",
+        "to": "서울대입구"
+       },
+       "timetable": [
+        {
+         "trainNo": "2472",
+         "departs": "22:06",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "상행·내선"
+        },
+        {
+         "trainNo": "2474",
+         "departs": "22:12",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "상행·내선"
+        },
+        {
+         "trainNo": "2476",
+         "departs": "22:17",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "상행·내선"
+        },
+        {
+         "trainNo": "2478",
+         "departs": "22:22",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "상행·내선"
+        },
+        {
+         "trainNo": "2480",
+         "departs": "22:29",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "상행·내선"
+        },
+        {
+         "trainNo": "2482",
+         "departs": "22:33",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "신도림",
+         "direction": "상행·내선"
+        },
+        {
+         "trainNo": "2484",
+         "departs": "22:38",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "상행·내선"
+        },
+        {
+         "trainNo": "2486",
+         "departs": "22:44",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "신도림",
+         "direction": "상행·내선"
+        }
+       ]
+      },
+      {
+       "direction": "하행·외선",
+       "first": {
+        "time": "05:44",
+        "nextDay": false,
+        "from": "서울대입구",
+        "to": "성수"
+       },
+       "last": {
+        "time": "00:54",
+        "nextDay": true,
+        "from": "성수",
+        "to": "삼성"
+       },
+       "timetable": [
+        {
+         "trainNo": "2465",
+         "departs": "22:04",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "하행·외선"
+        },
+        {
+         "trainNo": "2469",
+         "departs": "22:12",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "하행·외선"
+        },
+        {
+         "trainNo": "2473",
+         "departs": "22:22",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "하행·외선"
+        },
+        {
+         "trainNo": "2475",
+         "departs": "22:28",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "하행·외선"
+        },
+        {
+         "trainNo": "2477",
+         "departs": "22:33",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "하행·외선"
+        },
+        {
+         "trainNo": "2479",
+         "departs": "22:39",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "하행·외선"
+        },
+        {
+         "trainNo": "2481",
+         "departs": "22:44",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "하행·외선"
+        },
+        {
+         "trainNo": "2483",
+         "departs": "22:51",
+         "nextDay": false,
+         "origin": "성수",
+         "destination": "성수",
+         "direction": "하행·외선"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "asOf": "2026-11-19T13:04:36.540Z",
+  "source": "서울시 지하철 첫차·막차, 역별 시간표 (SearchFirstAndLastTrainbyLineServiceNew, SearchSTNTimeTableByIDService)",
+  "notes": [
+   "요일은 오늘 운행일 기준입니다. 공휴일이면 day: \"holiday\"로 다시 조회하세요.",
+   "nextDay: true는 자정을 넘긴 시각(다음 날 새벽)입니다."
+  ]
+ }
+}

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "mcp__seoul",
+      "WebSearch",
+      "WebFetch",
+      "Bash(python3:*)",
+      "Read(~/.claude/plugins/**)",
+      "Read(~/workshop-kit/**)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Bash(rm -rf:*)",
+      "Bash(curl:*)",
+      "Bash(sudo:*)"
+    ]
+  }
+}

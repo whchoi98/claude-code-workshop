@@ -1,0 +1,15 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "workshop-kit",
+  "owner": { "name": "Claude Code Workshop" },
+  "description": "Claude Code 워크숍 실습용 플러그인 모음",
+  "plugins": [
+    {
+      "name": "seoul-kit",
+      "source": "./plugins/seoul-kit",
+      "description": "서울 열린데이터로 HTML 현황판, Excel 통계표, PowerPoint 브리핑을 만드는 Skill 세 개",
+      "version": "0.1.0",
+      "category": "productivity"
+    }
+  ]
+}

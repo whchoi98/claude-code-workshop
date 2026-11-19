@@ -1,0 +1,13 @@
+# 참고용 외부 실습 자료(저작권 있음). 저장소에 올리지 않는다.
+/*.zip
+/motion-template-*.html
+/\[html\]*
+/*.txt
+
+# 실습 중 생기는 파일
+workspace/work/*
+workspace/out/*
+!workspace/work/.gitkeep
+!workspace/out/.gitkeep
+__pycache__/
+.DS_Store

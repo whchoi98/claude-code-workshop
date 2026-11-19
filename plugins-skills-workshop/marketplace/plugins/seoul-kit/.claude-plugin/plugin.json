@@ -1,0 +1,8 @@
+{
+  "name": "seoul-kit",
+  "description": "서울 열린데이터(서울 MCP)와 웹 자료로 HTML 현황판, Excel 통계표, PowerPoint 브리핑을 만든다. 모델은 자료(JSON)만 쓰고 파일은 정해진 도구가 만든다.",
+  "version": "0.1.0",
+  "author": { "name": "Claude Code Workshop" },
+  "license": "Proprietary",
+  "keywords": ["seoul", "opendata", "html", "excel", "powerpoint", "workshop"]
+}

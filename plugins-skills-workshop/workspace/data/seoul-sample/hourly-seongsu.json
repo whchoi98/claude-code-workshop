@@ -1,0 +1,198 @@
+{
+ "tool": "get_subway_hourly_ridership",
+ "arguments": {
+  "station": "성수",
+  "line": "2호선"
+ },
+ "result": {
+  "data": {
+   "month": "202610",
+   "station": "성수",
+   "lines": [
+    {
+     "line": "2호선",
+     "station": "성수",
+     "hours": [
+      {
+       "hour": 4,
+       "boardings": 101,
+       "alightings": 3,
+       "total": 104
+      },
+      {
+       "hour": 5,
+       "boardings": 5189,
+       "alightings": 6634,
+       "total": 11823
+      },
+      {
+       "hour": 6,
+       "boardings": 9583,
+       "alightings": 46879,
+       "total": 56462
+      },
+      {
+       "hour": 7,
+       "boardings": 21582,
+       "alightings": 78512,
+       "total": 100094
+      },
+      {
+       "hour": 8,
+       "boardings": 27553,
+       "alightings": 257045,
+       "total": 284598
+      },
+      {
+       "hour": 9,
+       "boardings": 25564,
+       "alightings": 203156,
+       "total": 228720
+      },
+      {
+       "hour": 10,
+       "boardings": 26286,
+       "alightings": 152889,
+       "total": 179175
+      },
+      {
+       "hour": 11,
+       "boardings": 36168,
+       "alightings": 147927,
+       "total": 184095
+      },
+      {
+       "hour": 12,
+       "boardings": 51706,
+       "alightings": 148579,
+       "total": 200285
+      },
+      {
+       "hour": 13,
+       "boardings": 73041,
+       "alightings": 150821,
+       "total": 223862
+      },
+      {
+       "hour": 14,
+       "boardings": 97878,
+       "alightings": 144520,
+       "total": 242398
+      },
+      {
+       "hour": 15,
+       "boardings": 130620,
+       "alightings": 136889,
+       "total": 267509
+      },
+      {
+       "hour": 16,
+       "boardings": 169269,
+       "alightings": 123844,
+       "total": 293113
+      },
+      {
+       "hour": 17,
+       "boardings": 229744,
+       "alightings": 114180,
+       "total": 343924
+      },
+      {
+       "hour": 18,
+       "boardings": 317011,
+       "alightings": 103771,
+       "total": 420782
+      },
+      {
+       "hour": 19,
+       "boardings": 201608,
+       "alightings": 60358,
+       "total": 261966
+      },
+      {
+       "hour": 20,
+       "boardings": 158237,
+       "alightings": 30355,
+       "total": 188592
+      },
+      {
+       "hour": 21,
+       "boardings": 126174,
+       "alightings": 20924,
+       "total": 147098
+      },
+      {
+       "hour": 22,
+       "boardings": 79290,
+       "alightings": 15959,
+       "total": 95249
+      },
+      {
+       "hour": 23,
+       "boardings": 24853,
+       "alightings": 10650,
+       "total": 35503
+      },
+      {
+       "hour": 0,
+       "boardings": 3068,
+       "alightings": 6478,
+       "total": 9546
+      },
+      {
+       "hour": 1,
+       "boardings": 12,
+       "alightings": 996,
+       "total": 1008
+      },
+      {
+       "hour": 2,
+       "boardings": 0,
+       "alightings": 0,
+       "total": 0
+      },
+      {
+       "hour": 3,
+       "boardings": 0,
+       "alightings": 0,
+       "total": 0
+      }
+     ],
+     "busiestHours": [
+      {
+       "hour": 18,
+       "total": 420782
+      },
+      {
+       "hour": 17,
+       "total": 343924
+      },
+      {
+       "hour": 16,
+       "total": 293113
+      }
+     ],
+     "quietestHours": [
+      {
+       "hour": 23,
+       "total": 35503
+      },
+      {
+       "hour": 6,
+       "total": 56462
+      },
+      {
+       "hour": 22,
+       "total": 95249
+      }
+     ]
+    }
+   ]
+  },
+  "asOf": "20261103",
+  "source": "지하철 호선별 역별 시간대별 승하차 인원 (CardSubwayTime)",
+  "notes": [
+   "그 달 전체 합계입니다(하루 평균은 그 달 일수로 나누세요). 혼잡도가 아니라 카드 승하차 인원입니다. hour 8은 08~09시입니다."
+  ]
+ }
+}

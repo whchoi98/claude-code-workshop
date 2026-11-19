@@ -1,0 +1,26 @@
+{
+ "tool": "get_road_traffic",
+ "arguments": {
+  "place": "강남역"
+ },
+ "result": {
+  "data": {
+   "place": "강남역",
+   "message": "해당 장소로 이동·진입시 시간이 다소 소요될 수 있어요.",
+   "index": "서행",
+   "averageSpeedKmh": 16,
+   "measuredAt": "2026-11-19 22:00",
+   "incidents": [
+    {
+     "type": "",
+     "detail": "",
+     "occurredAt": "",
+     "message": ""
+    }
+   ]
+  },
+  "asOf": "2026-11-19 22:00",
+  "source": "OA-21285 (citydata ROAD_TRAFFIC_STTS)",
+  "notes": []
+ }
+}
