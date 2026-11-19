@@ -112,7 +112,7 @@ claude plugin install seoul-kit@workshop-kit
 
 ## LAB 안내 (43~50분)
 
-랩 가이드(`lab/ClaudeCode_Day1_SeoulData_HandsOnLab.html`)를 화면에 띄우고 다음을 알린다.
+랩 가이드(`lab/ClaudeCode_Day1_SeoulData_HandsOnLab.html`)를 화면에 띄우고, 맨 앞의 실습 구조 그림으로 오늘 본 Skill, Plugin, 검사 규칙, 권한 설정이 LAB에서 어디에 쓰이는지 짚은 뒤 다음을 알린다.
 
 - 각자 자기 속도로 진행한다. 미션은 현황판, 통계표, 브리핑 순서다.
 - 상자 오른쪽의 복사를 눌러 붙여 넣는다. 장소와 역 이름은 자기 것으로 바꾼다.
@@ -124,6 +124,7 @@ claude plugin install seoul-kit@workshop-kit
 
 ## 준비물 점검
 
+- [ ] 진행자 서버에서 랩 가이드 준비 1번(자료 받기)을 마쳐 `~/workshop-kit`과 `~/seoul-lab`이 있다
 - [ ] 진행자 화면에서 시연 1~3을 처음부터 끝까지 한 번 돌려 봤다
 - [ ] 서울 MCP가 응답하지 않을 때 보여 줄 완성본(`out/` 폴더 사본)을 준비했다
 - [ ] 긴 요청 문구를 메모장에 붙여 넣기 좋게 준비했다

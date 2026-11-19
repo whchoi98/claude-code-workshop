@@ -11,3 +11,9 @@ workspace/out/*
 !workspace/out/.gitkeep
 __pycache__/
 .DS_Store
+
+# 인포그래픽 작업 폴더: 스킬에서 복사한 도구와 빌드 결과는 올리지 않는다
+infographic/*/infokit.py
+infographic/*/buildkit.py
+infographic/*/.aws-icon-bundle
+infographic/*/build/

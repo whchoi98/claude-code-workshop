@@ -35,7 +35,7 @@
 
 - [ ] 서울 MCP 워크숍 Gateway를 배포하고 워크숍 코드를 발급한다. `seoul-opendata-mcp` 저장소의 워크숍 Gateway 계획이 이 일을 다룬다. 이 운영안을 쓴 날(2026-11-19)에는 계획 문서만 있고 구현 전이었다.
 - [ ] 서울 열린데이터광장 API 키 수와 분당 한도를 참가자 수에 맞춘다(아래 4번).
-- [ ] 참가자 실습 서버마다 `bash scripts/setup-lab.sh`를 실행한다. 플러그인 마켓플레이스를 `~/workshop-kit`에, 작업 폴더를 `~/seoul-lab`에 두고 `openpyxl`과 `python-pptx`를 설치한다.
+- [ ] 실습 서버에는 미리 설치할 것이 없다. 참가자가 랩 가이드 준비 1번에서 워크숍 저장소를 받고 `scripts/setup-lab.sh`를 직접 실행한다. 이 스크립트가 플러그인 마켓플레이스를 `~/workshop-kit`에, 작업 폴더를 `~/seoul-lab`에 두고 `openpyxl`과 `python-pptx`를 설치한다. 서버에서 `git`, `python3`를 쓸 수 있는지와 github.com, pypi.org로 나가는 통신이 되는지만 미리 확인한다. 통신이 막힌 환경이면 진행자가 서버마다 같은 스크립트를 미리 실행해 둔다.
 - [ ] 랩 가이드를 게시한다. 가이드는 기존 핸즈온 랩 사이트의 한 파트(`ccw-hands-on-lab/ClaudeCode_Day1_SeoulData_HandsOnLab.html`, 사이드바의 캡스톤 · 프로젝트 선택 M7)로 들어가 있다. 워크숍 저장소와 github.io 저장소를 커밋하고 github.io를 push해야 공개된다.
 - [ ] 참가자 노트북에 Excel과 PowerPoint가 있는지 확인한다. 없으면 웹 버전으로 열 수 있는지 확인한다.
 
@@ -138,12 +138,14 @@ Day 1 숙제는 세 가지다.
 | Python 검사기와 HTML 안 JavaScript 검사기의 판정 일치 | 23건 모두 일치 |
 | 통계표와 브리핑 열기 | LibreOffice로 변환해 모양, 수식 계산, 차트를 확인 |
 | 작업 폴더에 내 Skill이 있을 때 `/monthly-report data/team-kpi.csv` | 통과. 세 결과가 53초에 나옴 |
-| `scripts/setup-lab.sh` | 임시 폴더에서 통과 |
+| 공개 저장소에서 받아 `scripts/setup-lab.sh`를 실행하고 플러그인을 설치하는 준비 1~2번 | 빈 홈 폴더에서 통과. 받기 3초, 스크립트 4초 |
+| `scripts/setup-lab.sh`를 pip이 없는 빈 서버에서 실행 | Amazon Linux 2023(Python 3.9)과 Ubuntu 24.04(Python 3.12) 컨테이너에서 통과. 두 번째 실행도 통과 |
 
 확인하지 못한 것은 리허설에서 본다.
 
 - 실제 Excel과 PowerPoint에서 열었을 때의 모양과 글꼴
 - 워크숍 Gateway를 거친 서울 MCP 호출(로컬 서버로만 시험했다)
+- 실제 실습 서버에서의 준비 1번. 컨테이너 시험에서 Amazon Linux 2023은 일반 계정으로도 통과했다. Ubuntu 24.04는 pip이 없는 일반 계정에서 `sudo`를 쓸 수 없으면 `[중단]` 안내를 내고 멈췄다. 암호 없는 `sudo`로 `python3-pip`을 설치하는 경로는 시험하지 못했다. 실습 서버가 Ubuntu라면 리허설에서 이 단계를 먼저 본다
 - code-server의 `/proxy/8000/` 경로로 결과 보관함 열기
 - 대화형 화면에서 승인 창이 뜨는 빈도. 헤드리스 시험에서는 Claude가 여러 명령을 한 줄로 묶었을 때 거부된 경우가 있었다
 - 미션 4의 내 Skill 저장. `.claude/skills/`에 쓰는 일은 승인이 필요해서 헤드리스 시험에서는 두 번 모두 거부됐다. 대화형 화면에서 승인 창이 뜨고 Yes로 저장되는지 본다

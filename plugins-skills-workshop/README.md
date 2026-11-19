@@ -11,17 +11,21 @@
 | `lab/` | 참가자용 랩 가이드(`ClaudeCode_Day1_SeoulData_HandsOnLab.html`). 기존 핸즈온 랩과 같은 디자인이며 `assets/`를 같은 폴더에 둔다 |
 | `docs/session-plugins-skills.md` | 50분 세션 구성안과 시연 대본 |
 | `docs/facilitator-runbook.md` | 진행자 운영안: 진행표, 사전 준비, 호출 한도, 대체 수단, 확인 범위 |
-| `scripts/setup-lab.sh` | 참가자 실습 서버 한 대를 LAB 상태로 만드는 스크립트 |
+| `scripts/setup-lab.sh` | 실습 서버 한 대를 LAB 상태로 만드는 스크립트. 참가자가 랩 가이드 준비 1번에서 직접 실행한다 |
 | `scripts/add-lab-to-workshop.py` | 랩 가이드를 기존 핸즈온 랩(`../ccw-hands-on-lab/`)의 캡스톤 M7로 넣는 스크립트. 여러 번 실행해도 된다 |
+| `infographic/seoul-lab/` | 랩 가이드 맨 앞의 실습 구조 그림 원본(`structure.py`)과 사실 확인 기록(`sources.md`). 빌드 방법은 `sources.md`에 있다 |
 
 ## 빠르게 돌려 보기
 
 ```bash
-bash scripts/setup-lab.sh
+git clone -q --depth 1 https://github.com/whchoi98/claude-code-workshop ~/claude-code-workshop
+bash ~/claude-code-workshop/plugins-skills-workshop/scripts/setup-lab.sh
 claude plugin marketplace add ~/workshop-kit
 claude plugin install seoul-kit@workshop-kit
 cd ~/seoul-lab && claude
 ```
+
+참가자가 랩 가이드의 준비 1~3번에서 실행하는 명령과 같다. 이미 이 저장소를 받아 둔 곳에서는 첫 줄을 건너뛰고 `bash scripts/setup-lab.sh`를 실행한다.
 
 Claude Code 안에서 `/seoul-kit:board 강남역, 여의도, 성수`를 실행한다. 결과는 `out/`에 생기고, 브라우저에서 code-server 주소 끝에 `/proxy/8000/`을 붙여 연다. 서울 MCP는 `seoul`이라는 이름으로 등록돼 있어야 한다.
 

@@ -731,3 +731,15 @@ html[data-theme="light"] #workshop-content .part-divider .rules span
 {background:#EDE6FB; border-color:#C9B8F0; color:#5B3FA8}
 @media  print{#workshop-content #themeToggle
 {display:none}}
+#workshop-content .lab-structure a
+{display:block; cursor:zoom-in}
+#workshop-content .lab-structure .ls-dark
+{display:none}
+html[data-theme="dark"] #workshop-content .lab-structure .ls-dark
+{display:block}
+html[data-theme="dark"] #workshop-content .lab-structure .ls-light
+{display:none}
+@media  print{#workshop-content .lab-structure .ls-dark
+{display:none !important}
+#workshop-content .lab-structure .ls-light
+{display:block !important}}
