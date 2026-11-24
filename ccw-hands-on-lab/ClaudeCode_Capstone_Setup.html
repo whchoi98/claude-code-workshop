@@ -97,44 +97,48 @@
 <section class="task" id="s1">
 <div class="task-head"><span class="task-num">SETUP 01</span><h2>Claude HUD, 세션 계기판</h2><span class="time-badge">5분</span></div>
 <p class="task-goal">
-    상태줄에 <strong>토큰 사용량, 활성 에이전트, 투두, 깃 상태</strong>를 상시 표시하는 HUD 플러그인입니다.
+    상태줄에 <strong>컨텍스트 사용량, 모델, 깃 상태</strong>를 상시 표시하고, 켜 두면 <strong>도구, 에이전트, 투두</strong>까지 보여 주는 HUD 플러그인입니다.
     캡스톤처럼 긴 빌드에서 컨텍스트가 얼마나 남았는지 감으로가 아니라 눈으로 봅니다.
-    원본: <a href="https://github.com/jarrodwatts/claude-hud" style="color:#c9a2ff">github.com/jarrodwatts/claude-hud</a>
+    원본: <a href="https://github.com/jarrodwatts/claude-hud" style="color:#c9a2ff">github.com/jarrodwatts/claude-hud</a>.
+    Claude Code 2.1.260 이상과 Node.js 22.18 이상이 필요합니다.
 </p>
 <div class="step-title"><span class="step-no">1</span>설치와 설정, 순서대로 한 줄씩</div>
-<p class="body">Claude 세션 안에서 다섯 줄이면 끝납니다. <strong>순서가 중요합니다</strong>: 마켓 등록 → 설치 → 리로드 → 표시 항목 설정 → 상태줄 활성화. 마지막 setup까지 마쳐야 하단 바가 나타납니다.</p>
+<p class="body">Claude 세션 안에서 네 줄이면 끝납니다. <strong>순서가 중요합니다</strong>: 마켓 등록, 설치, 리로드, <code class="inline">/hud</code> 순서입니다. 마지막 <code class="inline">/hud</code>까지 마쳐야 하단 바가 나타납니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력 1/5</span><button aria-label="Claude 세션 입력 1/5 복사" class="ws-copy" data-copy-code="workshop-code-001" data-copy-label="Claude 세션 입력 1/5 복사" type="button">복사</button></div>
+<div class="code-head"><span class="code-label">Claude 세션 입력 1/4</span><button aria-label="Claude 세션 입력 1/4 복사" class="ws-copy" data-copy-code="workshop-code-001" data-copy-label="Claude 세션 입력 1/4 복사" type="button">복사</button></div>
 <pre id="workshop-code-001"><code>/plugin marketplace add jarrodwatts/claude-hud</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력 2/5</span><button aria-label="Claude 세션 입력 2/5 복사" class="ws-copy" data-copy-code="workshop-code-002" data-copy-label="Claude 세션 입력 2/5 복사" type="button">복사</button></div>
+<div class="code-head"><span class="code-label">Claude 세션 입력 2/4</span><button aria-label="Claude 세션 입력 2/4 복사" class="ws-copy" data-copy-code="workshop-code-002" data-copy-label="Claude 세션 입력 2/4 복사" type="button">복사</button></div>
 <pre id="workshop-code-002"><code>/plugin install claude-hud</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력 3/5</span><button aria-label="Claude 세션 입력 3/5 복사" class="ws-copy" data-copy-code="workshop-code-003" data-copy-label="Claude 세션 입력 3/5 복사" type="button">복사</button></div>
+<div class="code-head"><span class="code-label">Claude 세션 입력 3/4</span><button aria-label="Claude 세션 입력 3/4 복사" class="ws-copy" data-copy-code="workshop-code-003" data-copy-label="Claude 세션 입력 3/4 복사" type="button">복사</button></div>
 <pre id="workshop-code-003"><code>/reload-plugins</code></pre>
 </div>
-<p class="body"><code class="inline">/reload-plugins</code>로 설치를 세션에 반영한 뒤 설정 커맨드가 열립니다.</p>
+<p class="body"><code class="inline">/reload-plugins</code>로 설치를 세션에 반영해야 <code class="inline">/hud</code>가 열립니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력 4/5</span><button aria-label="Claude 세션 입력 4/5 복사" class="ws-copy" data-copy-code="workshop-code-004" data-copy-label="Claude 세션 입력 4/5 복사" type="button">복사</button></div>
-<pre id="workshop-code-004"><code>/claude-hud:configure</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력 4/4</span><button aria-label="Claude 세션 입력 4/4 복사" class="ws-copy" data-copy-code="workshop-code-004" data-copy-label="Claude 세션 입력 4/4 복사" type="button">복사</button></div>
+<pre id="workshop-code-004"><code>/hud</code></pre>
 </div>
-<p class="body"><code class="inline">/claude-hud:configure</code>는 상태줄에 무엇을 띄울지(토큰, 도구, 스킬, 에이전트, 깃 상태 등)
-  대화형으로 고르는 단계입니다. 고민되면 프리셋 Full로 전부 켜 두고, 나중에 같은 커맨드로 다시 조정하면 됩니다.
-  스킬, 도구, 에이전트 표시는 기본 숨김이라 여기서 켜야 하며, 해당 활동이 있을 때만 바에 나타납니다.</p>
+<p class="body"><code class="inline">/hud</code>는 설치 상태를 점검한 뒤 상태줄을 HUD로 바꿔도 되는지 묻습니다. 승인하면 <code class="inline">~/.claude/settings.json</code>에 상태줄 설정이 들어가고 하단 바가 나타납니다. 다른 상태줄을 쓰고 있었다면 바꿀지 먼저 묻습니다.
+  예전의 <code class="inline">/claude-hud:setup</code>과 <code class="inline">/claude-hud:configure</code>는 0.15.0부터 <code class="inline">/hud</code> 하나로 합쳐졌습니다.</p>
+<div class="step-title"><span class="step-no">2</span>표시 항목 바꾸기, 말로 시키기</div>
+<p class="body">기본 화면은 두 줄입니다. 첫 줄은 모델과 프로젝트와 깃 브랜치, 둘째 줄은 컨텍스트 사용량입니다. 도구, 에이전트, 투두 줄은 기본이 꺼짐이라 <code class="inline">/hud</code> 뒤에 원하는 것을 말로 적어 켭니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력 5/5</span><button aria-label="Claude 세션 입력 5/5 복사" class="ws-copy" data-copy-code="workshop-code-005" data-copy-label="Claude 세션 입력 5/5 복사" type="button">복사</button></div>
-<pre id="workshop-code-005"><code>/claude-hud:setup</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-005" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-005"><code>/hud 도구, 에이전트, 할 일 줄도 보여 줘</code></pre>
 </div>
+<p class="body">Claude가 설정 항목을 찾아 미리보기를 보여 주고, 승인하면 저장합니다. 켠 줄은 해당 활동이 있을 때만 바에 나타납니다. 마음에 안 들면 <code class="inline">/hud 방금 바꾼 것 되돌려 줘</code>라고 하면 됩니다.</p>
 <div class="callout tip">
 <span class="co-title">하단 바가 안 보인다면</span>
-    다섯 줄의 <strong>순서</strong>를 지켰는지 먼저 확인하세요, 특히 리로드 전에 configure를 치면 커맨드가 없다고 나옵니다.
+    네 줄의 <strong>순서</strong>를 지켰는지 먼저 확인하세요. 리로드 전에 <code class="inline">/hud</code>를 치면 커맨드가 없다고 나옵니다.
+    상태줄에 <code class="inline">/hud</code>를 입력하라는 한 줄만 보이면 Node.js가 22.18보다 낮은 것입니다. <code class="inline">/hud</code>를 다시 실행하면 더 새 Node를 찾거나 설치를 도와줍니다.
     그래도 조용하면 <code class="inline">/exit</code>로 나갔다가 <code class="inline">claude</code>로 재진입하면 상태줄이 뜹니다.
   </div>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
-<label class="cp-item"><input data-cp="s1" type="checkbox"/><span>재진입 후 상태줄에 토큰/깃 정보가 표시된다</span></label>
+<label class="cp-item"><input data-cp="s1" type="checkbox"/><span>상태줄에 모델과 컨텍스트 사용량이 표시된다</span></label>
 </div>
 </section>
 <section class="task" id="s2">
@@ -250,7 +254,7 @@ done</code></pre>
 </div>
 <table class="tbl">
 <tr><th>확인</th><th>기대</th></tr>
-<tr><td>상태줄</td><td>HUD가 토큰, 에이전트, 깃 상태를 표시</td></tr>
+<tr><td>상태줄</td><td>HUD가 컨텍스트 사용량과 깃 상태를 표시, 켜 두면 도구와 에이전트도 표시</td></tr>
 <tr><td>/plugin</td><td>superpowers, AWS 툴킷 6종, 선택 설치분이 목록에</td></tr>
 <tr><td>/context all</td><td>플러그인 도구가 차지하는 컨텍스트 파악, 과하면 disable</td></tr>
 </table>
