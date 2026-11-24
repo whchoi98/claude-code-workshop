@@ -12,7 +12,7 @@
 | 신호등 값 | green, yellow, red, none 4종 | `kit/contracts.py` |
 | 수식 함수 | SUM, AVERAGE, MAX, MIN, ROUND, IF, RANK, ABS, COUNT 9종 | `kit/contracts.py`의 `FUNCTIONS` |
 | 권한 | 허용 `mcp__seoul`, `WebSearch`, `WebFetch`, `Bash(python3:*)`, 금지 `Read(./.env)`, `Bash(rm -rf:*)`, `Bash(curl:*)`, `Bash(sudo:*)` | `workspace/.claude/settings.json` |
-| 진행 시간 | 준비 10, M1 35, M2 40, 휴식 10, M3 40, M4 15, 합계 150분 | `lab/ClaudeCode_Day1_SeoulData_HandsOnLab.html`의 미션별 시간과 M2 끝의 쉬는 시간 |
+| 진행 시간 | 준비 5, M1 30, M2 25, 휴식 10, M3 25, M4 25, 합계 120분. 준비 1~3번은 오전 랩 기본 구성에서 마친다 | `lab/ClaudeCode_Day1_SeoulData_HandsOnLab.html`의 미션별 시간과 M2 끝의 쉬는 시간 |
 
 ## 다시 빌드하기
 

@@ -43,11 +43,11 @@ T = dict(
     s4=("규칙과 권한", "틀린 자료와 위험한 명령 차단"),
     rules=("자료 검사", "kit/contracts.py", ["신호등 값 4종만 허용", "수식 함수 9종만 허용", "실패 시 고칠 칸 안내"]),
     perms=("권한 설정", ".claude/settings.json", "허용: 서울 MCP, 웹 검색, python3", "금지: .env 읽기, rm -rf, curl, sudo"),
-    s5=("150분 진행", "각자 자기 속도로 진행"),
+    s5=("120분 진행", "각자 자기 속도로 진행"),
     # (이름, 분, 미션 여부)
-    plan=[("준비", 10, False), ("M1 현황판", 35, True), ("M2 통계표", 40, True), ("휴식", 10, False),
-          ("M3 브리핑", 40, True), ("M4 내 업무로", 15, True)],
-    note="시간은 랩 가이드의 미션별 배정, 2026.11 기준",
+    plan=[("준비", 5, False), ("M1 현황판", 30, True), ("M2 통계표", 25, True), ("휴식", 10, False),
+          ("M3 브리핑", 25, True), ("M4 내 업무로", 25, True)],
+    note="준비 1~3번은 오전에 진행, 시간은 랩 가이드의 미션별 배정, 2026.11 기준",
 )
 
 TS, KS = 30, 21   # 섹션 제목, 요지
@@ -149,7 +149,8 @@ def s5(d, x, y, w, h):
             d.rect(cx, sy, sw_, sh, rx=8, fill="orangeF", fo=0.16, stroke="orange", sw=1.4)
         else:
             d.rect(cx, sy, sw_, sh, rx=8, fill="panel", stroke="line2", sw=1.4)
-        d.text(cx + sw_ / 2, sy + 32, f"{name} {minutes}분", 18, 700, "text" if mission else "muted", "middle",
+        size = 18 if sw_ >= 100 else 15          # 5분짜리 좁은 칸은 글자를 줄인다
+        d.text(cx + sw_ / 2, sy + 32, f"{name} {minutes}분", size, 700, "text" if mission else "muted", "middle",
                box=(cx - 5, sy, sw_ + 10, sh))
         cx += sw_ + gap
 

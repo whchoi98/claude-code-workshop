@@ -1,6 +1,6 @@
 # Plugins & Skills 워크숍 Day 1 자료
 
-비개발 직군을 위한 Claude Code 워크숍 Day 1의 오후 세션(Plugins & Skills 50분)과 LAB(150분) 자료다. 참가자는 서울 열린데이터를 가져와 HTML 현황판, Excel 통계표, PowerPoint 브리핑을 각자 만든다.
+비개발 직군을 위한 Claude Code 워크숍 Day 1의 오후 세션(Plugins & Skills 50분)과 LAB(120분) 자료다. 참가자는 서울 열린데이터를 가져와 HTML 현황판, Excel 통계표, PowerPoint 브리핑을 각자 만든다.
 
 ## 구성
 
