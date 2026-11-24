@@ -39,8 +39,8 @@ argument-hint: "[무엇의 통계표인지] 예: 강남역 2호선 시간대별 
 
 정확한 규칙은 `python3 "${CLAUDE_SKILL_DIR}/../../kit/kit.py" rules sheet`, 완성된 예시는 `... kit.py example sheet`로 본다.
 
-- `title`, `subtitle`, `asOf`, `sheets`(1~4개), `sources`.
-- 시트마다 `name`, `columns`(2~12열), `rows`(1~200줄), `chart`(없어도 됨), `notes`(없어도 됨).
+- `title`, `subtitle`, `asOf`, `sheets`(1~4개), `sources`. `asOf`는 30자 이하다. 기준 시각이 여럿이면 가장 이른 시각과 가장 늦은 시각만 적는다.
+- 시트마다 `name`, `columns`(2~12열), `rows`(1~200줄), `chart`(없어도 됨), `notes`(없어도 됨, 3줄까지이고 줄마다 80자 이하).
 - 열의 `type`은 `text`, `number`, `formula` 가운데 하나다.
   - `format`: `int`, `decimal1`, `decimal2`, `percent`, `won`, `text`
   - `total`: 표 아래 요약 줄. `sum`, `average`, `max`, `min`

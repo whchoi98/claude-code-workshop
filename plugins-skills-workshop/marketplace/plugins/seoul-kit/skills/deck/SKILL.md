@@ -31,7 +31,7 @@ argument-hint: "[무엇을 보고할지] 예: 강남역 저녁 유동 브리핑"
 
 정확한 규칙은 `python3 "${CLAUDE_SKILL_DIR}/../../kit/kit.py" rules deck`, 완성된 예시는 `... kit.py example deck`로 본다.
 
-- `title`, `subtitle`, `presenter`, `date`, `theme`, `slides`(본문 2~8장), `sources`.
+- `title`, `subtitle`, `presenter`, `date`, `theme`, `slides`(본문 2~8장), `sources`. `presenter`와 `date`는 모르면 항목을 빼고, 빈 글로 두지 않는다.
 - `theme`은 `ink`(남색), `forest`(초록), `sunset`(주황), `ocean`(청록). 사용자가 고르지 않으면 `ink`.
 - 장의 `type`은 네 가지다.
 
@@ -39,7 +39,7 @@ argument-hint: "[무엇을 보고할지] 예: 강남역 저녁 유동 브리핑"
   |---|---|---|
   | `numbers` | 큰 숫자 2~4개 | `items`: `label`, `value`(글자, 10자 이하. 예: "5.4만"), `unit`, `note`, `signal` |
   | `chart` | 흐름이나 크기 비교 | `chart`(column, bar, line, pie), `categories`, `series`, `unit` |
-  | `table` | 항목별 비교 | `columns`(2~6열), `rows`(2~8줄) |
+  | `table` | 항목별 비교 | `columns`(2~6열. 열마다 `label`과 `type`을 적고 `label`은 12자 이하), `rows`(2~8줄, 칸마다 24자 이하) |
   | `bullets` | 읽어 낸 것, 다음 할 일 | `bullets` 2~5줄 |
 
 - 모든 장에 `title`(36자 이하)과 `takeaway`(60자 이하)를 쓴다. `takeaway`는 그 장의 한 줄 결론이다.
