@@ -409,6 +409,80 @@
 <label class="cp-item"><input data-cp="m4b" type="checkbox"/><span>내가 만든 Skill 한 줄로 결과가 나왔다</span></label>
 <label class="cp-item"><input data-cp="m4c" type="checkbox"/><span>내 업무에 적용할 순서를 받았다</span></label>
 </div>
+<div class="callout tip">
+<span class="co-title">시간이 남았다면</span>
+    바로 아래 <a href="#more">더 해 보기</a>에서 하나를 골라 이어서 하세요.
+  </div>
+</section>
+<section class="task" id="more">
+<div class="task-head"><span class="task-num">BONUS</span><h2>시간이 남으면, 더 해 보기</h2><span class="time-badge">선택</span></div>
+<p class="task-goal">
+    네 미션을 모두 마친 분을 위한 실습 다섯 가지입니다. 순서는 없습니다. 끌리는 것 <strong>하나만 골라도</strong> 되고, 하나에 5~10분쯤 걸립니다. 체크포인트와 위쪽 진행 표시에는 들어가지 않습니다.
+</p>
+<table class="tbl">
+<tr><th>실습</th><th>만드는 것</th><th>해 보는 것</th></tr>
+<tr><td>1. 아까와 지금</td><td>통계표</td><td>앞에서 만든 결과를 기준으로 두고 변화를 본다</td></tr>
+<tr><td>2. 퇴근길 한 화면</td><td>현황판</td><td>한 장소를 여러 종류의 데이터로 본다</td></tr>
+<tr><td>3. 모임 장소 고르기</td><td>브리핑</td><td>기준을 주고 추천과 근거를 받는다</td></tr>
+<tr><td>4. 다음 달이 왔다면</td><td>내 Skill이 만드는 세 결과</td><td>새 자료로 다시 실행하고, Skill에 규칙을 더한다</td></tr>
+<tr><td>5. 보고 마무리</td><td>고친 브리핑, 메일 문안</td><td>받는 사람 입장에서 검토시키고 고친다</td></tr>
+</table>
+<div class="step-title"><span class="step-no">1</span>아까와 지금 비교하기</div>
+<p class="body">미션 1에서 현황판을 만든 뒤로 시간이 꽤 지났습니다. 같은 장소를 지금 다시 가져와 그때와 견줍니다. 현황 보고에서는 지난번과 무엇이 달라졌는지가 먼저 읽힙니다. Claude는 <code class="inline">work</code> 폴더에 남아 있는 현황판 자료를 그때 값으로 쓰고, 지금 값만 새로 받습니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-040" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-040"><code>아까 만든 서울 현황판의 장소들을 지금 다시 가져와 줘. 그때와 지금의 인구를 나란히 놓은 통계표로 만들고, 차이와 변화율은 수식 열로 넣어 줘. 가장 많이 달라진 곳은 notes에 적어 줘</code></pre>
+</div>
+<p class="body">내려받아 변화율 칸에 수식이 들어 있는지 확인하세요. 낮과 저녁처럼 시간대가 다르면 차이가 크게 나옵니다. 이 차이를 추세로 읽어도 되는지 Claude에게 물어보세요.</p>
+<div class="step-title"><span class="step-no">2</span>퇴근길 한 화면 만들기</div>
+<p class="body">미션 1은 여러 장소를 같은 데이터로 비교했습니다. 이번에는 한 장소를 여러 데이터로 봅니다. 지하철 도착, 도로, 날씨, 혼잡도는 서로 다른 도구에서 오고, Skill이 한 화면으로 묶습니다. 강남역을 내가 퇴근할 때 지나는 역으로 바꾸세요.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-041" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-041"><code>/seoul-kit:board 강남역 퇴근길. 지하철 도착 정보를 표로 넣고, 도로 속도와 날씨와 지금 혼잡도를 카드로 모아 줘</code></pre>
+</div>
+<p class="body">현황판 맨 아래 출처에 도구가 몇 가지 적혔는지 세어 보세요. 지하철 도착 정보는 1분 안에 바뀌므로, 다시 만들어 달라고 하면 표가 달라집니다.</p>
+<div class="step-title"><span class="step-no">3</span>모임 장소 고르기 브리핑</div>
+<p class="body">지금까지 만든 브리핑은 현황을 알렸습니다. 이번에는 <strong>결정을 돕는 브리핑</strong>을 만듭니다. 기준을 내가 정해 주면 Claude가 데이터를 받아 한 곳을 추천하고 이유를 적습니다. 장소 세 곳과 기준은 내 것으로 바꿔도 됩니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-042" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-042"><code>/seoul-kit:deck 오늘 저녁 팀 모임 장소 고르기. 강남역, 성수, 여의도의 혼잡도와 상권을 지금 다시 받아서, 덜 붐비고 식당 상권이 활발한 곳을 추천해 줘. 세 곳을 비교하는 표, 추천하는 곳과 이유, 가기 전에 확인할 것까지 세 장으로</code></pre>
+</div>
+<p class="body">추천이 마음에 들지 않으면 기준을 바꿔 다시 시켜 보세요. 상권 숫자는 카드 결제의 일부만 집계한 값이라, 금액 자체보다 평소에 견준 수준으로 읽습니다.</p>
+<div class="step-title"><span class="step-no">4</span>다음 달이 왔다고 치고, 내 Skill 다시 쓰기</div>
+<p class="body">Skill로 남긴 보람은 다음 달에 드러납니다. 연습용 팀 지표에 12월 한 줄을 더하고, 미션 4에서 쓴 한 줄을 다시 실행합니다. 12월은 일부러 나쁜 달로 넣습니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력, 한 달 더하기</span><button aria-label="Claude 세션 입력, 한 달 더하기 복사" class="ws-copy" data-copy-code="workshop-code-043" data-copy-label="Claude 세션 입력, 한 달 더하기 복사" type="button">복사</button></div>
+<pre id="workshop-code-043"><code>data/team-kpi.csv에 2026-12 줄을 추가해 줘. 문의 접수 540, 처리 완료 498, 평균 처리 시간 7.2, 재문의율 9.6, 만족도 3.9야</code></pre>
+</div>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력, 다시 실행</span><button aria-label="Claude 세션 입력, 다시 실행 복사" class="ws-copy" data-copy-code="workshop-code-044" data-copy-label="Claude 세션 입력, 다시 실행 복사" type="button">복사</button></div>
+<pre id="workshop-code-044"><code>/monthly-report data/team-kpi.csv</code></pre>
+</div>
+<p class="body">결과 보관함에서 현황판을 새로 고치면 12월이 미달로 칠해져 있습니다. 통계표와 브리핑에도 12월이 들어갔습니다. 이어서 Skill에 규칙을 하나 더합니다. Skill은 한 번 쓰고 끝내는 문서가 아니라 보고하면서 다듬는 문서입니다. 승인 창이 뜨면 내 Skill 문서를 고치는 것인지 읽고 <strong>Yes</strong>를 고릅니다. 고치는 곳 수만큼 여러 번 뜰 수 있습니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력, 규칙 더하기</span><button aria-label="Claude 세션 입력, 규칙 더하기 복사" class="ws-copy" data-copy-code="workshop-code-045" data-copy-label="Claude 세션 입력, 규칙 더하기 복사" type="button">복사</button></div>
+<pre id="workshop-code-045"><code>monthly-report Skill에 규칙을 하나 추가해 줘. 지난달보다 나빠진 지표가 있으면 현황판의 읽어 낸 것 첫 줄과 브리핑 첫 장에서 그 지표부터 알리게 해 줘</code></pre>
+</div>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력, 다시 실행</span><button aria-label="Claude 세션 입력, 다시 실행 복사" class="ws-copy" data-copy-code="workshop-code-046" data-copy-label="Claude 세션 입력, 다시 실행 복사" type="button">복사</button></div>
+<pre id="workshop-code-046"><code>/monthly-report data/team-kpi.csv</code></pre>
+</div>
+<p class="body">현황판의 읽어 낸 것 첫 줄과 브리핑 첫 장이 나빠진 지표로 시작하는지 확인하세요. 바뀌지 않았다면 Claude Code를 끝냈다가 다시 시작한 뒤 실행합니다.</p>
+<div class="step-title"><span class="step-no">5</span>보고 마무리, 검토받고 메일 쓰기</div>
+<p class="body">보내기 전에 받는 사람 입장에서 한 번 읽습니다. Claude에게 팀장 역할을 맡겨 질문과 약한 곳을 먼저 받아 봅니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력, 검토받기</span><button aria-label="Claude 세션 입력, 검토받기 복사" class="ws-copy" data-copy-code="workshop-code-047" data-copy-label="Claude 세션 입력, 검토받기 복사" type="button">복사</button></div>
+<pre id="workshop-code-047"><code>앞에서 만든 서울 브리핑을 받는 팀장 입장에서 읽어 줘. 물어볼 만한 질문 세 개와 근거가 가장 약한 장 하나를 짚어 줘. 아직 고치지는 마</code></pre>
+</div>
+<p class="body">지적이 맞는지는 내가 먼저 판단합니다. 받아들일 만하면 고치게 하고, 보낼 메일 문안까지 받습니다.</p>
+<div class="code-wrap prompt" data-code-kind="prompt">
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치고 메일 쓰기</span><button aria-label="Claude 세션 입력, 고치고 메일 쓰기 복사" class="ws-copy" data-copy-code="workshop-code-048" data-copy-label="Claude 세션 입력, 고치고 메일 쓰기 복사" type="button">복사</button></div>
+<pre id="workshop-code-048"><code>짚은 장을 고쳐서 다시 만들고, 이 브리핑을 첨부해 보낼 메일 본문을 다섯 줄로 써 줘. 숫자는 브리핑에 있는 것만 써 줘</code></pre>
+</div>
+<div class="callout warn">
+<span class="co-title">보내는 것은 사람이</span>
+    Claude는 문안만 씁니다. 숫자와 받는 사람을 확인하고 보내는 일은 사람이 합니다.
+  </div>
 </section>
 <section class="task" id="help">
 <div class="task-head"><span class="task-num">HELP</span><h2>막히면</h2><span class="time-badge">참고</span></div>
@@ -498,6 +572,7 @@
 <a data-nav="m2" data-toc-link="" href="#m2"><span class="dot"></span>M2 통계표<span class="nav-time">25분</span></a>
 <a data-nav="m3" data-toc-link="" href="#m3"><span class="dot"></span>M3 브리핑<span class="nav-time">25분</span></a>
 <a data-nav="m4" data-toc-link="" href="#m4"><span class="dot"></span>M4 내 업무로<span class="nav-time">25분</span></a>
+<a data-nav="more" data-toc-link="" href="#more"><span class="dot"></span>더 해 보기<span class="nav-time">선택</span></a>
 <a data-nav="help" data-toc-link="" href="#help"><span class="dot"></span>막히면<span class="nav-time">참고</span></a>
 <a data-nav="wrapup" data-toc-link="" href="#wrapup"><span class="dot"></span>마무리<span class="nav-time"></span></a>
 </aside></nav><a class="back-to-top" href="#workshop-main">맨 위로 ↑</a></details>
