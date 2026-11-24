@@ -92,9 +92,9 @@
 <figcaption style="margin-top:8px; font-size:13px; color:var(--muted);">실습 구조. Claude는 자료를 모아 자료 파일만 쓰고, 정해진 도구가 그 자료를 검사해 결과물을 만듭니다. 그림을 누르면 크게 열립니다.</figcaption>
 </figure>
 <section class="task" id="ready">
-<div class="task-head"><span class="task-num">SETUP</span><h2>준비, 자료 받기와 플러그인 설치</h2><span class="time-badge">10분</span></div>
+<div class="task-head"><span class="task-num">SETUP</span><h2>준비, 플러그인 설치와 서울 데이터 연결</h2><span class="time-badge">10분</span></div>
 <p class="task-goal">
-    실습 자료를 받아 놓고, 오늘 쓸 <strong>seoul-kit 플러그인</strong>을 설치합니다. 플러그인은 강의에서 본 대로 Skill과 도구를 한 묶음으로 설치하는 단위입니다.
+    실습 자료를 받아 놓고, 오늘 쓸 <strong>seoul-kit 플러그인</strong>을 설치한 다음, 서울 열린데이터를 Claude Code에 연결합니다. 플러그인은 강의에서 본 대로 Skill과 도구를 한 묶음으로 설치하는 단위입니다.
 </p>
 <div class="step-title"><span class="step-no">1</span>실습 자료 받기, 터미널에서 두 줄</div>
 <p class="body">code-server의 터미널에서 차례로 실행합니다. 첫 줄은 실습 자료를 내려받습니다. 둘째 줄은 플러그인 목록을 <code class="inline">~/workshop-kit</code>에, 작업 폴더를 <code class="inline">~/seoul-lab</code>에 놓고, Excel과 PowerPoint 파일을 만드는 데 쓰는 Python 라이브러리를 설치합니다.</p>
@@ -117,21 +117,33 @@
 <div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 플러그인 설치 2/2</span><button aria-label="Terminal, 플러그인 설치 2/2 복사" class="ws-copy" data-copy-code="workshop-code-004" data-copy-label="Terminal, 플러그인 설치 2/2 복사" type="button">복사</button></div>
 <pre id="workshop-code-004"><code>claude plugin install seoul-kit@workshop-kit</code></pre>
 </div>
-<div class="step-title"><span class="step-no">3</span>작업 폴더에서 Claude Code 시작</div>
+<div class="step-title"><span class="step-no">3</span>서울 데이터 연결, 터미널에서 두 줄</div>
+<p class="body">같은 터미널에서 이어서 실행합니다. 첫 줄은 서울 열린데이터를 주는 서버(MCP 서버)를 <code class="inline">seoul</code>이라는 이름으로 Claude Code에 등록합니다. 붙여 넣은 뒤 <strong>Enter를 누르기 전에</strong> 맨 끝의 <code class="inline">seoul-XXXX-XXXX</code>를 진행자가 화면에 띄운 <strong>워크숍 코드</strong>로 바꿉니다. 대문자와 숫자를 화면 그대로 넣고, 끝의 큰따옴표는 지우지 않습니다.</p>
 <div class="code-wrap" data-code-kind="terminal">
-<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-005" data-copy-label="Terminal 복사" type="button">복사</button></div>
-<pre id="workshop-code-005"><code>cd ~/seoul-lab &amp;&amp; claude</code></pre>
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 서울 데이터 연결 1/2</span><button aria-label="Terminal, 서울 데이터 연결 1/2 복사" class="ws-copy" data-copy-code="workshop-code-005" data-copy-label="Terminal, 서울 데이터 연결 1/2 복사" type="button">복사</button></div>
+<pre id="workshop-code-005"><code>claude mcp add --scope user --transport http seoul https://seoul-workshop-gateway-ttx8d3jawk.gateway.bedrock-agentcore.ap-northeast-2.amazonaws.com/mcp --header "Authorization: Bearer seoul-XXXX-XXXX"</code></pre>
+</div>
+<p class="body">둘째 줄은 연결됐는지 확인합니다.</p>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 서울 데이터 연결 2/2</span><button aria-label="Terminal, 서울 데이터 연결 2/2 복사" class="ws-copy" data-copy-code="workshop-code-006" data-copy-label="Terminal, 서울 데이터 연결 2/2 복사" type="button">복사</button></div>
+<pre id="workshop-code-006"><code>claude mcp list</code></pre>
+</div>
+<p class="body"><code class="inline">seoul</code> 줄 끝에 <strong>Connected</strong>가 보이면 됩니다. <strong>Failed to connect</strong>가 보이면 코드를 잘못 넣은 것입니다. 아래 <a href="#help">막히면</a>의 첫 항목대로 지우고 다시 등록하세요.</p>
+<div class="step-title"><span class="step-no">4</span>작업 폴더에서 Claude Code 시작</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-007" data-copy-label="Terminal 복사" type="button">복사</button></div>
+<pre id="workshop-code-007"><code>cd ~/seoul-lab &amp;&amp; claude</code></pre>
 </div>
 <p class="body">처음 열면 이 폴더를 신뢰할지 묻습니다. <strong>Yes</strong>를 고릅니다. 이 폴더에는 오전에 배운 설정 파일이 들어 있어서 서울 데이터 도구와 결과물 만들기는 승인 창 없이 진행됩니다.</p>
-<div class="step-title"><span class="step-no">4</span>서울 데이터 연결 확인</div>
+<div class="step-title"><span class="step-no">5</span>Claude Code 안에서 확인하고 물어보기</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-006" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-006"><code>/mcp</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-008" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-008"><code>/mcp</code></pre>
 </div>
 <p class="body">목록에 <code class="inline">seoul</code>이 연결됨으로 보이면 됩니다. 보이지 않으면 아래 <a href="#help">막히면</a>의 첫 항목을 보세요. 이어서 실시간 질문을 하나 던집니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-007" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-007"><code>지금 광화문 어때? 사람 많아?</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-009"><code>지금 광화문 어때? 사람 많아?</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">이 페이지를 쓰는 법</span>
@@ -141,6 +153,7 @@
 <div class="cp-title">CHECKPOINT</div>
 <label class="cp-item"><input data-cp="r0" type="checkbox"/><span>터미널에 준비가 끝났습니다가 보였다</span></label>
 <label class="cp-item"><input data-cp="r1" type="checkbox"/><span>터미널에 Successfully installed plugin이 보였다</span></label>
+<label class="cp-item"><input data-cp="r4" type="checkbox"/><span>터미널의 seoul 줄 끝에 Connected가 보였다</span></label>
 <label class="cp-item"><input data-cp="r2" type="checkbox"/><span>/mcp 목록에 seoul이 연결됨으로 보인다</span></label>
 <label class="cp-item"><input data-cp="r3" type="checkbox"/><span>실시간 인구와 혼잡도가 담긴 답을 받았다</span></label>
 </div>
@@ -153,8 +166,8 @@
 <div class="step-title"><span class="step-no">1</span>장소 세 곳을 골라 만들기</div>
 <p class="body">회사 근처, 집 근처, 가 보고 싶은 곳처럼 내 장소를 고르세요. 서울의 주요 장소 121곳이 들어 있습니다. Claude가 장소마다 실시간 데이터를 가져오고, 자료 파일을 쓰고, 현황판을 만듭니다. 20초쯤 걸립니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-008" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-008"><code>/seoul-kit:board 강남역, 여의도, 성수</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-010"><code>/seoul-kit:board 강남역, 여의도, 성수</code></pre>
 </div>
 <div class="step-title"><span class="step-no">2</span>결과 보관함에서 열어 보기</div>
 <p class="body">브라우저 새 탭을 열고, 지금 쓰는 code-server 주소 끝에 <code class="inline">/proxy/8000/</code>을 붙여 들어갑니다. 오늘 만드는 결과가 모두 이 보관함에 쌓입니다. 탭을 열어 두면 새 결과가 스스로 나타납니다.</p>
@@ -170,27 +183,27 @@
 <div class="step-title"><span class="step-no">3</span>말로 고치기</div>
 <p class="body">마음에 안 드는 곳을 말로 고칩니다. 하나씩 시켜 보고, 보관함에서 현황판을 새로 고쳐 확인하세요.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 1</span><button aria-label="Claude 세션 입력, 고치기 1 복사" class="ws-copy" data-copy-code="workshop-code-009" data-copy-label="Claude 세션 입력, 고치기 1 복사" type="button">복사</button></div>
-<pre id="workshop-code-009"><code>도로 평균 속도와 미세먼지도 카드로 넣어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 1</span><button aria-label="Claude 세션 입력, 고치기 1 복사" class="ws-copy" data-copy-code="workshop-code-011" data-copy-label="Claude 세션 입력, 고치기 1 복사" type="button">복사</button></div>
+<pre id="workshop-code-011"><code>도로 평균 속도와 미세먼지도 카드로 넣어 줘</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 2</span><button aria-label="Claude 세션 입력, 고치기 2 복사" class="ws-copy" data-copy-code="workshop-code-010" data-copy-label="Claude 세션 입력, 고치기 2 복사" type="button">복사</button></div>
-<pre id="workshop-code-010"><code>신호등 이름을 한산, 보통, 혼잡으로 바꾸고 제목을 "점심시간 우리 동네"로 바꿔 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 2</span><button aria-label="Claude 세션 입력, 고치기 2 복사" class="ws-copy" data-copy-code="workshop-code-012" data-copy-label="Claude 세션 입력, 고치기 2 복사" type="button">복사</button></div>
+<pre id="workshop-code-012"><code>신호등 이름을 한산, 보통, 혼잡으로 바꾸고 제목을 "점심시간 우리 동네"로 바꿔 줘</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 3</span><button aria-label="Claude 세션 입력, 고치기 3 복사" class="ws-copy" data-copy-code="workshop-code-011" data-copy-label="Claude 세션 입력, 고치기 3 복사" type="button">복사</button></div>
-<pre id="workshop-code-011"><code>주차장 빈자리도 표에 열로 추가할 수 있어? 가능하면 해 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 3</span><button aria-label="Claude 세션 입력, 고치기 3 복사" class="ws-copy" data-copy-code="workshop-code-013" data-copy-label="Claude 세션 입력, 고치기 3 복사" type="button">복사</button></div>
+<pre id="workshop-code-013"><code>주차장 빈자리도 표에 열로 추가할 수 있어? 가능하면 해 줘</code></pre>
 </div>
 <div class="step-title"><span class="step-no">4</span>일부러 틀려 보기</div>
 <p class="body">현황판에는 지켜야 할 규칙이 있습니다. 규칙을 어기면 어떻게 되는지 직접 봅니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-012" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-012"><code>실험이야. work 폴더의 현황판 자료 파일에서 첫 번째 카드의 signal을 blue로 바꾸고 다시 만들어 봐. 무슨 일이 생기는지 그대로 보여 주고, 고치지는 마</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-014" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-014"><code>실험이야. work 폴더의 현황판 자료 파일에서 첫 번째 카드의 signal을 blue로 바꾸고 다시 만들어 봐. 무슨 일이 생기는지 그대로 보여 주고, 고치지는 마</code></pre>
 </div>
 <p class="body"><strong>검사 실패</strong>와 함께 어느 칸이 왜 틀렸는지 나옵니다. 사람이 잘못 고쳐도, AI가 잘못 써도 같은 검사를 거칩니다. 확인했으면 되돌립니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-013" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-013"><code>이제 원래대로 되돌리고 다시 만들어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-015" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-015"><code>이제 원래대로 되돌리고 다시 만들어 줘</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">여기까지 배운 것</span>
@@ -219,20 +232,20 @@
 <div class="step-title"><span class="step-no">1</span>주제를 골라 만들기</div>
 <p class="body">아래 넷 가운데 하나를 고르거나, 역과 구 이름을 내 것으로 바꾸세요.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 지하철</span><button aria-label="Claude 세션 입력, 지하철 복사" class="ws-copy" data-copy-code="workshop-code-014" data-copy-label="Claude 세션 입력, 지하철 복사" type="button">복사</button></div>
-<pre id="workshop-code-014"><code>/seoul-kit:sheet 강남역 2호선 시간대별 승하차</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 지하철</span><button aria-label="Claude 세션 입력, 지하철 복사" class="ws-copy" data-copy-code="workshop-code-016" data-copy-label="Claude 세션 입력, 지하철 복사" type="button">복사</button></div>
+<pre id="workshop-code-016"><code>/seoul-kit:sheet 강남역 2호선 시간대별 승하차</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 대기질</span><button aria-label="Claude 세션 입력, 대기질 복사" class="ws-copy" data-copy-code="workshop-code-015" data-copy-label="Claude 세션 입력, 대기질 복사" type="button">복사</button></div>
-<pre id="workshop-code-015"><code>/seoul-kit:sheet 서울 25개 자치구의 지금 대기질. 미세먼지가 높은 순으로</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 대기질</span><button aria-label="Claude 세션 입력, 대기질 복사" class="ws-copy" data-copy-code="workshop-code-017" data-copy-label="Claude 세션 입력, 대기질 복사" type="button">복사</button></div>
+<pre id="workshop-code-017"><code>/seoul-kit:sheet 서울 25개 자치구의 지금 대기질. 미세먼지가 높은 순으로</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 실거래</span><button aria-label="Claude 세션 입력, 실거래 복사" class="ws-copy" data-copy-code="workshop-code-016" data-copy-label="Claude 세션 입력, 실거래 복사" type="button">복사</button></div>
-<pre id="workshop-code-016"><code>/seoul-kit:sheet 성동구 최근 아파트 실거래. 면적당 가격 열도 넣어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 실거래</span><button aria-label="Claude 세션 입력, 실거래 복사" class="ws-copy" data-copy-code="workshop-code-018" data-copy-label="Claude 세션 입력, 실거래 복사" type="button">복사</button></div>
+<pre id="workshop-code-018"><code>/seoul-kit:sheet 성동구 최근 아파트 실거래. 면적당 가격 열도 넣어 줘</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 문화행사</span><button aria-label="Claude 세션 입력, 문화행사 복사" class="ws-copy" data-copy-code="workshop-code-017" data-copy-label="Claude 세션 입력, 문화행사 복사" type="button">복사</button></div>
-<pre id="workshop-code-017"><code>/seoul-kit:sheet 이번 달 서울 무료 문화행사 목록</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 문화행사</span><button aria-label="Claude 세션 입력, 문화행사 복사" class="ws-copy" data-copy-code="workshop-code-019" data-copy-label="Claude 세션 입력, 문화행사 복사" type="button">복사</button></div>
+<pre id="workshop-code-019"><code>/seoul-kit:sheet 이번 달 서울 무료 문화행사 목록</code></pre>
 </div>
 <div class="step-title"><span class="step-no">2</span>내려받아 Excel에서 열기</div>
 <p class="body">결과 보관함에서 통계표를 누르면 내 컴퓨터로 내려받습니다. 열어서 합계나 비중 칸을 눌러 수식이 들어 있는지 보고, 숫자 하나를 바꿔 합계와 순위가 따라 바뀌는지 확인하세요. 머리글의 필터로 일부만 남기면 합계 줄도 바뀝니다. 마지막 시트는 출처입니다.</p>
@@ -246,22 +259,22 @@
 </figure>
 <div class="step-title"><span class="step-no">3</span>말로 고치기</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 1</span><button aria-label="Claude 세션 입력, 고치기 1 복사" class="ws-copy" data-copy-code="workshop-code-018" data-copy-label="Claude 세션 입력, 고치기 1 복사" type="button">복사</button></div>
-<pre id="workshop-code-018"><code>시트를 하나 더 만들어서 성수역과 나란히 비교해 줘. 두 역의 배율 열도 넣어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 1</span><button aria-label="Claude 세션 입력, 고치기 1 복사" class="ws-copy" data-copy-code="workshop-code-020" data-copy-label="Claude 세션 입력, 고치기 1 복사" type="button">복사</button></div>
+<pre id="workshop-code-020"><code>시트를 하나 더 만들어서 성수역과 나란히 비교해 줘. 두 역의 배율 열도 넣어 줘</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 2</span><button aria-label="Claude 세션 입력, 고치기 2 복사" class="ws-copy" data-copy-code="workshop-code-019" data-copy-label="Claude 세션 입력, 고치기 2 복사" type="button">복사</button></div>
-<pre id="workshop-code-019"><code>10월은 31일이니까 하루 평균 열을 수식으로 추가해 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 2</span><button aria-label="Claude 세션 입력, 고치기 2 복사" class="ws-copy" data-copy-code="workshop-code-021" data-copy-label="Claude 세션 입력, 고치기 2 복사" type="button">복사</button></div>
+<pre id="workshop-code-021"><code>10월은 31일이니까 하루 평균 열을 수식으로 추가해 줘</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 3</span><button aria-label="Claude 세션 입력, 고치기 3 복사" class="ws-copy" data-copy-code="workshop-code-020" data-copy-label="Claude 세션 입력, 고치기 3 복사" type="button">복사</button></div>
-<pre id="workshop-code-020"><code>차트를 막대로 바꾸고, 가장 붐비는 시간대 세 개를 notes에 적어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 3</span><button aria-label="Claude 세션 입력, 고치기 3 복사" class="ws-copy" data-copy-code="workshop-code-022" data-copy-label="Claude 세션 입력, 고치기 3 복사" type="button">복사</button></div>
+<pre id="workshop-code-022"><code>차트를 막대로 바꾸고, 가장 붐비는 시간대 세 개를 notes에 적어 줘</code></pre>
 </div>
 <div class="step-title"><span class="step-no">4</span>웹에서 비교 기준 찾아 붙이기</div>
 <p class="body">서울 데이터에 없는 것은 웹에서 찾습니다. Claude가 검색하고 페이지를 직접 열어 확인한 뒤 출처 주소를 적습니다. 찾지 못했다는 답도 정상입니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-021" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-021"><code>이 표와 견줄 만한 기준을 웹에서 하나 찾아 줘. 예를 들면 지하철 전체에서 이 역의 순위나 지난해 수치. 직접 열어 확인한 숫자만 시트로 추가하고 출처 주소를 적어 줘. 못 찾으면 못 찾았다고 말해 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-023" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-023"><code>이 표와 견줄 만한 기준을 웹에서 하나 찾아 줘. 예를 들면 지하철 전체에서 이 역의 순위나 지난해 수치. 직접 열어 확인한 숫자만 시트로 추가하고 출처 주소를 적어 줘. 못 찾으면 못 찾았다고 말해 줘</code></pre>
 </div>
 <div class="callout warn">
 <span class="co-title">웹에서 온 숫자는 한 번 더</span>
@@ -298,12 +311,12 @@
 <div class="step-title"><span class="step-no">1</span>앞의 두 결과로 만들기</div>
 <p class="body">주제를 적지 않으면 지금까지 만든 자료를 묶습니다. 주제를 직접 적어도 됩니다. 한 번 확인한 숫자는 다시 가져오지 않고 이어 씁니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 앞의 결과 묶기</span><button aria-label="Claude 세션 입력, 앞의 결과 묶기 복사" class="ws-copy" data-copy-code="workshop-code-022" data-copy-label="Claude 세션 입력, 앞의 결과 묶기 복사" type="button">복사</button></div>
-<pre id="workshop-code-022"><code>/seoul-kit:deck</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 앞의 결과 묶기</span><button aria-label="Claude 세션 입력, 앞의 결과 묶기 복사" class="ws-copy" data-copy-code="workshop-code-024" data-copy-label="Claude 세션 입력, 앞의 결과 묶기 복사" type="button">복사</button></div>
+<pre id="workshop-code-024"><code>/seoul-kit:deck</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 주제 지정</span><button aria-label="Claude 세션 입력, 주제 지정 복사" class="ws-copy" data-copy-code="workshop-code-023" data-copy-label="Claude 세션 입력, 주제 지정 복사" type="button">복사</button></div>
-<pre id="workshop-code-023"><code>/seoul-kit:deck 강남역 저녁 유동 브리핑. 앞에서 만든 자료를 쓰고 팀장에게 보고하는 다섯 장으로</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 주제 지정</span><button aria-label="Claude 세션 입력, 주제 지정 복사" class="ws-copy" data-copy-code="workshop-code-025" data-copy-label="Claude 세션 입력, 주제 지정 복사" type="button">복사</button></div>
+<pre id="workshop-code-025"><code>/seoul-kit:deck 강남역 저녁 유동 브리핑. 앞에서 만든 자료를 쓰고 팀장에게 보고하는 다섯 장으로</code></pre>
 </div>
 <div class="step-title"><span class="step-no">2</span>내려받아 PowerPoint에서 열기</div>
 <p class="body">차트를 눌러 데이터 편집이 되는지 보고, 슬라이드 아래 발표자 노트에 대본이 들어 있는지 확인하세요. 표지와 출처 장은 자동으로 붙습니다.</p>
@@ -313,27 +326,27 @@
 </figure>
 <div class="step-title"><span class="step-no">3</span>말로 고치기</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 1</span><button aria-label="Claude 세션 입력, 고치기 1 복사" class="ws-copy" data-copy-code="workshop-code-024" data-copy-label="Claude 세션 입력, 고치기 1 복사" type="button">복사</button></div>
-<pre id="workshop-code-024"><code>색을 forest로 바꿔 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 1</span><button aria-label="Claude 세션 입력, 고치기 1 복사" class="ws-copy" data-copy-code="workshop-code-026" data-copy-label="Claude 세션 입력, 고치기 1 복사" type="button">복사</button></div>
+<pre id="workshop-code-026"><code>색을 forest로 바꿔 줘</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 2</span><button aria-label="Claude 세션 입력, 고치기 2 복사" class="ws-copy" data-copy-code="workshop-code-025" data-copy-label="Claude 세션 입력, 고치기 2 복사" type="button">복사</button></div>
-<pre id="workshop-code-025"><code>두 번째 장의 한 줄 결론을 더 짧고 분명하게 고쳐 줘. 숫자를 되풀이하지 말고 뜻을 적어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 2</span><button aria-label="Claude 세션 입력, 고치기 2 복사" class="ws-copy" data-copy-code="workshop-code-027" data-copy-label="Claude 세션 입력, 고치기 2 복사" type="button">복사</button></div>
+<pre id="workshop-code-027"><code>두 번째 장의 한 줄 결론을 더 짧고 분명하게 고쳐 줘. 숫자를 되풀이하지 말고 뜻을 적어 줘</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 3</span><button aria-label="Claude 세션 입력, 고치기 3 복사" class="ws-copy" data-copy-code="workshop-code-026" data-copy-label="Claude 세션 입력, 고치기 3 복사" type="button">복사</button></div>
-<pre id="workshop-code-026"><code>표가 있는 장을 막대 차트로 바꿔 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 고치기 3</span><button aria-label="Claude 세션 입력, 고치기 3 복사" class="ws-copy" data-copy-code="workshop-code-028" data-copy-label="Claude 세션 입력, 고치기 3 복사" type="button">복사</button></div>
+<pre id="workshop-code-028"><code>표가 있는 장을 막대 차트로 바꿔 줘</code></pre>
 </div>
 <div class="step-title"><span class="step-no">4</span>배경 한 장 더하기</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-027" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-027"><code>이 주제와 관련된 최근 소식이나 정책을 웹에서 하나 찾아서 정리 장 앞에 한 장으로 넣어 줘. 직접 연 페이지만 쓰고 출처 주소를 붙여 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-029" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-029"><code>이 주제와 관련된 최근 소식이나 정책을 웹에서 하나 찾아서 정리 장 앞에 한 장으로 넣어 줘. 직접 연 페이지만 쓰고 출처 주소를 붙여 줘</code></pre>
 </div>
 <div class="step-title"><span class="step-no">5</span>검산하기</div>
 <p class="body">보고 전에 숫자가 어디서 왔는지 되짚습니다. 표를 받은 뒤 숫자 하나를 골라 통계표와 직접 대조하세요.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-028" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-028"><code>브리핑에 들어간 숫자를 전부 뽑아서, 각각 어느 자료의 어느 값에서 왔는지 표로 보여 줘. 직접 계산한 값은 계산식을 적어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-030" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-030"><code>브리핑에 들어간 숫자를 전부 뽑아서, 각각 어느 자료의 어느 값에서 왔는지 표로 보여 줘. 직접 계산한 값은 계산식을 적어 줘</code></pre>
 </div>
 <div class="callout tip">
 <span class="co-title">여기까지 배운 것</span>
@@ -361,34 +374,34 @@
 </p>
 <div class="step-title"><span class="step-no">1</span>팀 지표로 세 가지 만들기</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 현황판</span><button aria-label="Claude 세션 입력, 현황판 복사" class="ws-copy" data-copy-code="workshop-code-029" data-copy-label="Claude 세션 입력, 현황판 복사" type="button">복사</button></div>
-<pre id="workshop-code-029"><code>data/team-kpi.csv로 현황판을 만들어 줘. 신호등은 달성, 주의, 미달로 하고, 기준은 재문의율 7% 이하면 달성, 9% 이하면 주의, 그보다 높으면 미달이야</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 현황판</span><button aria-label="Claude 세션 입력, 현황판 복사" class="ws-copy" data-copy-code="workshop-code-031" data-copy-label="Claude 세션 입력, 현황판 복사" type="button">복사</button></div>
+<pre id="workshop-code-031"><code>data/team-kpi.csv로 현황판을 만들어 줘. 신호등은 달성, 주의, 미달로 하고, 기준은 재문의율 7% 이하면 달성, 9% 이하면 주의, 그보다 높으면 미달이야</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 통계표</span><button aria-label="Claude 세션 입력, 통계표 복사" class="ws-copy" data-copy-code="workshop-code-030" data-copy-label="Claude 세션 입력, 통계표 복사" type="button">복사</button></div>
-<pre id="workshop-code-030"><code>같은 자료로 통계표도 만들어 줘. 처리율 열을 수식으로 넣고 월별 추이 차트를 붙여 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 통계표</span><button aria-label="Claude 세션 입력, 통계표 복사" class="ws-copy" data-copy-code="workshop-code-032" data-copy-label="Claude 세션 입력, 통계표 복사" type="button">복사</button></div>
+<pre id="workshop-code-032"><code>같은 자료로 통계표도 만들어 줘. 처리율 열을 수식으로 넣고 월별 추이 차트를 붙여 줘</code></pre>
 </div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력, 브리핑</span><button aria-label="Claude 세션 입력, 브리핑 복사" class="ws-copy" data-copy-code="workshop-code-031" data-copy-label="Claude 세션 입력, 브리핑 복사" type="button">복사</button></div>
-<pre id="workshop-code-031"><code>방금 두 결과를 묶어 월간 보고 브리핑으로 만들어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력, 브리핑</span><button aria-label="Claude 세션 입력, 브리핑 복사" class="ws-copy" data-copy-code="workshop-code-033" data-copy-label="Claude 세션 입력, 브리핑 복사" type="button">복사</button></div>
+<pre id="workshop-code-033"><code>방금 두 결과를 묶어 월간 보고 브리핑으로 만들어 줘</code></pre>
 </div>
 <div class="step-title"><span class="step-no">2</span>내 Skill로 저장하기</div>
 <p class="body">매달 같은 보고를 한다면 방금 한 요청을 Skill로 남깁니다. 다음 달에는 한 줄이면 됩니다. 저장할 때 승인 창이 뜨면 내용을 읽고 <strong>Yes</strong>를 고릅니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-032" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-032"><code>방금 한 세 가지 요청을 "monthly-report"라는 Skill로 만들어 줘. 이 폴더의 .claude/skills 안에 두고, CSV 파일 경로를 받아서 현황판, 통계표, 브리핑을 차례로 만들게 해 줘. 신호등 기준도 그 안에 적어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-034" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-034"><code>방금 한 세 가지 요청을 "monthly-report"라는 Skill로 만들어 줘. 이 폴더의 .claude/skills 안에 두고, CSV 파일 경로를 받아서 현황판, 통계표, 브리핑을 차례로 만들게 해 줘. 신호등 기준도 그 안에 적어 줘</code></pre>
 </div>
 <p class="body">만든 뒤 Claude Code를 끝냈다가(<code class="inline">Ctrl+C</code> 두 번) 터미널에서 <code class="inline">claude</code>로 다시 시작하고 실행합니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-033" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-033"><code>/monthly-report data/team-kpi.csv</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-035" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-035"><code>/monthly-report data/team-kpi.csv</code></pre>
 </div>
 <p class="body">세 결과가 차례로 만들어지며 1분쯤 걸립니다. 결과 보관함에서 새 결과 세 개를 확인하세요.</p>
 <div class="step-title"><span class="step-no">3</span>내 업무 한 줄 적기</div>
 <p class="body">내 업무에서 매주 또는 매달 되풀이하는 보고를 하나 떠올려 대괄호 안을 바꿔 물어보세요. 이 답이 Day 2 숙제의 출발점입니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-034" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-034"><code>나는 매주 [여기에 내 업무를 적으세요. 예: 고객 문의 건수를 엑셀로 정리해 팀장에게 메일로 보고]를 해. 오늘 배운 방식으로 바꾸려면 어떤 자료가 필요하고 어떤 순서로 하면 될지 정리해 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-036" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-036"><code>나는 매주 [여기에 내 업무를 적으세요. 예: 고객 문의 건수를 엑셀로 정리해 팀장에게 메일로 보고]를 해. 오늘 배운 방식으로 바꾸려면 어떤 자료가 필요하고 어떤 순서로 하면 될지 정리해 줘</code></pre>
 </div>
 <div class="checkpoint">
 <div class="cp-title">CHECKPOINT</div>
@@ -402,28 +415,32 @@
 <p class="task-goal">
     아래에서 내 증상을 찾아 그대로 해 보고, 그래도 안 되면 손을 들어 진행자를 부르세요.
 </p>
-<div class="step-title"><span class="step-no">?</span>/mcp에 seoul이 없거나 연결이 안 된다</div>
-<p class="body">Claude Code를 끝내고 터미널에서 실행합니다. 주소와 코드는 진행자가 화면에 띄워 둔 것을 씁니다.</p>
+<div class="step-title"><span class="step-no">?</span>seoul이 Failed to connect로 나오거나 /mcp 목록에 없다</div>
+<p class="body">워크숍 코드를 잘못 넣었거나 준비 3번을 건너뛴 것입니다. Claude Code가 열려 있으면 <code class="inline">/exit</code>로 끝내고 터미널에서 차례로 실행합니다. 첫 줄은 잘못 등록된 것을 지웁니다. 등록한 적이 없으면 그런 이름이 없다고 나오는데 그대로 넘어갑니다. 둘째 줄은 준비 3번의 명령입니다. 끝의 <code class="inline">seoul-XXXX-XXXX</code>를 화면의 코드로 바꿔 실행하고, <code class="inline">claude mcp list</code>로 다시 확인합니다.</p>
 <div class="code-wrap" data-code-kind="terminal">
-<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal</span><button aria-label="Terminal 복사" class="ws-copy" data-copy-code="workshop-code-035" data-copy-label="Terminal 복사" type="button">복사</button></div>
-<pre id="workshop-code-035"><code>claude mcp add --transport http seoul &lt;주소&gt; --header "Authorization: Bearer &lt;코드&gt;"</code></pre>
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 다시 등록 1/2</span><button aria-label="Terminal, 다시 등록 1/2 복사" class="ws-copy" data-copy-code="workshop-code-037" data-copy-label="Terminal, 다시 등록 1/2 복사" type="button">복사</button></div>
+<pre id="workshop-code-037"><code>claude mcp remove seoul</code></pre>
+</div>
+<div class="code-wrap" data-code-kind="terminal">
+<div class="code-head"><span class="code-label"><span aria-hidden="true" class="terminal-lights"><span class="terminal-light-close"></span><span class="terminal-light-minimize"></span><span class="terminal-light-zoom"></span></span>Terminal, 다시 등록 2/2</span><button aria-label="Terminal, 다시 등록 2/2 복사" class="ws-copy" data-copy-code="workshop-code-038" data-copy-label="Terminal, 다시 등록 2/2 복사" type="button">복사</button></div>
+<pre id="workshop-code-038"><code>claude mcp add --scope user --transport http seoul https://seoul-workshop-gateway-ttx8d3jawk.gateway.bedrock-agentcore.ap-northeast-2.amazonaws.com/mcp --header "Authorization: Bearer seoul-XXXX-XXXX"</code></pre>
 </div>
 <div class="step-title"><span class="step-no">?</span>서울 데이터가 응답하지 않거나 한도 안내가 나온다</div>
 <p class="body">여러 사람이 함께 쓰는 서버라 잠깐 밀릴 수 있습니다. 1분 뒤 다시 시키거나, 미리 받아 둔 자료로 진행하세요.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-036" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-036"><code>서울 MCP가 응답하지 않아. data/seoul-sample 폴더의 미리 받아 둔 자료로 만들어 줘. 화면에 미리 받아 둔 자료라고 적어 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-039" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-039"><code>서울 MCP가 응답하지 않아. data/seoul-sample 폴더의 미리 받아 둔 자료로 만들어 줘. 화면에 미리 받아 둔 자료라고 적어 줘</code></pre>
 </div>
 <div class="step-title"><span class="step-no">?</span>결과 보관함이 열리지 않는다</div>
 <p class="body">주소 끝에 빗금까지 넣었는지 확인하세요. <code class="inline">/proxy/8000/</code>입니다. 그래도 안 열리면 Claude에게 시킵니다.</p>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-037" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-037"><code>결과 보관함을 켜 줘</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-040" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-040"><code>결과 보관함을 켜 줘</code></pre>
 </div>
 <div class="step-title"><span class="step-no">?</span>검사 실패가 계속 나온다</div>
 <div class="code-wrap prompt" data-code-kind="prompt">
-<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-038" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
-<pre id="workshop-code-038"><code>검사 실패가 나온 칸을 규칙에 맞게 줄이거나 고쳐서 다시 만들어 줘. 규칙은 바꾸지 마</code></pre>
+<div class="code-head"><span class="code-label">Claude 세션 입력</span><button aria-label="Claude 세션 입력 복사" class="ws-copy" data-copy-code="workshop-code-041" data-copy-label="Claude 세션 입력 복사" type="button">복사</button></div>
+<pre id="workshop-code-041"><code>검사 실패가 나온 칸을 규칙에 맞게 줄이거나 고쳐서 다시 만들어 줘. 규칙은 바꾸지 마</code></pre>
 </div>
 <table class="tbl">
 <tr><th>증상</th><th>해 볼 것</th></tr>
@@ -431,6 +448,8 @@
 <tr><td>Excel에서 합계가 0으로 보인다</td><td>위쪽 노란 띠의 편집 사용을 누른다</td></tr>
 <tr><td>내 Skill을 저장하지 못했다고 한다</td><td>저장할 때 뜨는 승인 창에서 Yes를 고르고 다시 시킨다. 창이 뜨지 않고 거부되면 진행자를 부른다</td></tr>
 <tr><td><code class="inline">/seoul-kit:</code>을 쳐도 목록이 안 나온다</td><td>Claude Code를 끝냈다가 다시 시작한다. 그래도 없으면 준비 2번의 설치 명령을 다시 실행한다</td></tr>
+<tr><td>서울 데이터를 연결할 때 <code class="inline">already exists</code>가 나온다</td><td>이미 등록돼 있다. <code class="inline">claude mcp list</code>에서 Connected면 그대로 진행하고, Failed to connect면 위 첫 항목대로 지우고 다시 등록한다</td></tr>
+<tr><td>잘 되다가 서울 데이터 서버가 코드를 거부한다고 나온다</td><td>워크숍 코드가 바뀌었거나 만료된 것이다. 진행자를 부른다. 새 코드를 받아 위 첫 항목대로 다시 등록한다</td></tr>
 <tr><td>자료를 받을 때 <code class="inline">already exists</code>가 나온다</td><td>이미 받은 것이다. 준비 1번의 둘째 줄부터 실행한다</td></tr>
 <tr><td>플러그인 목록을 등록할 때 경로를 찾지 못한다고 나온다</td><td>준비 1번을 건너뛴 것이다. 준비 1번의 두 줄을 먼저 실행한다</td></tr>
 <tr><td>준비 1번에서 <code class="inline">[중단]</code>이 나온다</td><td>화면을 그대로 두고 진행자를 부른다</td></tr>
@@ -490,7 +509,7 @@
 <script>
 (function () {
   "use strict";
-  var taskGroups = { ready:["r0","r1","r2","r3"], m1:["m1a","m1b","m1c","m1d"], m2:["m2a","m2b","m2c","m2d"], m3:["m3a","m3b","m3c","m3d"], m4:["m4a","m4b","m4c"] };
+  var taskGroups = { ready:["r0","r1","r4","r2","r3"], m1:["m1a","m1b","m1c","m1d"], m2:["m2a","m2b","m2c","m2d"], m3:["m3a","m3b","m3c","m3d"], m4:["m4a","m4b","m4c"] };
   var state = {};
   function refresh() {
     var doneCount = 0;

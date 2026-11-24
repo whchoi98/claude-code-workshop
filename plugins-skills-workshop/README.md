@@ -22,12 +22,15 @@ git clone -q --depth 1 https://github.com/whchoi98/claude-code-workshop ~/claude
 bash ~/claude-code-workshop/plugins-skills-workshop/scripts/setup-lab.sh
 claude plugin marketplace add ~/workshop-kit
 claude plugin install seoul-kit@workshop-kit
+claude mcp add --scope user --transport http seoul <Gateway 주소> --header "Authorization: Bearer <워크숍 코드>"
 cd ~/seoul-lab && claude
 ```
 
-참가자가 랩 가이드의 준비 1~3번에서 실행하는 명령과 같다. 이미 이 저장소를 받아 둔 곳에서는 첫 줄을 건너뛰고 `bash scripts/setup-lab.sh`를 실행한다.
+참가자가 랩 가이드의 준비 1~4번에서 실행하는 명령과 같다. 이미 이 저장소를 받아 둔 곳에서는 첫 줄을 건너뛰고 `bash scripts/setup-lab.sh`를 실행한다.
 
-Claude Code 안에서 `/seoul-kit:board 강남역, 여의도, 성수`를 실행한다. 결과는 `out/`에 생기고, 브라우저에서 code-server 주소 끝에 `/proxy/8000/`을 붙여 연다. 서울 MCP는 `seoul`이라는 이름으로 등록돼 있어야 한다.
+서울 MCP는 `seoul`이라는 이름으로 등록한다. Gateway 주소는 랩 가이드 준비 3번의 명령에 들어 있다. 워크숍 코드는 행사마다 새로 발급하고 며칠 뒤 만료되므로 저장소와 랩 가이드에 넣지 않는다. 가이드에는 `seoul-XXXX-XXXX`로 비워 두었고, 진행자가 화면에 띄운 코드로 참가자가 바꿔 넣는다. `--scope user`를 빼면 명령을 실행한 폴더에서만 등록되므로 `~/seoul-lab`에서 시작한 Claude Code에는 `seoul`이 보이지 않는다.
+
+Claude Code 안에서 `/seoul-kit:board 강남역, 여의도, 성수`를 실행한다. 결과는 `out/`에 생기고, 브라우저에서 code-server 주소 끝에 `/proxy/8000/`을 붙여 연다.
 
 ## 기존 핸즈온 랩과의 관계
 
