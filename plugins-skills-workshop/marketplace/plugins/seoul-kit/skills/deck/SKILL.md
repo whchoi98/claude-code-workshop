@@ -18,7 +18,7 @@ argument-hint: "[무엇을 보고할지] 예: 강남역 저녁 유동 브리핑"
 2. `work/` 폴더를 본다. 같은 주제의 현황판이나 통계표 자료가 있으면 그 숫자를 다시 쓴다. 이미 확인한 숫자를 도구로 또 부르지 않는다.
 3. 빠진 자료를 채운다. 숫자는 서울 MCP에서, 배경이 되는 사실(정책, 최근 소식, 다른 지역과의 비교)은 필요할 때 웹에서 하나만 찾아 출처와 함께 넣는다. 웹 자료가 없어도 브리핑은 완성된다.
 4. 이야기 순서를 정한다. 보통 "지금 상태, 흐름, 비교, 읽어 낸 것과 다음 할 일" 순이다.
-5. 자료 파일을 `work/<짧은-영문-이름>.json`에 쓴다. Write 도구로 직접 쓰고, 셸이나 python으로 만들어 쓰지 않는다.
+5. 자료 파일을 `work/<짧은-영문-이름>.json`에 쓴다. Write 도구로 직접 쓰고 셸이나 python으로 만들어 쓰지 않는다.
 6. 만든다.
    ```bash
    python3 "${CLAUDE_SKILL_DIR}/../../kit/kit.py" deck work/<이름>.json
@@ -31,7 +31,7 @@ argument-hint: "[무엇을 보고할지] 예: 강남역 저녁 유동 브리핑"
 
 정확한 규칙은 `python3 "${CLAUDE_SKILL_DIR}/../../kit/kit.py" rules deck`, 완성된 예시는 `... kit.py example deck`로 본다.
 
-- `title`, `subtitle`, `presenter`, `date`, `theme`, `slides`(본문 2~8장), `sources`. `presenter`와 `date`는 모르면 항목을 빼고, 빈 글로 두지 않는다.
+- `title`, `subtitle`, `presenter`, `date`, `theme`, `slides`(본문 2~8장), `sources`. `presenter`와 `date`는 모르면 항목을 빼고 빈 글로 두지 않는다.
 - `theme`은 `ink`(남색), `forest`(초록), `sunset`(주황), `ocean`(청록). 사용자가 고르지 않으면 `ink`.
 - 장의 `type`은 네 가지다.
 
@@ -49,5 +49,5 @@ argument-hint: "[무엇을 보고할지] 예: 강남역 저녁 유동 브리핑"
 
 - 한 장에는 한 가지만 말한다. 차트 하나에 계열은 셋까지만 넣는다.
 - `takeaway`는 "무엇이 어떻다"로 끝나는 문장으로 쓴다. 제목을 되풀이하지 않는다.
-- 줄이 8줄을 넘는 표는 통계표(Excel)로 돌리고, 브리핑에는 위에서 다섯 줄만 싣는다.
+- 줄이 8줄을 넘는 표는 통계표(Excel)로 돌리고 브리핑에는 위에서 다섯 줄만 싣는다.
 - 마지막 본문 장은 `bullets`로 읽어 낸 것과 다음 할 일을 적는다.
